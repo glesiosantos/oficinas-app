@@ -1,10 +1,18 @@
+import authRouter from '../pages/auth/router'
+
 const routes = [
   {
-    path: '/',
+    path: '',
+    component: () => import('layouts/AuthLayout.vue'),
+    children: [...authRouter]
+  },
+  {
+    path: '',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/IndexPage.vue') }
-    ]
+      { path: '', name:'dashboard', component: () => import('pages/IndexPage.vue') }
+    ],
+    meta: { requiresAuth: true }
   },
 
   // Always leave this as last one,

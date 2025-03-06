@@ -1,6 +1,7 @@
 import { defineRouter } from '#q-app/wrappers'
 import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router'
 import routes from './routes'
+import { useAuthStore } from '../stores/auth.store'
 
 /*
  * If not building with SSR mode, you can
@@ -24,6 +25,26 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE)
+  })
+
+  Router.beforeEach((to, from, next) => {
+    const authStore = useAuthStore(); // Inicializa o authStore
+
+    // Verifica se a rota requer autenticação
+    if (to.matched.some((record) => record.meta.requiresAuth)) {
+      // Se não houver accessToken, redireciona para login
+      if (!authStore.accessToken) {
+        next({
+          name: 'sign-in',
+          query: { redirect: to.fullPath }, // Armazena a rota original para redirecionar após login
+        });
+      } else {
+        next(); // Permite acesso se autenticado
+      }
+    } else {
+      // Rotas públicas (como /login) são liberadas
+      next();
+    }
   })
 
   return Router
