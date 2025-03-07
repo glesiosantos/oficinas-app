@@ -15,14 +15,14 @@
           Quasar App
         </q-toolbar-title>
 
-        <q-btn-dropdown :label="authStore.user.apelido" flat>
+        <q-btn-dropdown label="Adminitrador" flat>
           <q-list>
             <q-item clickable v-close-popup @click="router.push({ name: 'profile'})">
                 <q-item-section>
                   <q-item-label>Perfil do usuário</q-item-label>
                 </q-item-section>
             </q-item>
-            <q-item clickable v-close-popup @click="logout">
+            <q-item clickable v-close-popup @click="sair">
                 <q-item-section>
                   <q-item-label>Sair do Sistema</q-item-label>
                 </q-item-section>
@@ -61,10 +61,11 @@
 <script setup>
 import { ref } from 'vue'
 import EssentialLink from 'components/EssentialLink.vue'
-import { useAuthStore } from 'src/stores/auth.store'
 import { useRouter } from 'vue-router'
+import { authService } from 'src/pages/auth/services/auth_service'
 
-const authStore = useAuthStore()
+const { logout } = authService()
+
 const router = useRouter()
 
 const linksList = [
@@ -112,8 +113,8 @@ const linksList = [
   }
 ]
 
-const logout = () => {
-  authStore.logout()
+const sair = () => {
+  logout()
   router.replace({ name: 'login'})
 }
 

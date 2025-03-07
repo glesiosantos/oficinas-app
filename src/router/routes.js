@@ -2,14 +2,14 @@ import authRouter from '../pages/auth/router';
 
 const routes = [
   {
-    path: '/auth',
+    path: '',
     component: () => import('layouts/AuthLayout.vue'),
     children: [
       ...authRouter
     ],
   },
   {
-    path: '/',
+    path: '',
     component: () => import('layouts/MainLayout.vue'),
     meta: { requiresAuth: true }, // Todas as rotas filhas exigem autenticação
     children: [

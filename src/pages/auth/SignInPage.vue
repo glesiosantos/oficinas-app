@@ -33,26 +33,30 @@
 </template>
 
 <script setup>
-import { useAuthStore } from 'src/stores/auth.store'
 import { reactive } from 'vue'
 
 import { useRouter } from 'vue-router'
+import { authService } from './services/auth_service'
+import useNotify from 'src/composables/useNotify'
 
 const router = useRouter()
-
-const authStore = useAuthStore()
+const { logar } = authService()
+const { notifyError, notifySuccess } = useNotify()
 
 const form = reactive({
   cpf: '',
   senha: ''
 })
 
-const handleForm = async () => {
-  try {
-    await authStore.login(form)
-    router.push({name :'dashboard'})
-  } catch (error) {
+const handleForm = () => {
+   logar(form).then(response => {
+    console.log(response)
+    router.replace({ name: 'dashboard'})
+    notifySuccess("Logado com sucesso!")
+   }).catch((error) => {
+    notifyError(error.message)
     console.log(error)
-  }
+  })
+
 }
 </script>

@@ -10,4 +10,18 @@
 </template>
 
 <script setup>
+import { useAuthStore } from 'src/stores/auth.store'
+import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const authStore = useAuthStore()
+const router = useRouter()
+
+onMounted(() => {
+  if(authStore.isAuth) {
+    router.push({ name: 'dashboard'})
+  } else {
+    router.replace({ name: 'login'})
+  }
+})
 </script>

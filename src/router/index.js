@@ -1,16 +1,6 @@
 import { defineRouter } from '#q-app/wrappers'
 import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router'
 import routes from './routes'
-import { useAuthStore } from '../stores/auth.store'
-
-/*
- * If not building with SSR mode, you can
- * directly export the Router instantiation;
- *
- * The function below can be async too; either use
- * async/await or return a Promise which resolves
- * with the Router instance.
- */
 
 export default defineRouter(function (/* { store, ssrContext } */) {
   const createHistory = process.env.SERVER
@@ -20,45 +10,10 @@ export default defineRouter(function (/* { store, ssrContext } */) {
   const Router = createRouter({
     scrollBehavior: () => ({ left: 0, top: 0 }),
     routes,
-
-    // Leave this as is and make changes in quasar.conf.js instead!
-    // quasar.conf.js -> build -> vueRouterMode
-    // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE)
   })
 
-  Router.beforeEach(async (to, from, next) => {
-    const authStore = useAuthStore(); // Inicializa o authStore
 
-    if (!authStore.accessToken) {
-      const storedRefreshToken = localStorage.getItem('refreshToken');
-      if (storedRefreshToken) {
-        try {
-          // Tenta renovar o token antes de decidir redirecionar
-          await authStore.initializeAuth();
-        } catch (error) {
-          console.error('Erro ao inicializar autenticação:', error);
-          // Se falhar, prossegue para verificar a necessidade de login
-        }
-      }
-    }
-
-    // Verifica se a rota requer autenticação
-    if (to.matched.some((record) => record.meta.requiresAuth)) {
-      // Se não houver accessToken, redireciona para login
-      if (!authStore.accessToken) {
-        next({
-          path: '/auth/login',
-          query: { redirect: to.fullPath }, // Armazena a rota original para redirecionar após login
-        });
-      } else {
-        next(); // Permite acesso se autenticado
-      }
-    } else {
-      // Rotas públicas (como /login) são liberadas
-      next();
-    }
-  })
 
   return Router
 })
