@@ -36,21 +36,23 @@
 import { useAuthStore } from 'src/stores/auth.store'
 import { reactive } from 'vue'
 
-import useNotify from 'src/composables/UseNotify'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const authStore = useAuthStore()
-const { notfifySucess, notfifyError } = useNotify()
 
 const form = reactive({
   cpf: '',
   senha: ''
 })
 
-const handleForm = () => {
-  authStore.login(form).then(response => {
-    console.log(response)
-    notfifySucess('Login realizando com sucesso!')
-  }).catch(error => notfifyError(error.message))
+const handleForm = async () => {
+  try {
+    await authStore.login(form)
+    router.push({name :'dashboard'})
+  } catch (error) {
+    console.log(error)
+  }
 }
-
 </script>

@@ -27,15 +27,28 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE)
   })
 
-  Router.beforeEach((to, from, next) => {
+  Router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore(); // Inicializa o authStore
+
+    if (!authStore.accessToken) {
+      const storedRefreshToken = localStorage.getItem('refreshToken');
+      if (storedRefreshToken) {
+        try {
+          // Tenta renovar o token antes de decidir redirecionar
+          await authStore.initializeAuth();
+        } catch (error) {
+          console.error('Erro ao inicializar autenticação:', error);
+          // Se falhar, prossegue para verificar a necessidade de login
+        }
+      }
+    }
 
     // Verifica se a rota requer autenticação
     if (to.matched.some((record) => record.meta.requiresAuth)) {
       // Se não houver accessToken, redireciona para login
       if (!authStore.accessToken) {
         next({
-          name: 'sign-in',
+          path: '/auth/login',
           query: { redirect: to.fullPath }, // Armazena a rota original para redirecionar após login
         });
       } else {

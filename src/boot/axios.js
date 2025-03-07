@@ -27,25 +27,25 @@ function setupInterceptors(store) {
   api.interceptors.response.use(
     (response) => response, // Retorna a resposta diretamente se for bem-sucedida
     async (error) => {
-      const originalRequest = error.config;
+      const originalRequest = error.config
       if (
         error.response?.status === 401 &&
         !originalRequest._retry && // Evita loop infinito
         store.refreshToken // Só tenta refresh se houver refreshToken
       ) {
-        originalRequest._retry = true;
+        originalRequest._retry = true
         try {
-          await store.refreshAccessToken(); // Renova o token
-          originalRequest.headers.Authorization = `Bearer ${store.accessToken}`;
+          await store.refreshAccessToken() // Renova o token
+          originalRequest.headers.Authorization = `Bearer ${store.accessToken}`
           return api(originalRequest); // Repete a requisição original com o novo token
         } catch (refreshError) {
-          console.error('Erro ao renovar token:', refreshError);
+          console.error('Erro ao renovar token:', refreshError)
           store.logout(); // Faz logout se o refresh falhar
-          window.location.href = '/login'; // Redireciona para login
-          return Promise.reject(refreshError);
+          window.location.href = '/auth/login' // Redireciona para login
+          return Promise.reject(refreshError)
         }
       }
-      return Promise.reject(error);
+      return Promise.reject(error)
     }
   );
 }

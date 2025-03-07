@@ -11,11 +11,11 @@ export const useAuthStore = defineStore('authStore', () => {
   // Função de login
   async function login(credentials) {
     try {
-      const response = await api.post('/v1/auth/autenticar', credentials);
+      const response = await api.post('/v1/auth/autenticar', credentials)
       console.log(response.data)
       accessToken.value = response.data.accessToken;
       refreshToken.value = response.data.refreshToken;
-      user.value = response.data.user;
+      user.value = response.data.usuario;
       localStorage.setItem('refreshToken', refreshToken.value); // Armazena o refresh token
     } catch (error) {
       console.error('Erro ao fazer login:', error);
