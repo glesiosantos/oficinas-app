@@ -1,18 +1,31 @@
+import authRouter from '../pages/auth/router';
+
 const routes = [
   {
-    path: '/',
-    component: () => import('layouts/MainLayout.vue'),
+    path: '',
+    component: () => import('layouts/AuthLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/IndexPage.vue') }
-    ]
+      ...authRouter
+    ],
+  },
+  {
+    path: '',
+    component: () => import('layouts/MainLayout.vue'),
+    meta: { requiresAuth: true }, // Todas as rotas filhas exigem autenticação
+    children: [
+      {
+        path: '', // Raiz redireciona para dashboard
+        name: 'dashboard',
+        component: () => import('pages/IndexPage.vue'),
+      },
+    ],
   },
 
-  // Always leave this as last one,
-  // but you can also remove it
+  // Rota 404 (catch-all)
   {
     path: '/:catchAll(.*)*',
-    component: () => import('pages/ErrorNotFound.vue')
-  }
-]
+    component: () => import('pages/ErrorNotFound.vue'),
+  },
+];
 
-export default routes
+export default routes;
