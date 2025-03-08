@@ -49,14 +49,9 @@ const form = reactive({
 })
 
 const handleForm = () => {
-   logar(form).then(response => {
-    console.log(response)
+  logar(form).then(() => {
     router.replace({ name: 'dashboard'})
     notifySuccess("Logado com sucesso!")
-   }).catch((error) => {
-    notifyError(error.message)
-    console.log(error)
-  })
-
+  }).catch((error) => notifyError(error.message))
 }
 </script>

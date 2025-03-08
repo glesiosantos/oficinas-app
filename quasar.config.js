@@ -53,7 +53,7 @@ export default defineConfig((ctx) => {
       env: {
         URL_API:  ctx.dev
         ? 'http://localhost:5001/api/'
-        : 'https://prod.api.oficinas.com.br'
+        : 'https://prod.api.oficinas.com.br/'
       },
       // rawDefine: {}
       // ignorePublicFolder: true,
