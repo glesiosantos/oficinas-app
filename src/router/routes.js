@@ -1,4 +1,5 @@
-import authRouter from '../pages/auth/router';
+import authRouter from '../pages/auth/router'
+import fornecedorRouter from '../pages/fornecedor/router'
 
 const routes = [
   {
@@ -18,6 +19,7 @@ const routes = [
         name: 'dashboard',
         component: () => import('pages/IndexPage.vue'),
       },
+      ...fornecedorRouter
     ],
   },
 
