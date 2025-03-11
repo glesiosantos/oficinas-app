@@ -35,7 +35,7 @@
                     dense
                     color="primary"
                     size="sm"
-                    @click="drawer.openDrawer('edit', props.row)"
+                    @click="openDrawer('edit', props.row)"
                     icon="edit"
                   />
 
@@ -85,8 +85,6 @@ const rows = ref([])
 const { notifySuccess, notifyError } = useNotify()
 const {fornecedores } = useFornecedorStore()
 
-
-
 const { drawer, isEdit, currentData, openDrawer, closeDrawer } = useDrawer()
 const {addFornecedor, carregarFornecedores} = fornecedorService()
 
@@ -110,20 +108,20 @@ const columns = [
 
 const handleSubmit = async (formData) => {
   if (isEdit.value) {
-    // Editar fornecedor existente
+
     const index = rows.value.findIndex(row => row === currentData.value)
     if (index !== -1) {
       rows.value[index] = { ...formData }
     }
   } else {
     await addFornecedor(formData).then( response => {
-      console.log('*** **** **** **** ', response.status)
+      console.log('*** **** **** **** ', response )
       notifySuccess('Fornecedor adicionado com sucesso!')
     }).catch(error => notifyError(error.message))
   }
   closeDrawer()
 }
 
-onMounted(() => carregarFornecedores())
+onMounted(async () => await carregarFornecedores())
 
 </script>
