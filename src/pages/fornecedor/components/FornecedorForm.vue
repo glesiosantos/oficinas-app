@@ -26,6 +26,8 @@
         label="Nome do Fornecedor"
         outlined
         class="q-mb-md"
+        lazy-rules
+        :rules="[val => (val && val.length > 0) || 'Nome do Fornecedor é obrigatório']"
       />
 
       <!-- Lista de contatos -->
@@ -35,6 +37,8 @@
           mask="(##) #.####.####"
           :label="index === 0 ? 'Contato Principal' : `Contato ${index + 1}`"
           outlined
+          lazy-rules
+          :rules="[val => (val && val.length > 0) || 'Contato principal é obrigatório']"
         >
           <template v-slot:append>
             <q-btn
@@ -94,6 +98,7 @@ const props = defineProps({
 defineEmits(['submit', 'cancel'])
 
 const form = ref({
+  id: null,
   nomeFornecedor: '',
   contatos: ['']
 })
