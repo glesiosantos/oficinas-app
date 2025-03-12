@@ -7,7 +7,6 @@ const fornecedorStore = useFornecedorStore()
 const idEstabelecimento = authStore.auth.estabelecimento.idEstabelecimento
 
 export const fornecedorService = () => {
-
   const addFornecedor = async (data) => {
     const request = Object.assign({}, data, { idEstabelecimento: idEstabelecimento })
     const response = await api.post('/v1/fornecedores', request, {
@@ -17,10 +16,10 @@ export const fornecedorService = () => {
   }
 
   const carregarFornecedores = async () => {
-      const response = await api.get(`/v1/fornecedores/${idEstabelecimento}`, {
-        headers: { Authorization: `Bearer ${authStore.auth.token}` }
-      })
-      fornecedorStore.setFornecedores(response.data)
+    const response = await api.get(`/v1/fornecedores/${idEstabelecimento}`, {
+      headers: { Authorization: `Bearer ${authStore.auth.token}` }
+    })
+    fornecedorStore.setFornecedores(response.data)
   }
 
   const editarFornecedor = async (data) => {
@@ -28,15 +27,13 @@ export const fornecedorService = () => {
     const response = await api.put(`/v1/fornecedores/editar`, request, {
       headers: { Authorization: `Bearer ${authStore.auth.token}` }
     })
-    fornecedorStore.setFornecedores(response.data)
+    return response.data // Retorna o fornecedor atualizado, mas não seta diretamente no store
   }
 
   const excluirFornecedor = async (data) => {
     await api.post('/v1/fornecedores/remove', { idEstabelecimento: idEstabelecimento, idFornecedor: data }, {
     headers: { Authorization: `Bearer ${authStore.auth.token}` }
   })}
-
-
 
   return { addFornecedor, carregarFornecedores, editarFornecedor, excluirFornecedor }
 }

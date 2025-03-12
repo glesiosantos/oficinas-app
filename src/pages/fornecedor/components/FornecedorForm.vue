@@ -1,7 +1,5 @@
-<!-- src/components/FornecedorForm.vue -->
 <template>
   <q-form @submit="$emit('submit', form)" class="column">
-    <!-- Cabeçalho com título e botão de fechar -->
     <q-card-section class="bg-primary text-white">
       <div class="row items-center no-wrap">
         <div class="text-h6">
@@ -19,7 +17,6 @@
       </div>
     </q-card-section>
 
-    <!-- Conteúdo do formulário -->
     <q-card-section class="col-grow">
       <q-input
         v-model="form.nomeFornecedor"
@@ -30,22 +27,20 @@
         :rules="[val => (val && val.length > 0) || 'Nome do Fornecedor é obrigatório']"
       />
 
-      <!-- Lista de contatos -->
       <div v-for="(contato, index) in form.contatos" :key="index" class="q-mb-md">
         <q-input
           v-model="form.contatos[index]"
-          mask="(##) #.####.####"
+          mask="(##) #.####-####"
           :label="index === 0 ? 'Contato Principal' : `Contato ${index + 1}`"
           outlined
           lazy-rules
-          :rules="[val => (val && val.length > 0) || 'Contato principal é obrigatório']"
+          :rules="[val => (val && val.length > 0) || 'Contato é obrigatório']"
         >
           <template v-slot:append>
             <q-btn
               v-if="index > 0"
               round
               dense
-              mask="(##) #.####.####"
               flat
               icon="delete"
               color="negative"
@@ -55,7 +50,6 @@
         </q-input>
       </div>
 
-      <!-- Botão para adicionar novo contato -->
       <q-btn
         flat
         label="Adicionar Contato"
@@ -66,7 +60,6 @@
       />
     </q-card-section>
 
-    <!-- Botões no final do modal -->
     <q-card-actions class="q-pa-md">
       <q-btn
         flat
@@ -89,7 +82,6 @@
 <script setup>
 import { ref, watch } from 'vue'
 
-// Definir as props explicitamente
 const props = defineProps({
   isEdit: Boolean,
   initialData: Object
@@ -97,33 +89,33 @@ const props = defineProps({
 
 defineEmits(['submit', 'cancel'])
 
+// Criar uma cópia independente dos dados
 const form = ref({
   id: null,
   nomeFornecedor: '',
   contatos: ['']
 })
 
-// Adicionar um novo contato
 function addContact() {
   form.value.contatos.push('')
 }
 
-// Remover um contato pelo índice
 function removeContact(index) {
   if (form.value.contatos.length > 1) {
     form.value.contatos.splice(index, 1)
   }
 }
 
-// Observar initialData para preencher o formulário
 watch(() => props.initialData, (newData) => {
   if (newData) {
-    form.value = { ...newData }
-    if (!Array.isArray(form.value.contatos) || form.value.contatos.length === 0) {
-      form.value.contatos = ['']
+    // Criar uma cópia profunda para evitar alterações no objeto original
+    form.value = {
+      id: newData.id,
+      nomeFornecedor: newData.nomeFornecedor || '',
+      contatos: Array.isArray(newData.contatos) && newData.contatos.length > 0 ? [...newData.contatos] : ['']
     }
   } else {
-    form.value = { nomeFornecedor: '', contatos: [''] }
+    form.value = { id: null, nomeFornecedor: '', contatos: [''] }
   }
 }, { immediate: true })
 </script>
