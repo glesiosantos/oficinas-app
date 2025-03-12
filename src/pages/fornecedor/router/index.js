@@ -1,5 +1,5 @@
 const FornecedorListaPagePage = import('../FornecedorListaPage.vue')
 
 export default [
-  { path: '', name: 'fornecedores', component: () =>  FornecedorListaPagePage}
+  { path: '/fornecedores', name: 'fornecedores', component: () =>  FornecedorListaPagePage}
 ]

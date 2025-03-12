@@ -115,6 +115,12 @@ const linksList = [
     icon: 'people',
     route: {name: 'fornecedores'}
   },
+  {
+    title: 'Colaboradores',
+    caption: 'quasar.dev',
+    icon: 'people',
+    route: {name: 'colaboradores'}
+  },
 ]
 
 const sair = () => {
