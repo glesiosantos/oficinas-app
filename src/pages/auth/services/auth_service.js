@@ -5,6 +5,7 @@ import { useAuthStore } from 'src/stores/auth.store'
 export const authService = () => {
 
   const authStore = useAuthStore()
+  const bearerToken = `Bearer ${authStore.auth.token}`
 
   const logar = async (data) => {
     const response = await api.post('/v1/auth/autenticar', data)
@@ -16,7 +17,6 @@ export const authService = () => {
     let response
 
     if (authStore.isAuth) {
-      const bearerToken = `Bearer ${authStore.auth.token}`
       response = await api.post('/v1/auth/refresh', {token: authStore.auth.token }, {headers: {
         Authorization: bearerToken
       }})

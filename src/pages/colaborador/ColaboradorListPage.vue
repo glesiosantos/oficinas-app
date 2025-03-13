@@ -33,17 +33,30 @@
 
     <q-drawer v-model="drawer" side="right" overlay elevated :width="400">
       <q-scroll-area class="fit">
-        add colaborador
+        <colaborador-form
+          v-if="drawer"
+          :is-edit="isEdit"
+          :initial-data="currentData"
+          :perfils="colaboradoreStore.perfils"
+          @submit="handleSubmit"
+          @cancel="closeDrawer"
+        />
       </q-scroll-area>
     </q-drawer>
   </q-page>
 </template>
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { date } from 'quasar'
 import { useDrawer } from 'src/composables/useDrawer'
 
-const { drawer, openDrawer } = useDrawer()
+import ColaboradorForm from './components/ColaboradorForm.vue'
+import { colaboradorService } from './services/colaborador_service'
+import { useColaboradorStore } from 'src/stores/colaborador.store'
+
+const { drawer, openDrawer,closeDrawer } = useDrawer()
+const { carregarPerfisDoSistema } = colaboradorService()
+const colaboradoreStore = useColaboradorStore()
 
 const filter = ref('')
 
@@ -70,4 +83,6 @@ const columns = [
   { label: 'Data de Cadastro', name: 'dtCadastro', field: row => row.dtCadastro, format: (val) => date.formatDate(val, 'DD/MM/YYYY')},
   { label: 'Ações', field: 'actions', name: 'actions', align: 'center' }
 ]
+
+onMounted(async () => await carregarPerfisDoSistema())
 </script>
