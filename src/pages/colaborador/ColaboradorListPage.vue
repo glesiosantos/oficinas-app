@@ -7,7 +7,7 @@
             flat
             bordered
             :columns="columns"
-            :rows="colaboradores"
+            :rows="colaboradoreStore.colaboradores"
             :filter="filter"
           >
             <template v-slot:top>
@@ -56,36 +56,21 @@ import { useColaboradorStore } from 'src/stores/colaborador.store'
 import useNotify from 'src/composables/useNotify'
 
 const { drawer, openDrawer,closeDrawer, isEdit, currentData } = useDrawer()
-const { carregarPerfisDoSistema } = colaboradorService()
+const { carregarColaboradores, carregarPerfisDoSistema } = colaboradorService()
 const colaboradoreStore = useColaboradorStore()
 const { notifyError, notifySuccess } = useNotify()
 
 const filter = ref('')
 
-const colaboradores = ref([
-  {
-    id: 1,
-    cpf: "965.485.173-34",
-    nomeCompleto: "Glêsio Santos da Silva",
-    principal: true,
-    perfil: "Proprietário",
-    dtCadastro: "2025-03-12"
-  },
-  {
-    id: 2,
-    cpf: "001.010.171-04",
-    nomeCompleto: "Henrico Brito",
-    principal: false,
-    perfil: "Atendente",
-    dtCadastro: "2025-03-12"
-  }
-])
-
 const columns = [
-  { label: 'CPF', field: row => row.cpf, format: val => `${val}`, align: 'left' },
+  { label: 'CPF',
+    field: row => row.cpf,
+    format: val => formatarCPF(val)
+    , align: 'left'
+  },
   { label: 'Nome do Colaborador', field: row => row.nomeCompleto, format: val => `${val}`, align: 'left' },
   { label: 'Perfil', name: 'perfil', field: row => row.perfil, format: val => `${val}`, sortable: true, align: 'left' },
-  { label: 'Data de Cadastro', name: 'dtCadastro', field: row => row.dtCadastro, format: (val) => date.formatDate(val, 'DD/MM/YYYY')},
+  { label: 'Data de Cadastro', name: 'criadoEm', field: row => row.criadoEm, format: (val) => date.formatDate(val, 'DD/MM/YYYY')},
   { label: 'Ações', field: 'actions', name: 'actions', align: 'center' }
 ]
 
@@ -109,7 +94,16 @@ const handleSubmit = async (formData) => {
   }
 }
 
+const formatarCPF = (cpf) => {
+  if (!cpf) return ''; // Retorna vazio se o CPF for null ou undefined
+  const apenasNumeros = cpf.replace(/\D/g, ''); // Remove tudo que não for número
+  if (apenasNumeros.length !== 11) return cpf; // Retorna sem formatação se não tiver 11 dígitos
+
+  return apenasNumeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+};
+
 onMounted(async () => {
+  await carregarColaboradores()
   await carregarPerfisDoSistema()
 })
 </script>
