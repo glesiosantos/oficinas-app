@@ -1,27 +1,48 @@
 import { api } from '../../../boot/axios'
 import { useAuthStore } from 'src/stores/auth.store'
 
-
 export const authService = () => {
-
   const authStore = useAuthStore()
-  const bearerToken = `Bearer ${authStore.auth.token}`
+
+  const getBearerToken = () => {
+    if (!authStore.isAuth || !authStore.auth?.token) {
+      throw new Error('Usuário não autenticado ou token não disponível')
+    }
+    return `Bearer ${authStore.auth.token}`
+  }
 
   const logar = async (data) => {
-    const response = await api.post('/v1/auth/autenticar', data)
-    authStore.setAuth(response.data)
+    try {
+      const response = await api.post('/v1/auth/autenticar', data)
+      authStore.setAuth(response.data)
+      return response.data
+    } catch (error) {
+      console.error('Erro ao realizar login:', error.message)
+      throw error
+    }
   }
 
   const refreshToken = async () => {
+    try {
+      if (!authStore.isAuth) {
+        // Silencia o erro específico de "não autenticado" no console
+        throw new Error('Usuário não autenticado, não é possível renovar o token', { silent: true })
+      }
 
-    let response
+      const bearerToken = getBearerToken()
+      const response = await api.post('/v1/auth/refresh', { token: authStore.auth.token }, {
+        headers: { Authorization: bearerToken }
+      })
 
-    if (authStore.isAuth) {
-      response = await api.post('/v1/auth/refresh', {token: authStore.auth.token }, {headers: {
-        Authorization: bearerToken
-      }})
+      authStore.setAuth(response.data)
+      return response.data
+    } catch (error) {
+      // Só exibe no console se não for um erro silencioso
+      if (!error.silent) {
+        console.error('Erro ao renovar o token:', error.message)
+      }
+      throw error
     }
-    return response;
   }
 
   const logout = () => {

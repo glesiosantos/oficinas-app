@@ -97,10 +97,12 @@ import { ref } from 'vue'
 import EssentialLink from 'components/EssentialLink.vue'
 import { useRouter } from 'vue-router'
 import { authService } from 'src/pages/auth/services/auth_service'
+import useNotify from 'src/composables/useNotify'
 
 const { logout } = authService()
 
 const router = useRouter()
+const { notifySuccess } = useNotify()
 
 const linksList = [
   {
@@ -125,6 +127,7 @@ const linksList = [
 
 const sair = () => {
   logout()
+  notifySuccess('Logout realizado!')
   router.replace({ name: 'login'})
 }
 
