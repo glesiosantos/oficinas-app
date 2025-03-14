@@ -22,7 +22,7 @@
 
             <template v-slot:body-cell-actions="props">
               <q-td :props="props" class="q-gutter-x-xs text-center">
-                <q-btn round dense color="primary" size="sm" icon="edit" v-if="!props.row.principal" />
+                <q-btn round dense color="primary" size="sm" icon="edit" v-if="!props.row.principal" @click="openDrawer('edit', props.row)" />
                 <q-btn round dense color="red" size="sm" icon="delete" v-if="!props.row.principal" />
               </q-td>
             </template>
@@ -46,23 +46,26 @@
   </q-page>
 </template>
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, nextTick } from 'vue'
 import { date } from 'quasar'
 import { useDrawer } from 'src/composables/useDrawer'
 
 import ColaboradorForm from './components/ColaboradorForm.vue'
 import { colaboradorService } from './services/colaborador_service'
 import { useColaboradorStore } from 'src/stores/colaborador.store'
+import useNotify from 'src/composables/useNotify'
 
-const { drawer, openDrawer,closeDrawer } = useDrawer()
+const { drawer, openDrawer,closeDrawer, isEdit, currentData } = useDrawer()
 const { carregarPerfisDoSistema } = colaboradorService()
 const colaboradoreStore = useColaboradorStore()
+const { notifyError, notifySuccess } = useNotify()
 
 const filter = ref('')
 
 const colaboradores = ref([
   {
     id: 1,
+    cpf: "965.485.173-34",
     nomeCompleto: "Glêsio Santos da Silva",
     principal: true,
     perfil: "Proprietário",
@@ -70,6 +73,7 @@ const colaboradores = ref([
   },
   {
     id: 2,
+    cpf: "001.010.171-04",
     nomeCompleto: "Henrico Brito",
     principal: false,
     perfil: "Atendente",
@@ -78,11 +82,34 @@ const colaboradores = ref([
 ])
 
 const columns = [
+  { label: 'CPF', field: row => row.cpf, format: val => `${val}`, align: 'left' },
   { label: 'Nome do Colaborador', field: row => row.nomeCompleto, format: val => `${val}`, align: 'left' },
   { label: 'Perfil', name: 'perfil', field: row => row.perfil, format: val => `${val}`, sortable: true, align: 'left' },
   { label: 'Data de Cadastro', name: 'dtCadastro', field: row => row.dtCadastro, format: (val) => date.formatDate(val, 'DD/MM/YYYY')},
   { label: 'Ações', field: 'actions', name: 'actions', align: 'center' }
 ]
 
-onMounted(async () => await carregarPerfisDoSistema())
+const handleSubmit = async (formData) => {
+  try {
+    console.log('Dados enviados:', formData)
+    if (isEdit.value) {
+      await carregarPerfisDoSistema()
+      notifySuccess('Colaborador atualizado com sucesso!')
+    } else {
+      await carregarPerfisDoSistema()
+      notifySuccess('Colaborador adicionado com sucesso!')
+    }
+    await nextTick()
+    closeDrawer()
+  } catch (error) {
+    console.error('Erro ao processar colaborador:', error)
+    notifyError('Erro ao salvar colaborador: ' + (error.message || 'Erro desconhecido'))
+    await nextTick()
+    closeDrawer()
+  }
+}
+
+onMounted(async () => {
+  await carregarPerfisDoSistema()
+})
 </script>

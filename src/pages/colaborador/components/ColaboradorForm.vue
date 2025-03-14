@@ -25,7 +25,6 @@
         label="CPF"
         outlined
         mask="###.###.###-##"
-        class="q-mb-md"
         lazy-rules
         :rules="[val => (val && val.length > 0) || 'CPF é obrigatório']"
       />
@@ -34,29 +33,32 @@
         v-model="form.nomeColaborador"
         label="Nome do Colaborador"
         outlined
-        class="q-mb-md"
         lazy-rules
         :rules="[val => (val && val.length > 0) || 'Nome do Colaborador é obrigatório']"
       />
 
       <q-select
         outlined
-        v-model="form.perfil"
         :options="perfils"
-        label="Perfil do Colaborador"
+        option-label="descricao"
+        option-value="nome"
+        label="Selecione o perfil"
+        v-model="form.perfil"
+        emit-value
+        map-options
+        lazy-rules
+        :rules="[val => (val && val.length > 0) || 'Perfil é campo obrigatório']"
       />
     </q-card-section>
 
     <!-- Rodapé (botões) -->
-    <q-card-section class="footer-fixed q-pa-md text-right ">
+    <q-card-section class="footer-fixed q-pa-md text-right">
       <q-btn
         flat
         label="Cancelar"
         color="negative"
-        class="q-mr-md"
         @click="$emit('cancel')"
       />
-
       <q-btn
         type="submit"
         color="primary"
@@ -72,7 +74,7 @@ import { ref, watch } from 'vue'
 const props = defineProps({
   isEdit: Boolean,
   initialData: Object,
-  perfils: Array
+  perfils: Array // Lista de perfis recebida do colaboradorStore
 })
 
 defineEmits(['submit', 'cancel'])
@@ -85,19 +87,17 @@ const form = ref({
   perfil: ''
 })
 
+// Atualizar o formulário quando initialData mudar
 watch(() => props.initialData, (newData) => {
   if (newData) {
-    // Criar uma cópia profunda para evitar alterações no objeto original
     form.value = {
-      id: newData.id,
-      nomeColaborador: newData.nomeColaborador || '',
+      id: newData.id || null,
+      nomeColaborador: newData.nomeColaborador || newData.nomeCompleto || '', // Ajuste para compatibilidade com a tabela
       cpf: newData.cpf || '',
-      perfil: newData.perfil || '',
+      perfil: newData.perfil || ''
     }
   } else {
     form.value = { id: null, nomeColaborador: '', cpf: '', perfil: '' }
   }
 }, { immediate: true })
 </script>
-
-

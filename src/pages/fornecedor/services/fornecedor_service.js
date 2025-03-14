@@ -4,7 +4,7 @@ import { useFornecedorStore } from 'src/stores/fornecedor.store'
 
 const authStore = useAuthStore()
 const fornecedorStore = useFornecedorStore()
-const idEstabelecimento = authStore.auth.estabelecimento.idEstabelecimento
+const idEstabelecimento = authStore.auth?.estabelecimento.idEstabelecimento
 
 export const fornecedorService = () => {
   const addFornecedor = async (data) => {

@@ -1,9 +1,9 @@
+import { useColaboradorStore } from 'src/stores/colaborador.store'
 import { api } from '../../../boot/axios'
 import { useAuthStore } from 'src/stores/auth.store'
-import { useFornecedorStore } from 'src/stores/fornecedor.store'
 
 const authStore = useAuthStore()
-const colaboradorStore = useFornecedorStore()
+const colaboradorStore = useColaboradorStore()
 
 export const colaboradorService = () => {
 

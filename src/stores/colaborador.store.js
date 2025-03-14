@@ -7,9 +7,7 @@ export const useColaboradorStore = defineStore('colaboradorStore', () => {
 
   const perfils = ref([])
 
-  const setColaboradores = (data) => {
-    colaboradores.value = data
-  }
+  const setColaboradores = (data) => colaboradores.value = data
 
   const setPerfils = (data) => perfils.value = data
 
