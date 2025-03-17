@@ -73,7 +73,6 @@ const columns = [
 
 const handleSubmit = async (formData) => {
   try {
-    console.log('Dados enviados:', formData)
     if (isEdit.value) {
       await editarFornecedor(formData)
       await carregarFornecedores()

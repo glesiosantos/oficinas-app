@@ -35,7 +35,6 @@
     <q-drawer
       v-model="leftDrawerOpen"
       show-if-above
-      bordered
     >
       <q-scroll-area style="height: calc(100% - 150px); margin-top: 150px; border-right: 1px solid #ddd">
         <q-list>
@@ -56,17 +55,20 @@
       <q-img
   class="absolute-top"
   src="https://wallpapers.com/images/featured/fundo-azul-liso-pxzqbyisuhs4gu7m.jpg"
-  style="height: 180px"
+  style="height: 200px"
 >
   <!-- Logo da Empresa e Nome na mesma linha -->
   <div class="absolute-top row justify-center items-center q-px-md q-py-sm w-100 bg-transparent">
     <q-avatar size="60px" class="q-mr-md">
       <img
-        src="https://img.freepik.com/vetores-premium/desenho-de-logotipo-bonito-e-unico-para-empresa-de-comercio-eletronico-e-varejo_1287271-14561.jpg?semt=ais_hybrid"
+        :src="authStore.auth.estabelecimento.logo"
         alt="Logo da Empresa"
       >
     </q-avatar>
-    <div class="text-weight-bold text-white text-h6">Auto Center para Teste</div>
+    <div class="text-weight-bold text-white text-h6">
+      {{authStore.auth.estabelecimento.nomeEstabelecimento}}
+    </div>
+    <span class="text-caption text-uppercase">Plano {{authStore.auth.plano.descricao}}</span>
   </div>
 
   <!-- Avatar do Usuário, Nome e Perfil na mesma linha -->
@@ -78,8 +80,8 @@
       >
     </q-avatar>
     <div>
-      <div class="text-weight-bold text-white">Glêsio Santos</div>
-      <div class="text-white text-caption">PROPRIETÁRIO</div>
+      <div class="text-weight-bold text-white">{{authStore.auth.nome}}</div>
+      <div class="text-white text-caption">{{authStore.auth.perfil}}</div>
     </div>
   </div>
 </q-img>
@@ -97,28 +99,39 @@ import { ref } from 'vue'
 import EssentialLink from 'components/EssentialLink.vue'
 import { useRouter } from 'vue-router'
 import { authService } from 'src/pages/auth/services/auth_service'
+import useNotify from 'src/composables/useNotify'
+import { useAuthStore } from 'src/stores/auth.store'
 
 const { logout } = authService()
+const authStore = useAuthStore()
 
 const router = useRouter()
+const { notifySuccess } = useNotify()
 
 const linksList = [
   {
     title: 'Dashboard',
-    caption: 'quasar.dev',
+    caption: 'Painel Geral',
     icon: 'dashboard',
     route: {name: 'dashboard'}
   },
   {
     title: 'Fornecedores',
-    caption: 'quasar.dev',
-    icon: 'people',
+    caption: 'Controle de fornecedores',
+    icon: 'group',
     route: {name: 'fornecedores'}
+  },
+  {
+    title: 'Colaboradores',
+    caption: 'Controle de colaboradores',
+    icon: 'diversity_2',
+    route: {name: 'colaboradores'}
   },
 ]
 
 const sair = () => {
   logout()
+  notifySuccess('Logout realizado!')
   router.replace({ name: 'login'})
 }
 
