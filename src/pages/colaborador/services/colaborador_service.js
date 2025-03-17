@@ -19,7 +19,7 @@ export const colaboradorService = () => {
   }
 
   const editarColaborador = async (data) => {
-    const request = Object.assign({}, data, { idUsuario: data.idColaborador })
+    const request = Object.assign({}, data, { idUsuario: data.idColaborador, idEstabelecimento })
     const response = await api.put(`/v1/usuarios/editar`, request,
       {headers: { Authorization: `Bearer ${token}` }})
     return response
