@@ -10,11 +10,27 @@ const token = authStore.auth.token
 
 export const colaboradorService = () => {
 
-  const addColaborador = () => {}
+  const addColaborador = async (data) => {
+    const request = Object.assign({}, data, { idEstabelecimento: idEstabelecimento })
+    const response = await api.post('/v1/usuarios', request, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    return response
+  }
 
-  const editarColaborador = () => {}
+  const editarColaborador = async (data) => {
+    const request = data
+    const response = await api.post(`/v1/usuarios/`, request,
+      {headers: { Authorization: `Bearer ${token}` }})
+   colaboradorStore.setColaboradores(response.data)
+  }
 
-  const removerColaborador = () => {}
+  const removerColaborador = async (data) => {
+    const response = await api.delete(`v1/usuarios/remover/${data.idColaborador}/estabelecimento/${idEstabelecimento}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    return response
+  }
 
   const carregarColaboradores = async () => {
     const response = await api.get(`/v1/usuarios/${idEstabelecimento}`,

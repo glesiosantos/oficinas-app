@@ -23,26 +23,16 @@ export const authService = () => {
   }
 
   const refreshToken = async () => {
-    try {
-      if (!authStore.isAuth) {
-        // Silencia o erro específico de "não autenticado" no console
-        throw new Error('Usuário não autenticado, não é possível renovar o token', { silent: true })
-      }
 
-      const bearerToken = getBearerToken()
-      const response = await api.post('/v1/auth/refresh', { token: authStore.auth.token }, {
-        headers: { Authorization: bearerToken }
-      })
+    let response
 
-      authStore.setAuth(response.data)
-      return response.data
-    } catch (error) {
-      // Só exibe no console se não for um erro silencioso
-      if (!error.silent) {
-        console.error('Erro ao renovar o token:', error.message)
-      }
-      throw error
+    if (authStore.isAuth) {
+      const bearerToken = `Bearer ${getBearerToken()}`
+      response = await api.post('/v1/auth/refresh', {token: authStore.auth.token }, {headers: {
+        Authorization: bearerToken
+      }})
     }
+    return response;
   }
 
   const logout = () => {

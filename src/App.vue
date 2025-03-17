@@ -16,7 +16,7 @@ onMounted(async () => {
 
   const refresh = await refreshToken()
 
-  if(authStore.isAuth && refresh) {
+  if(authStore.isAuth && refresh.data) {
     router.push({ name: 'dashboard'})
   } else {
     router.replace({ name: 'login'})

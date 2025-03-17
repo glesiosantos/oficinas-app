@@ -30,7 +30,7 @@
       />
 
       <q-input
-        v-model="form.nomeColaborador"
+        v-model="form.nomeCompleto"
         label="Nome do Colaborador"
         outlined
         lazy-rules
@@ -82,7 +82,7 @@ defineEmits(['submit', 'cancel'])
 // Criar uma cópia independente dos dados
 const form = ref({
   id: null,
-  nomeColaborador: '',
+  nomeCompleto: '',
   cpf: '',
   perfil: ''
 })
@@ -92,12 +92,12 @@ watch(() => props.initialData, (newData) => {
   if (newData) {
     form.value = {
       id: newData.id || null,
-      nomeColaborador: newData.nomeColaborador || newData.nomeCompleto || '', // Ajuste para compatibilidade com a tabela
+      nomeCompleto: newData.nomeCompleto || newData.nomeCompleto || '', // Ajuste para compatibilidade com a tabela
       cpf: newData.cpf || '',
       perfil: newData.perfil || ''
     }
   } else {
-    form.value = { id: null, nomeColaborador: '', cpf: '', perfil: '' }
+    form.value = { id: null, nomeCompleto: '', cpf: '', perfil: '' }
   }
 }, { immediate: true })
 </script>

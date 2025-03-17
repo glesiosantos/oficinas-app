@@ -17,13 +17,18 @@
                 </template>
               </q-input>
               <q-space />
-              <q-btn color="primary" label="Adicionar Fornecedor" @click="openDrawer('add')" :class="{'full-width q-mt-sm': $q.screen.xs}"/>
+              <q-btn
+                v-if="authStore.auth.plano.totalUsuario > colaboradoreStore.colaboradores.length"
+                color="primary"
+                label="Adicionar Fornecedor"
+                @click="openDrawer('add')"
+                :class="{'full-width q-mt-sm': $q.screen.xs}"/>
             </template>
 
             <template v-slot:body-cell-actions="props">
               <q-td :props="props" class="q-gutter-x-xs text-center">
-                <q-btn round dense color="primary" size="sm" icon="edit" v-if="!props.row.principal" @click="openDrawer('edit', props.row)" />
-                <q-btn round dense color="red" size="sm" icon="delete" v-if="!props.row.principal" />
+                <q-btn round dense color="primary" size="sm" icon="edit" v-if="!props.row.usuarioPrincipal" @click="openDrawer('edit', props.row)" />
+                <q-btn round dense color="red" size="sm" icon="delete" v-if="!props.row.usuarioPrincipal" @click="deletar(props.row)"/>
               </q-td>
             </template>
           </q-table>
@@ -54,11 +59,13 @@ import ColaboradorForm from './components/ColaboradorForm.vue'
 import { colaboradorService } from './services/colaborador_service'
 import { useColaboradorStore } from 'src/stores/colaborador.store'
 import useNotify from 'src/composables/useNotify'
+import { useAuthStore } from 'src/stores/auth.store'
 
 const { drawer, openDrawer,closeDrawer, isEdit, currentData } = useDrawer()
-const { carregarColaboradores, carregarPerfisDoSistema } = colaboradorService()
-const colaboradoreStore = useColaboradorStore()
+const { carregarColaboradores, carregarPerfisDoSistema, addColaborador, removerColaborador } = colaboradorService()
 const { notifyError, notifySuccess } = useNotify()
+const colaboradoreStore = useColaboradorStore()
+const authStore = useAuthStore()
 
 const filter = ref('')
 
@@ -76,13 +83,17 @@ const columns = [
 
 const handleSubmit = async (formData) => {
   try {
-    console.log('Dados enviados:', formData)
     if (isEdit.value) {
+
       await carregarPerfisDoSistema()
       notifySuccess('Colaborador atualizado com sucesso!')
     } else {
-      await carregarPerfisDoSistema()
-      notifySuccess('Colaborador adicionado com sucesso!')
+      const response = await addColaborador(formData)
+      await carregarColaboradores()
+      if(response.status === 201) {
+        notifySuccess('Colaborador adicionado com sucesso!')
+      }
+
     }
     await nextTick()
     closeDrawer()
@@ -92,6 +103,11 @@ const handleSubmit = async (formData) => {
     await nextTick()
     closeDrawer()
   }
+}
+
+const deletar = async (idColaborador) => {
+  await removerColaborador(idColaborador)
+  await carregarColaboradores()
 }
 
 const formatarCPF = (cpf) => {
