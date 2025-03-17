@@ -62,8 +62,8 @@ import useNotify from 'src/composables/useNotify'
 import { useAuthStore } from 'src/stores/auth.store'
 
 const { drawer, openDrawer,closeDrawer, isEdit, currentData } = useDrawer()
-const { carregarColaboradores, carregarPerfisDoSistema, addColaborador, removerColaborador } = colaboradorService()
-const { notifyError, notifySuccess } = useNotify()
+const { carregarColaboradores, carregarPerfisDoSistema, addColaborador, removerColaborador, editarColaborador } = colaboradorService()
+const { notifyError, notifySuccess, notifyWarning } = useNotify()
 const colaboradoreStore = useColaboradorStore()
 const authStore = useAuthStore()
 
@@ -84,22 +84,30 @@ const columns = [
 const handleSubmit = async (formData) => {
   try {
     if (isEdit.value) {
-
-      await carregarPerfisDoSistema()
-      notifySuccess('Colaborador atualizado com sucesso!')
+      const response = await editarColaborador(formData)
+      console.log('**** **** ',response.status)
+      if (response.status === 204) {
+        notifySuccess('Colaborador atualizado com sucesso!')
+      }
     } else {
       const response = await addColaborador(formData)
-      await carregarColaboradores()
       if(response.status === 201) {
         notifySuccess('Colaborador adicionado com sucesso!')
       }
-
     }
+    await carregarPerfisDoSistema()
+    await carregarColaboradores()
     await nextTick()
     closeDrawer()
   } catch (error) {
-    console.error('Erro ao processar colaborador:', error)
-    notifyError('Erro ao salvar colaborador: ' + (error.message || 'Erro desconhecido'))
+
+    if(error.status === 400) {
+      console.log('response ', error)
+      error.response.data.forEach(e => notifyWarning(e.mensagem));
+    } else {
+      notifyError('Erro ao salvar colaborador: ' + (error.message || 'Erro desconhecido'))
+    }
+
     await nextTick()
     closeDrawer()
   }

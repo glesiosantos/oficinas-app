@@ -81,7 +81,7 @@ defineEmits(['submit', 'cancel'])
 
 // Criar uma cópia independente dos dados
 const form = ref({
-  id: null,
+  idColaborador: null,
   nomeCompleto: '',
   cpf: '',
   perfil: ''
@@ -91,13 +91,13 @@ const form = ref({
 watch(() => props.initialData, (newData) => {
   if (newData) {
     form.value = {
-      id: newData.id || null,
+      idColaborador: newData.idColaborador || null,
       nomeCompleto: newData.nomeCompleto || newData.nomeCompleto || '', // Ajuste para compatibilidade com a tabela
       cpf: newData.cpf || '',
       perfil: newData.perfil || ''
     }
   } else {
-    form.value = { id: null, nomeCompleto: '', cpf: '', perfil: '' }
+    form.value = { idColaborador: null, nomeCompleto: '', cpf: '', perfil: '' }
   }
 }, { immediate: true })
 </script>

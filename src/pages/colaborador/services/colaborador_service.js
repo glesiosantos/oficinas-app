@@ -19,10 +19,10 @@ export const colaboradorService = () => {
   }
 
   const editarColaborador = async (data) => {
-    const request = data
-    const response = await api.post(`/v1/usuarios/`, request,
+    const request = Object.assign({}, data, { idUsuario: data.idColaborador })
+    const response = await api.put(`/v1/usuarios/editar`, request,
       {headers: { Authorization: `Bearer ${token}` }})
-   colaboradorStore.setColaboradores(response.data)
+    return response
   }
 
   const removerColaborador = async (data) => {
