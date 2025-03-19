@@ -18,7 +18,7 @@ const routes = [
       {
         path: '', // Raiz redireciona para dashboard
         name: 'dashboard',
-        component: () => import('pages/IndexPage.vue'),
+        component: () => import('src/pages/dashboard/IndexPage.vue'),
       },
       ...fornecedorRouter,
       ...colaboradorRouter

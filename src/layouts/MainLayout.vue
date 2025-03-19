@@ -12,7 +12,7 @@
         />
 
         <q-toolbar-title>
-          Quasar App
+          Auto Revise
         </q-toolbar-title>
 
         <q-btn-dropdown label="Adminitrador" flat>
