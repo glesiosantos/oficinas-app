@@ -38,11 +38,10 @@
 
     <q-drawer v-model="drawer" side="right" overlay elevated :width="400">
       <q-scroll-area class="fit">
-        <colaborador-form
+        <cliente-form
           v-if="drawer"
           :is-edit="isEdit"
           :initial-data="currentData"
-          :perfils="colaboradoreStore.perfils"
           @submit="handleSubmit"
           @cancel="closeDrawer"
         />
@@ -55,7 +54,7 @@ import { onMounted, ref, nextTick } from 'vue'
 import { date } from 'quasar'
 import { useDrawer } from 'src/composables/useDrawer'
 
-import ColaboradorForm from './components/ColaboradorForm.vue'
+import ClienteForm from './components/ClienteForm.vue'
 import { colaboradorService } from './services/cliente_service'
 import { useColaboradorStore } from 'src/stores/colaborador.store'
 import useNotify from 'src/composables/useNotify'

@@ -127,6 +127,12 @@ const linksList = [
     icon: 'diversity_2',
     route: {name: 'colaboradores'}
   },
+  {
+    title: 'Cliente',
+    caption: 'Controle de clientes',
+    icon: 'group',
+    route: {name: 'clientes'}
+  },
 ]
 
 const sair = () => {
