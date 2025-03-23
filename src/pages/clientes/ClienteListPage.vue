@@ -44,6 +44,8 @@
           :initial-data="currentData"
           @submit="handleSubmit"
           @cancel="closeDrawer"
+          :marcas="marcaStore.marcas"
+          :modelos="marcaStore.modelos"
         />
       </q-scroll-area>
     </q-drawer>
@@ -59,23 +61,27 @@ import { colaboradorService } from './services/cliente_service'
 import { useColaboradorStore } from 'src/stores/colaborador.store'
 import useNotify from 'src/composables/useNotify'
 import { useAuthStore } from 'src/stores/auth.store'
+import { marcaService } from '../marcas/services/marca_service'
+import { useMarcaStore } from 'src/stores/marca.store'
 
 const { drawer, openDrawer,closeDrawer, isEdit, currentData } = useDrawer()
 const { carregarColaboradores, carregarPerfisDoSistema, addColaborador, removerColaborador, editarColaborador } = colaboradorService()
+const { carregarMarcas, carregarModelosDasMarcas } = marcaService()
 const { notifyError, notifySuccess, notifyWarning } = useNotify()
 const colaboradoreStore = useColaboradorStore()
 const authStore = useAuthStore()
+const marcaStore = useMarcaStore()
 
 const filter = ref('')
 
 const columns = [
-  { label: 'CPF',
+  { label: 'CPF ou CNPJ',
     field: row => row.cpf,
     format: val => formatarCPF(val)
     , align: 'left'
   },
-  { label: 'Nome do Colaborador', field: row => row.nomeCompleto, format: val => `${val}`, align: 'left' },
-  { label: 'Perfil', name: 'perfil', field: row => row.perfil, format: val => `${val}`, sortable: true, align: 'left' },
+  { label: 'Nome Completo', field: row => row.nomeCompleto, format: val => `${val}`, align: 'left' },
+  { label: 'Contatos', name: 'perfil', field: row => row.perfil, format: val => `${val}`, sortable: true, align: 'left' },
   { label: 'Data de Cadastro', name: 'criadoEm', field: row => row.criadoEm, format: (val) => date.formatDate(val, 'DD/MM/YYYY')},
   { label: 'Ações', field: 'actions', name: 'actions', align: 'center' }
 ]
@@ -128,5 +134,7 @@ const formatarCPF = (cpf) => {
 onMounted(async () => {
   await carregarColaboradores()
   await carregarPerfisDoSistema()
+  await carregarMarcas()
+  await carregarModelosDasMarcas()
 })
 </script>

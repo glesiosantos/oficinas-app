@@ -72,7 +72,7 @@
       <q-btn flat label="Adicionar Contato" color="primary" icon="add" @click="addContact" class="q-my-sm" />
 
       <!-- Veículos -->
-      <div v-for="(veiculo, index) in form.veiculos" :key="`veiculo-${index}`" >
+      <div v-for="(veiculo, index) in form.veiculos" :key="`veiculo-${index}`">
         <q-input
           v-model="veiculo.placa"
           label="Placa"
@@ -106,17 +106,26 @@
         <q-select
           v-model="veiculo.marca"
           :options="marcas"
-          label="Marca"
+          label="Selecione uma marca"
+          option-label="nome"
+          option-value="id"
           outlined
+          emit-value
+          map-options
           lazy-rules
           :rules="[(val) => !!val || 'Marca é obrigatória']"
+          @update:model-value="resetModelo(index)"
         />
         <q-select
           v-model="veiculo.modelo"
-          :options="modelosPorMarca[veiculo.marca] || []"
+          :options="getModelosPorMarca(veiculo.marca)"
           label="Modelo"
           outlined
+          option-label="modelo"
+          option-value="idModelo"
           lazy-rules
+          emit-value
+          map-options
           :rules="[(val) => !!val || 'Modelo é obrigatório']"
           :disable="!veiculo.marca"
         />
@@ -145,6 +154,14 @@ import { ref, watch } from 'vue';
 const props = defineProps({
   isEdit: Boolean,
   initialData: Object,
+  marcas: {
+    type: Array,
+    default: () => [],
+  },
+  modelos: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 defineEmits(['submit', 'cancel']);
@@ -162,29 +179,9 @@ const form = ref({
   nomeCompleto: '',
   cpfOuCnpj: '',
   contatos: [''],
-  veiculos: [{ placa: '', ano: null, marca: '', modelo: '' }],
+  veiculos: [{ placa: '', ano: null, marca: null, modelo: null }],
 });
 
-// Lista de marcas e modelos (exemplo estático)
-const marcas = ref([
-  'Volkswagen',
-  'Fiat',
-  'Chevrolet',
-  'Ford',
-  'Honda',
-  'Toyota',
-]);
-
-const modelosPorMarca = ref({
-  Volkswagen: ['Gol', 'Polo', 'Golf', 'Tiguan'],
-  Fiat: ['Palio', 'Punto', '500', 'Argo'],
-  Chevrolet: ['Celta', 'Cruze', 'Onix', 'Tracker'],
-  Ford: ['Fiesta', 'Focus', 'Ranger', 'EcoSport'],
-  Honda: ['Civic', 'Fit', 'CR-V', 'HR-V'],
-  Toyota: ['Corolla', 'Hilux', 'Yaris', 'RAV4'],
-});
-
-// Funções para contatos
 function addContact() {
   form.value.contatos.push('');
 }
@@ -195,9 +192,8 @@ function removeContact(index) {
   }
 }
 
-// Funções para veículos
 function addVehicle() {
-  form.value.veiculos.push({ placa: '', ano: null, marca: '', modelo: '' });
+  form.value.veiculos.push({ placa: '', ano: null, marca: null, modelo: null });
 }
 
 function removeVehicle(index) {
@@ -206,7 +202,21 @@ function removeVehicle(index) {
   }
 }
 
-// Watcher para initialData
+function resetModelo(index) {
+  // Reseta o modelo quando a marca muda
+  form.value.veiculos[index].modelo = null;
+}
+
+function getModelosPorMarca(marcaId) {
+  if (!marcaId || !Array.isArray(props.modelos)) {
+    return [];
+  }
+  const filtered = props.modelos.filter((modelo) => {
+    return modelo.idMarca === marcaId;
+  });
+  return filtered;
+}
+
 watch(
   () => props.initialData,
   (newData) => {
@@ -219,8 +229,13 @@ watch(
         contatos: newData.contatos && Array.isArray(newData.contatos) ? [...newData.contatos] : [''],
         veiculos:
           newData.veiculos && Array.isArray(newData.veiculos)
-            ? [...newData.veiculos]
-            : [{ placa: '', ano: null, marca: '', modelo: '' }],
+            ? newData.veiculos.map((v) => ({
+                placa: v.placa || '',
+                ano: v.ano || null,
+                marca: props.marcas.find((m) => m.id === v.marca?.id) || null,
+                modelo: props.modelos.find((m) => m.idModelo === v.modelo?.idModelo) || null,
+              }))
+            : [{ placa: '', ano: null, marca: null, modelo: null }],
       };
     } else {
       form.value = {
@@ -229,14 +244,13 @@ watch(
         nomeCompleto: '',
         cpfOuCnpj: '',
         contatos: [''],
-        veiculos: [{ placa: '', ano: null, marca: '', modelo: '' }],
+        veiculos: [{ placa: '', ano: null, marca: null, modelo: null }],
       };
     }
   },
   { immediate: true }
 );
 
-// Watcher para limpar cpfOuCnpj ao mudar tipoCliente
 watch(
   () => form.value.tipoCliente,
   (newVal, oldVal) => {
@@ -248,11 +262,10 @@ watch(
 </script>
 
 <style scoped>
-/* Opcional: Ajustar margens entre os campos dos veículos */
 .q-mb-md > * {
-  margin-bottom: 16px; /* Espaçamento consistente entre os campos */
+  margin-bottom: 16px;
 }
 .q-mb-md:last-child {
-  margin-bottom: 0; /* Remove margem extra no último campo */
+  margin-bottom: 0;
 }
 </style>
