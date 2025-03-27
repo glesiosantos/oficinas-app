@@ -15,7 +15,7 @@
           Auto Revise
         </q-toolbar-title>
 
-        <q-btn-dropdown label="Adminitrador" flat>
+        <q-btn-dropdown :label="authStore.auth.nome" flat>
           <q-list>
             <q-item clickable v-close-popup @click="router.push({ name: 'profile'})">
                 <q-item-section>
@@ -139,6 +139,7 @@ const sair = () => {
   logout()
   notifySuccess('Logout realizado!')
   router.replace({ name: 'login'})
+  window.location.reload()
 }
 
 const leftDrawerOpen = ref(false)

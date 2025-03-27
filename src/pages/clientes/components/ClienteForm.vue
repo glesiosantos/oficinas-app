@@ -4,18 +4,18 @@
     <q-card-section class="bg-primary text-white">
       <div class="row items-center no-wrap">
         <div class="text-h6">
-          {{ isEdit ? 'Editar Cliente' : 'Novo Cliente' }}
+          {{ isEdit ? 'Adicionar Veículo' : 'Novo Cliente' }}
         </div>
         <q-space />
         <q-btn flat round dense icon="close" color="white" @click="$emit('cancel')" />
       </div>
     </q-card-section>
 
-    <!-- Corpo (campos) -->
     <q-card-section class="flex-1">
       <!-- Tipo de Cliente -->
       <div class="q-gutter-sm q-mb-sm">
         <q-radio
+          :disable="isEdit"
           v-for="t in tipoCliente"
           v-model="form.tipoCliente"
           :val="t.tipo"
@@ -27,6 +27,7 @@
       <!-- CPF ou CNPJ -->
       <q-input
         v-model="form.cpfOuCnpj"
+        :disable="isEdit"
         label="CPF ou CNPJ"
         outlined
         :mask="form.tipoCliente === 'PF' ? '###.###.###-##' : '##.###.###/####-##'"
@@ -37,19 +38,31 @@
         ]"
       />
 
-      <!-- Nome do Colaborador -->
-      <q-input
-        v-model="form.nomeCompleto"
-        label="Nome do Colaborador"
+      <q-input v-if="form.tipoCliente == 'PJ'"
+        v-model="form.razao"
+        :disable="isEdit"
+        label="Razão Social"
+        :style="{ textTransform: 'uppercase' }"
         outlined
         lazy-rules
-        :rules="[(val) => (val && val.length > 0) || 'Nome do Colaborador é obrigatório']"
+        :rules="[(val) => (val && val.length > 0) || 'Razão social é obrigatório']"
+      />
+
+      <q-input
+        v-model="form.nome"
+        :disable="isEdit"
+        label="Nome Completo ou Nome Fantasia"
+        :style="{ textTransform: 'uppercase' }"
+        outlined
+        lazy-rules
+        :rules="[(val) => (val && val.length > 0) || 'Nome Completo é obrigatório']"
       />
 
       <!-- Contatos -->
       <div v-for="(contato, index) in form.contatos" :key="index">
         <q-input
           v-model="form.contatos[index]"
+          :disable="isEdit"
           mask="(##) #.####-####"
           :label="index === 0 ? 'Contato Principal' : `Contato ${index + 1}`"
           outlined
@@ -69,32 +82,40 @@
           </template>
         </q-input>
       </div>
-      <q-btn flat label="Adicionar Contato" color="primary" icon="add" @click="addContact" class="q-my-sm" />
+      <q-btn flat label="Adicionar Contato" color="primary" icon="add" @click="addContact" class="q-my-sm" v-if="!isEdit"/>
 
-      <!-- Veículos -->
-      <div v-for="(veiculo, index) in form.veiculos" :key="`veiculo-${index}`">
+      <!-- Veículo Único -->
+      <div class="q-gutter-sm q-mb-sm">
+        <q-radio
+          v-for="v in tiposVeiculo"
+           v-model="form.veiculo.tipoVeiculo"
+          :val="v"
+          :label="v"
+          :key="v"
+        />
+      </div>
+      <div class="q-mt-md">
+
         <q-input
-          v-model="veiculo.placa"
-          label="Placa"
+          v-model="form.veiculo.cor"
+          label="Cor do Veículo"
+          :style="{ textTransform: 'uppercase' }"
           outlined
-          mask="AAA-#X##"
+          lazy-rules
+          :rules="[(val) => (val && val.length > 0) || 'Cor é obrigatória']"
+        />
+
+        <q-input
+          v-model="form.veiculo.placa"
+          label="Placa"
+          :style="{ textTransform: 'uppercase' }"
+          outlined
           lazy-rules
           :rules="[(val) => (val && val.length > 0) || 'Placa é obrigatória']"
-        >
-          <template v-slot:append>
-            <q-btn
-              v-if="index > 0"
-              round
-              dense
-              flat
-              icon="delete"
-              color="negative"
-              @click="removeVehicle(index)"
-            />
-          </template>
-        </q-input>
+        />
+
         <q-input
-          v-model.number="veiculo.ano"
+          v-model.number="form.veiculo.ano"
           label="Ano"
           outlined
           type="number"
@@ -104,7 +125,7 @@
           ]"
         />
         <q-select
-          v-model="veiculo.marca"
+          v-model="form.veiculo.marca"
           :options="marcas"
           label="Selecione uma marca"
           option-label="nome"
@@ -114,11 +135,11 @@
           map-options
           lazy-rules
           :rules="[(val) => !!val || 'Marca é obrigatória']"
-          @update:model-value="resetModelo(index)"
+          @update:model-value="resetModelo"
         />
         <q-select
-          v-model="veiculo.modelo"
-          :options="getModelosPorMarca(veiculo.marca)"
+          v-model="form.veiculo.modelo"
+          :options="getModelosPorMarca(form.veiculo.marca)"
           label="Modelo"
           outlined
           option-label="modelo"
@@ -127,17 +148,9 @@
           emit-value
           map-options
           :rules="[(val) => !!val || 'Modelo é obrigatório']"
-          :disable="!veiculo.marca"
+          :disable="!form.veiculo.marca"
         />
       </div>
-      <q-btn
-        flat
-        label="Adicionar Veículo"
-        color="primary"
-        icon="add"
-        @click="addVehicle"
-        class="q-my-sm"
-      />
     </q-card-section>
 
     <!-- Rodapé (botões) -->
@@ -170,16 +183,20 @@ defineEmits(['submit', 'cancel']);
 const tipoCliente = ref([
   { tipo: 'PF', descricao: 'Pessoa Física' },
   { tipo: 'PJ', descricao: 'Pessoa Jurídica' },
-]);
+])
+
+// Tipos de veículo
+const tiposVeiculo = ref(['Carro', 'Moto']);
 
 // Formulário inicial
 const form = ref({
-  tipoCliente: 'PF',
+  tipoCliente: '',
   idCliente: null,
-  nomeCompleto: '',
+  nome: '',
   cpfOuCnpj: '',
+  razao: '',
   contatos: [''],
-  veiculos: [{ placa: '', ano: null, marca: null, modelo: null }],
+  veiculo: { tipoVeiculo: '', cor: '', placa: '', ano: null, marca: null, modelo: null },
 });
 
 function addContact() {
@@ -192,30 +209,36 @@ function removeContact(index) {
   }
 }
 
-function addVehicle() {
-  form.value.veiculos.push({ placa: '', ano: null, marca: null, modelo: null });
-}
-
-function removeVehicle(index) {
-  if (form.value.veiculos.length > 1) {
-    form.value.veiculos.splice(index, 1);
-  }
-}
-
-function resetModelo(index) {
-  // Reseta o modelo quando a marca muda
-  form.value.veiculos[index].modelo = null;
+function resetModelo() {
+  form.value.veiculo.modelo = null;
 }
 
 function getModelosPorMarca(marcaId) {
   if (!marcaId || !Array.isArray(props.modelos)) {
     return [];
   }
-  const filtered = props.modelos.filter((modelo) => {
-    return modelo.idMarca === marcaId;
-  });
-  return filtered;
+  return props.modelos.filter((modelo) => modelo.idMarca === marcaId);
 }
+
+// Watch para sincronizar nome com razão social quando for PF
+watch(
+  () => form.value.tipoCliente,
+  (newVal) => {
+    if (newVal === 'PF') {
+      form.value.razao = form.value.nome; // Copia o nome para razão social
+    }
+  }
+);
+
+// Watch para atualizar razão social quando o nome mudar (somente para PF)
+watch(
+  () => form.value.nome,
+  (newVal) => {
+    if (form.value.tipoCliente === 'PF') {
+      form.value.razao = newVal; // Sincroniza com o nome
+    }
+  }
+);
 
 watch(
   () => props.initialData,
@@ -224,27 +247,27 @@ watch(
       form.value = {
         tipoCliente: newData.tipoCliente || 'PF',
         idCliente: newData.idCliente || null,
-        nomeCompleto: newData.nomeCompleto || '',
+        nome: newData.nome || '',
         cpfOuCnpj: newData.cpfOuCnpj || newData.cpf || '',
+        razao: newData.razao || (newData.tipoCliente === 'PF' ? newData.nome : ''), // Preenche razão com nome para PF
         contatos: newData.contatos && Array.isArray(newData.contatos) ? [...newData.contatos] : [''],
-        veiculos:
-          newData.veiculos && Array.isArray(newData.veiculos)
-            ? newData.veiculos.map((v) => ({
-                placa: v.placa || '',
-                ano: v.ano || null,
-                marca: props.marcas.find((m) => m.id === v.marca?.id) || null,
-                modelo: props.modelos.find((m) => m.idModelo === v.modelo?.idModelo) || null,
-              }))
-            : [{ placa: '', ano: null, marca: null, modelo: null }],
+        veiculo: {
+          tipoVeiculo: newData.veiculo?.tipoVeiculo || '',
+          placa: newData.veiculo?.placa || '',
+          ano: newData.veiculo?.ano || null,
+          marca: props.marcas.find((m) => m.id === newData.veiculo?.marca?.id) || null,
+          modelo: props.modelos.find((m) => m.idModelo === newData.veiculo?.modelo?.idModelo) || null,
+        },
       };
     } else {
       form.value = {
         tipoCliente: 'PF',
         idCliente: null,
-        nomeCompleto: '',
+        nome: '',
         cpfOuCnpj: '',
+        razao: '',
         contatos: [''],
-        veiculos: [{ placa: '', ano: null, marca: null, modelo: null }],
+        veiculo: { tipoVeiculo: '', placa: '', ano: null, marca: null, modelo: null },
       };
     }
   },
@@ -256,6 +279,9 @@ watch(
   (newVal, oldVal) => {
     if (newVal !== oldVal) {
       form.value.cpfOuCnpj = '';
+      if (newVal === 'PF') {
+        form.value.razao = form.value.nome; // Garante que razão social seja preenchida
+      }
     }
   }
 );
