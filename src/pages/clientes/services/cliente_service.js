@@ -18,7 +18,6 @@ export const clienteService = () => {
 
   const carregarClienteESeusVeiculos = async (data) => {
     const response = await api.get(`v1/estabelecimento/clientes/${idEstabelecimento}/${data}`,{ headers: { Authorization: `Bearer ${token}` }})
-    console.log(response.data)
     response.data
   }
 
@@ -30,9 +29,13 @@ export const clienteService = () => {
 
   const carregarClientes = async () => {
     const response = await api.get(`/v1/estabelecimento/clientes/${idEstabelecimento}`,{headers: { Authorization: `Bearer ${token}` }})
-    console.log(response.data)
     clienteStore.setClientes(response.data)
   }
 
-  return { addCliente, adicionarVeiculo, carregarClienteESeusVeiculos, carregarClientes }
+  const carregarClientePeloCpfOuCnpj = async (data) => {
+    const response = await api.get(`/v1/clientes/${data}`,{headers: { Authorization: `Bearer ${token}` }})
+    return response
+  }
+
+  return { addCliente, adicionarVeiculo, carregarClienteESeusVeiculos, carregarClientes, carregarClientePeloCpfOuCnpj }
 }

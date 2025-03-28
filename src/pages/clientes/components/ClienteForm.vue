@@ -31,6 +31,7 @@
         label="CPF ou CNPJ"
         outlined
         :mask="form.tipoCliente === 'PF' ? '###.###.###-##' : '##.###.###/####-##'"
+        :loading="loading"
         lazy-rules
         :rules="[
           (val) => (val && val.length > 0) || (form.tipoCliente === 'PF' ? 'CPF é obrigatório' : 'CNPJ é obrigatório'),
@@ -88,14 +89,13 @@
       <div class="q-gutter-sm q-mb-sm">
         <q-radio
           v-for="v in tiposVeiculo"
-           v-model="form.veiculo.tipoVeiculo"
+          v-model="form.veiculo.tipoVeiculo"
           :val="v"
           :label="v"
           :key="v"
         />
       </div>
       <div class="q-mt-md">
-
         <q-input
           v-model="form.veiculo.cor"
           label="Cor do Veículo"
@@ -156,13 +156,19 @@
     <!-- Rodapé (botões) -->
     <q-card-section class="footer-fixed q-pa-md text-right">
       <q-btn flat label="Cancelar" color="negative" @click="$emit('cancel')" />
-      <q-btn type="submit" color="primary" label="Salvar" />
+      <q-btn type="submit" color="primary" label="Salvar" :disable="loading" />
     </q-card-section>
   </q-form>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue';
+import { debounce } from 'quasar';
+import { clienteService } from '../services/cliente_service';
+import useNotify from 'src/composables/useNotify';
+
+const { notifyError, notifyWarning, notifySuccess } = useNotify();
+const { carregarClientePeloCpfOuCnpj } = clienteService();
 
 const props = defineProps({
   isEdit: Boolean,
@@ -179,18 +185,15 @@ const props = defineProps({
 
 defineEmits(['submit', 'cancel']);
 
-// Tipos de cliente
 const tipoCliente = ref([
   { tipo: 'PF', descricao: 'Pessoa Física' },
   { tipo: 'PJ', descricao: 'Pessoa Jurídica' },
-])
+]);
 
-// Tipos de veículo
 const tiposVeiculo = ref(['Carro', 'Moto']);
 
-// Formulário inicial
 const form = ref({
-  tipoCliente: '',
+  tipoCliente: 'PF',
   idCliente: null,
   nome: '',
   cpfOuCnpj: '',
@@ -199,6 +202,54 @@ const form = ref({
   veiculo: { tipoVeiculo: '', cor: '', placa: '', ano: null, marca: null, modelo: null },
 });
 
+const loading = ref(false);
+const lastFetchedCpfOuCnpj = ref(''); // Para rastrear o último valor buscado sem máscara
+
+// Função para buscar dados na API com debounce
+const fetchClientData = debounce(async (cpfOuCnpj) => {
+  const cleanCpfOuCnpj = cpfOuCnpj.replace(/\D/g, '');
+  if (!cleanCpfOuCnpj || loading.value || props.isEdit || lastFetchedCpfOuCnpj.value === cleanCpfOuCnpj) return;
+
+  if ((form.value.tipoCliente === 'PF' && cleanCpfOuCnpj.length !== 11) ||
+      (form.value.tipoCliente === 'PJ' && cleanCpfOuCnpj.length !== 14)) {
+    return;
+  }
+
+  try {
+    loading.value = true;
+    const response = await carregarClientePeloCpfOuCnpj(cleanCpfOuCnpj);
+
+    if (response.status === 200) {
+      populateForm(response.data);
+      lastFetchedCpfOuCnpj.value = cleanCpfOuCnpj; // Armazena o valor sem máscara
+      notifySuccess('Cliente encontrado e dados preenchidos!');
+    }
+  } catch (error) {
+    if (error.response?.data?.status === 400) {
+      notifyWarning('Cliente não encontrado, preencha os dados para cadastrar.');
+    } else {
+      notifyError('Erro ao buscar cliente: ' + (error.message || 'Erro desconhecido'));
+    }
+  } finally {
+    loading.value = false;
+  }
+}, 500);
+
+function populateForm(data) {
+  const newFormData = {
+    tipoCliente: data.tipo === 'Pessoa Física' ? 'PF' : 'PJ',
+    idCliente: data.idCliente || null,
+    nome: data.nome || '',
+    cpfOuCnpj: data.cpfOuCnpj || '', // Mantém o valor bruto da API
+    razao: data.razao || (data.tipo === 'Pessoa Física' ? data.nome : ''),
+    contatos: data.contatos && Array.isArray(data.contatos) ? [...data.contatos] : [''],
+    veiculo: { ...form.value.veiculo }, // Mantém os dados atuais do veículo
+  };
+
+  Object.assign(form.value, newFormData);
+}
+
+// Funções auxiliares
 function addContact() {
   form.value.contatos.push('');
 }
@@ -220,71 +271,41 @@ function getModelosPorMarca(marcaId) {
   return props.modelos.filter((modelo) => modelo.idMarca === marcaId);
 }
 
-// Watch para sincronizar nome com razão social quando for PF
-watch(
-  () => form.value.tipoCliente,
-  (newVal) => {
+// Watchers
+watch(() => form.value.cpfOuCnpj, (newVal, oldVal) => {
+  const cleanNewVal = newVal ? newVal.replace(/\D/g, '') : '';
+  const cleanOldVal = oldVal ? oldVal.replace(/\D/g, '') : '';
+  if (cleanNewVal && cleanNewVal !== cleanOldVal) { // Compara valores sem máscara
+    fetchClientData(newVal);
+  }
+});
+
+watch(() => form.value.tipoCliente, (newVal) => {
+  if (newVal === 'PF') {
+    form.value.razao = form.value.nome;
+  }
+});
+
+watch(() => form.value.nome, (newVal) => {
+  if (form.value.tipoCliente === 'PF') {
+    form.value.razao = newVal;
+  }
+});
+
+watch(() => props.initialData, (newData) => {
+  if (newData) {
+    populateForm(newData);
+  }
+}, { immediate: true });
+
+watch(() => form.value.tipoCliente, (newVal, oldVal) => {
+  if (newVal !== oldVal) {
+    form.value.cpfOuCnpj = '';
     if (newVal === 'PF') {
-      form.value.razao = form.value.nome; // Copia o nome para razão social
+      form.value.razao = form.value.nome;
     }
   }
-);
-
-// Watch para atualizar razão social quando o nome mudar (somente para PF)
-watch(
-  () => form.value.nome,
-  (newVal) => {
-    if (form.value.tipoCliente === 'PF') {
-      form.value.razao = newVal; // Sincroniza com o nome
-    }
-  }
-);
-
-watch(
-  () => props.initialData,
-  (newData) => {
-    if (newData) {
-      form.value = {
-        tipoCliente: newData.tipoCliente || 'PF',
-        idCliente: newData.idCliente || null,
-        nome: newData.nome || '',
-        cpfOuCnpj: newData.cpfOuCnpj || newData.cpf || '',
-        razao: newData.razao || (newData.tipoCliente === 'PF' ? newData.nome : ''), // Preenche razão com nome para PF
-        contatos: newData.contatos && Array.isArray(newData.contatos) ? [...newData.contatos] : [''],
-        veiculo: {
-          tipoVeiculo: newData.veiculo?.tipoVeiculo || '',
-          placa: newData.veiculo?.placa || '',
-          ano: newData.veiculo?.ano || null,
-          marca: props.marcas.find((m) => m.id === newData.veiculo?.marca?.id) || null,
-          modelo: props.modelos.find((m) => m.idModelo === newData.veiculo?.modelo?.idModelo) || null,
-        },
-      };
-    } else {
-      form.value = {
-        tipoCliente: 'PF',
-        idCliente: null,
-        nome: '',
-        cpfOuCnpj: '',
-        razao: '',
-        contatos: [''],
-        veiculo: { tipoVeiculo: '', placa: '', ano: null, marca: null, modelo: null },
-      };
-    }
-  },
-  { immediate: true }
-);
-
-watch(
-  () => form.value.tipoCliente,
-  (newVal, oldVal) => {
-    if (newVal !== oldVal) {
-      form.value.cpfOuCnpj = '';
-      if (newVal === 'PF') {
-        form.value.razao = form.value.nome; // Garante que razão social seja preenchida
-      }
-    }
-  }
-);
+});
 </script>
 
 <style scoped>
