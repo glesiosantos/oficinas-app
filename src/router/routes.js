@@ -1,6 +1,7 @@
 import authRouter from '../pages/auth/router'
 import fornecedorRouter from '../pages/fornecedor/router'
 import colaboradorRouter from '../pages/colaborador/router'
+import clienteRouter from '../pages/clientes/router'
 
 const routes = [
   {
@@ -21,7 +22,8 @@ const routes = [
         component: () => import('src/pages/dashboard/IndexPage.vue'),
       },
       ...fornecedorRouter,
-      ...colaboradorRouter
+      ...colaboradorRouter,
+      ...clienteRouter
     ],
   },
 
