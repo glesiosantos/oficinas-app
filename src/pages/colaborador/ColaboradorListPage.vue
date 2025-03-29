@@ -20,7 +20,8 @@
               <q-btn
                 v-if="authStore.auth.plano.totalUsuario > colaboradoreStore.colaboradores.length"
                 color="primary"
-                label="Adicionar Fornecedor"
+                class="text-black"
+                label="Adicionar Colaborador"
                 @click="openDrawer('add')"
                 :class="{'full-width q-mt-sm': $q.screen.xs}"/>
             </template>
@@ -85,7 +86,6 @@ const handleSubmit = async (formData) => {
   try {
     if (isEdit.value) {
       const response = await editarColaborador(formData)
-      console.log('**** **** ',response.status)
       if (response.status === 204) {
         notifySuccess('Colaborador atualizado com sucesso!')
       }

@@ -8,14 +8,15 @@
           round
           icon="menu"
           aria-label="Menu"
+          class="text-black"
           @click="toggleLeftDrawer"
         />
 
-        <q-toolbar-title>
-          Auto Revise
+        <q-toolbar-title class="text-black">
+          <span class="text-weight-bold">AutoRevise</span>  PRO
         </q-toolbar-title>
 
-        <q-btn-dropdown :label="authStore.auth.nome" flat>
+        <q-btn-dropdown :label="authStore.auth.nome" flat class="text-black">
           <q-list>
             <q-item clickable v-close-popup @click="router.push({ name: 'profile'})">
                 <q-item-section>
@@ -53,8 +54,7 @@
       </q-scroll-area>
 
       <q-img
-  class="absolute-top"
-  src="https://wallpapers.com/images/featured/fundo-azul-liso-pxzqbyisuhs4gu7m.jpg"
+  class="absolute-top header-drawer"
   style="height: 200px"
 >
   <!-- Logo da Empresa e Nome na mesma linha -->
@@ -65,10 +65,10 @@
         alt="Logo da Empresa"
       >
     </q-avatar>
-    <div class="text-weight-bold text-white text-h6">
+    <div class="text-weight-bold text-h6 text-black">
       {{authStore.auth.estabelecimento.nomeEstabelecimento}}
     </div>
-    <span class="text-caption text-uppercase">Plano {{authStore.auth.plano.descricao}}</span>
+    <span class="text-caption text-uppercase text-black">Plano {{authStore.auth.plano.descricao}}</span>
   </div>
 
   <!-- Avatar do Usuário, Nome e Perfil na mesma linha -->
@@ -80,8 +80,8 @@
       >
     </q-avatar>
     <div>
-      <div class="text-weight-bold text-white">{{authStore.auth.nome}}</div>
-      <div class="text-white text-caption">{{authStore.auth.perfil}}</div>
+      <div class="text-black text-weight-bold">{{authStore.auth.nome}}</div>
+      <div class="text-black text-caption">{{authStore.auth.perfil}}</div>
     </div>
   </div>
 </q-img>
@@ -148,3 +148,8 @@ function toggleLeftDrawer () {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }
 </script>
+<style scoped>
+.header-drawer {
+  background-color: #fec842;
+}
+</style>

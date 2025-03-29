@@ -19,6 +19,7 @@
               <q-space />
               <q-btn
                 color="primary"
+                class="text-black"
                 label="Adicionar cliente"
                 @click="openDrawer('add')"
                 :class="{'full-width q-mt-sm': $q.screen.xs}"/>
@@ -26,7 +27,7 @@
 
             <template v-slot:body-cell-actions="props">
               <q-td :props="props" class="q-gutter-x-xs text-center">
-                <q-btn round dense color="primary" size="md" @click="openDrawer('edit', props.row)" title="Adicionar um Carro">
+                <q-btn round dense color="primary text-black" size="md" @click="openDrawer('edit', props.row)" title="Adicionar um Carro">
                   <span class="material-symbols-outlined" style="font-size: 20px;">transportation</span>
                 </q-btn>
                 <q-btn

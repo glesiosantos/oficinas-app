@@ -2,7 +2,7 @@
 <template>
   <q-page padding>
     <q-card>
-      <q-card-section class="bg-primary text-white">
+      <q-card-section class="bg-primary">
         <div class="text-h6">Detalhes do Cliente</div>
       </q-card-section>
 
@@ -79,6 +79,7 @@
             <q-td :props="props">
               <q-btn
                 color="primary"
+                class="text-black"
                 size="sm"
                 label="Novo Pedido"
                 icon="shopping_cart"

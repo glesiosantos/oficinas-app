@@ -1,7 +1,9 @@
 <template>
   <q-page class="flex flex-center q-pa-md">
     <q-card class="full-width q-pa-md">
-      <q-img src="./../../assets/quasar-logo-vertical.svg" style="width: 150px;"/>
+      <div class="text-center">
+        <q-img src="./../../assets/logo.jpeg" style="width: 150px;"/>
+      </div>
       <q-separator class="full-width q-ma-lg"/>
       <q-form @submit.prevent="handleForm" class="q-gutter-y-sm">
         <q-input
@@ -19,7 +21,7 @@
           label="Senha"
           lazy-rules
           :rules="[val => (val && val.length > 0) || 'Senha é campo obrigatório']"/>
-        <q-btn color="primary" type="submit" label="Acessar plataforma" class="full-width"/>
+        <q-btn color="primary" type="submit" label="Acessar plataforma" class="full-width text-black"/>
       </q-form>
       <!-- <q-btn
         color="red"

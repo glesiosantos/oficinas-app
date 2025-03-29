@@ -1,13 +1,13 @@
 <template>
   <q-form @submit="$emit('submit', form)" class="column">
     <!-- Cabeçalho -->
-    <q-card-section class="bg-primary text-white">
+    <q-card-section class="bg-primary">
       <div class="row items-center no-wrap">
         <div class="text-h6">
           {{ isEdit ? 'Adicionar Veículo' : 'Novo Cliente' }}
         </div>
         <q-space />
-        <q-btn flat round dense icon="close" color="white" @click="$emit('cancel')" />
+        <q-btn flat round dense icon="close" color="black" @click="$emit('cancel')" />
       </div>
     </q-card-section>
 
@@ -83,7 +83,7 @@
           </template>
         </q-input>
       </div>
-      <q-btn flat label="Adicionar Contato" color="primary" icon="add" @click="addContact" class="q-my-sm" v-if="!isEdit"/>
+      <q-btn flat label="Adicionar Contato" color="black" icon="add" @click="addContact" class="q-my-sm" v-if="!isEdit"/>
 
       <!-- Veículo Único -->
       <div class="q-gutter-sm q-mb-sm">
@@ -156,7 +156,7 @@
     <!-- Rodapé (botões) -->
     <q-card-section class="footer-fixed q-pa-md text-right">
       <q-btn flat label="Cancelar" color="negative" @click="$emit('cancel')" />
-      <q-btn type="submit" color="primary" label="Salvar" :disable="loading" />
+      <q-btn type="submit" color="primary" class="text-black" label="Salvar" :disable="loading" />
     </q-card-section>
   </q-form>
 </template>
