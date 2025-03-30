@@ -82,7 +82,7 @@
 
           <q-btn-dropdown auto-close icon="person_pin" flat class="text-black" no-icon-animation>
           <q-list>
-            <q-item clickable v-close-popup @click="router.push({ name: 'profile'})">
+            <q-item clickable v-close-popup @click="router.push({ name: 'colaboradorPerfil'})">
                 <q-item-section>
                   <q-item-label>Perfil do usuário</q-item-label>
                 </q-item-section>
@@ -212,6 +212,12 @@ const linksList = [
     caption: 'Pedidos realizado',
     icon: 'monitor',
     route: {name: 'pedidos'}
+  },
+  {
+    title: 'Estabelecimento',
+    caption: 'Informações do estabelecimento',
+    icon: 'storefront',
+    route: {name: 'estabelecimentoDetails'}
   },
 ]
 
