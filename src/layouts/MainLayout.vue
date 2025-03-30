@@ -18,10 +18,10 @@
 
         <q-btn-group flat class="right-icons">
 
+          <!-- TODO: configurar um servidor de tickets -->
           <q-btn color="primary" icon="support_agent" class="text-black"/>
 
-          <q-btn-dropdown auto-close color="primary" class="text-black" icon="notifications" no-caret>
-            <!-- dropdown content goes here -->
+          <!-- <q-btn-dropdown auto-close color="primary" class="text-black" icon="notifications" no-caret>
             <q-list padding style="width: 250px">
               <q-item clickable>
                 <q-item-section avatar>
@@ -78,7 +78,7 @@
                 </q-item-section>
               </q-item>
             </q-list>
-          </q-btn-dropdown>
+          </q-btn-dropdown> -->
 
           <q-btn-dropdown auto-close icon="person_pin" flat class="text-black" no-icon-animation>
           <q-list>
@@ -101,9 +101,9 @@
     <q-footer class="small-screen-only">
       <q-tabs>
         <q-route-tab exact class="text-black" replace icon="dashboard" label="Dashboard" :to="{name: 'dashboard'}"/>
-        <q-route-tab exact class="text-black" replace icon="manage_accounts" label="Clintes" :to="{name: 'clientes'}"/>
+        <q-route-tab exact class="text-black" replace icon="groups" label="Clintes" :to="{name: 'clientes'}"/>
         <q-route-tab exact class="text-black" replace icon="monitor" label="Pedido" :to="{name: 'pedidos'}"/>
-        <q-route-tab exact class="text-black" replace icon="manage_accounts" label="Perfil"/>
+        <q-route-tab exact class="text-black" replace icon="calculate" label="Orçamento" :to="{name: 'criarOrcamentoAvulso'}"/>
       </q-tabs>
     </q-footer>
 
@@ -204,7 +204,7 @@ const linksList = [
   {
     title: 'Cliente',
     caption: 'Controle de clientes',
-    icon: 'group',
+    icon: 'groups',
     route: {name: 'clientes'}
   },
   {

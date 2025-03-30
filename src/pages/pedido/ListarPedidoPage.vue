@@ -1,76 +1,82 @@
-<!-- src/pages/ListarPedido.vue -->
+<!-- src/pages/ListarPedidos.vue -->
 <template>
   <q-page class="q-pa-md">
-    <div class="text-h5 q-mb-md">Gerenciamento de Pedidos</div>
+    <div class="text-h5 q-mb-md">Gerenciamento de Pedidos/Orçamentos</div>
 
     <!-- Filtros -->
-    <div class="q-mb-md">
-      <q-form @submit="filtrarPedidos">
-        <div class="row q-col-gutter-md">
-          <div :class="['col-12', { 'col-md-4': !isMobile }]">
-            <q-select
-              v-model="filtros.status"
-              :options="statusOptions"
-              label="Status"
-              outlined
-              dense
-              multiple
-              use-chips
-              emit-value
-              map-options
-            />
-          </div>
-          <div :class="['col-12', { 'col-md-4': !isMobile }]">
-            <q-input
-              v-model="filtros.dataInicio"
-              label="Data Início"
-              outlined
-              dense
-              mask="##/##/####"
-              placeholder="DD/MM/AAAA"
-            >
-              <template v-slot:append>
-                <q-icon name="event" class="cursor-pointer">
-                  <q-popup-proxy>
-                    <q-date v-model="filtros.dataInicio" mask="DD/MM/YYYY" />
-                  </q-popup-proxy>
-                </q-icon>
-              </template>
-            </q-input>
-          </div>
-          <div :class="['col-12', { 'col-md-4': !isMobile }]">
-            <q-input
-              v-model="filtros.dataFim"
-              label="Data Fim"
-              outlined
-              dense
-              mask="##/##/####"
-              placeholder="DD/MM/AAAA"
-            >
-              <template v-slot:append>
-                <q-icon name="event" class="cursor-pointer">
-                  <q-popup-proxy>
-                    <q-date v-model="filtros.dataFim" mask="DD/MM/YYYY" />
-                  </q-popup-proxy>
-                </q-icon>
-              </template>
-            </q-input>
-          </div>
-          <div class="col-12">
-            <q-btn color="primary" label="Filtrar" type="submit" />
-          </div>
+    <q-form @submit="filtrarPedidos" class="q-mb-md">
+      <div class="row q-col-gutter-md">
+        <div :class="['col-12', { 'col-md-3': !isMobile }]">
+          <q-input
+            v-model="filtros.cliente"
+            label="Cliente (Nome ou CPF)"
+            outlined
+            dense
+            clearable
+          />
         </div>
-      </q-form>
-    </div>
+        <div :class="['col-12', { 'col-md-3': !isMobile }]">
+          <q-input
+            v-model="filtros.dataInicio"
+            label="Data Início"
+            outlined
+            dense
+            mask="##/##/####"
+            placeholder="DD/MM/AAAA"
+          >
+            <template v-slot:append>
+              <q-icon name="event" class="cursor-pointer">
+                <q-popup-proxy>
+                  <q-date v-model="filtros.dataInicio" mask="DD/MM/YYYY" />
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+          </q-input>
+        </div>
+        <div :class="['col-12', { 'col-md-3': !isMobile }]">
+          <q-input
+            v-model="filtros.dataFim"
+            label="Data Fim"
+            outlined
+            dense
+            mask="##/##/####"
+            placeholder="DD/MM/AAAA"
+          >
+            <template v-slot:append>
+              <q-icon name="event" class="cursor-pointer">
+                <q-popup-proxy>
+                  <q-date v-model="filtros.dataFim" mask="DD/MM/YYYY" />
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+          </q-input>
+        </div>
+        <div :class="['col-12', { 'col-md-3': !isMobile }]">
+          <q-select
+            v-model="filtros.status"
+            :options="statusOptions"
+            label="Status"
+            outlined
+            dense
+            multiple
+            use-chips
+            clearable
+          />
+        </div>
+        <div class="col-12">
+          <q-btn color="primary" label="Filtrar" type="submit" class="q-mr-sm text-black" />
+          <q-btn color="accent" label="Limpar Filtros" @click="limparFiltros" flat />
+        </div>
+      </div>
+    </q-form>
 
     <!-- Tabela de Pedidos -->
     <q-table
       :rows="pedidosFiltrados"
       :columns="columns"
-      row-key="id"
+      row-key="numero"
       :loading="loading"
       :pagination="pagination"
-      class="q-mb-md"
     >
       <template v-slot:body-cell-status="props">
         <q-td :props="props">
@@ -81,40 +87,9 @@
       </template>
     </q-table>
 
-    <!-- FAB para novo pedido -->
     <q-page-sticky position="bottom-right" :offset="[18, 18]">
-      <q-btn fab icon="add" color="primary" @click="abrirDialogNovoPedido" />
+      <q-btn fab icon="add_shopping_cart" color="accent" :to="{name: 'criar-pedido'}" />
     </q-page-sticky>
-
-    <!-- Dialog para novo pedido -->
-    <q-dialog v-model="dialogNovoPedido">
-      <q-card style="min-width: 350px">
-        <q-card-section>
-          <div class="text-h6">Novo Pedido</div>
-        </q-card-section>
-        <q-card-section>
-          <q-form @submit="cadastrarPedido">
-            <q-input
-              v-model="novoPedido.cliente"
-              label="Nome do Cliente"
-              outlined
-              dense
-              class="q-mb-md"
-              :rules="[val => !!val || 'Campo obrigatório']"
-            />
-            <q-input
-              v-model="novoPedido.produto"
-              label="Produto"
-              outlined
-              dense
-              class="q-mb-md"
-              :rules="[val => !!val || 'Campo obrigatório']"
-            />
-            <q-btn color="primary" label="Cadastrar" type="submit" />
-          </q-form>
-        </q-card-section>
-      </q-card>
-    </q-dialog>
   </q-page>
 </template>
 
@@ -123,111 +98,99 @@ import { defineComponent, ref, computed, onMounted } from 'vue'
 import { date } from 'quasar'
 
 export default defineComponent({
-  name: 'ListarPedidoPage',
-
+  name: 'ListarPedidosPage',
   setup() {
     const pedidos = ref([])
     const loading = ref(false)
-    const dialogNovoPedido = ref(false)
+    const hoje = date.formatDate(new Date(), 'DD/MM/YYYY')
     const filtros = ref({
-      status: [],
-      dataInicio: null,
-      dataFim: null
-    })
-    const novoPedido = ref({
       cliente: '',
-      produto: ''
+      status: [],
+      dataInicio: hoje,
+      dataFim: hoje
     })
 
     const pedidosIniciais = [
-      { id: 1, cliente: 'João Silva', produto: 'Smartphone', status: 'Pendente', data: '29/03/2025' },
-      { id: 2, cliente: 'Maria Souza', produto: 'Notebook', status: 'Concluído', data: '29/03/2025' },
-      { id: 3, cliente: 'Pedro Santos', produto: 'Tablet', status: 'Cancelado', data: '29/03/2025' },
-      { id: 4, cliente: 'Ana Costa', produto: 'Monitor', status: 'Pendente', data: '29/03/2025' }
+      { numero: '001', cliente: 'João Silva', cpf: '123.456.789-00', placa: 'ABC-1234', tipo: 'Pedido', status: 'Pendente', data: hoje },
+      { numero: '002', cliente: 'Maria Souza', cpf: '987.654.321-00', placa: 'XYZ-5678', tipo: 'Orçamento', status: 'Concluído', data: hoje },
     ]
 
     const columns = [
-      { name: 'id', label: 'ID', field: 'id', sortable: true },
+      { name: 'numero', label: 'Nº Pedido', field: 'numero', sortable: true },
       { name: 'cliente', label: 'Cliente', field: 'cliente', sortable: true },
-      { name: 'produto', label: 'Produto', field: 'produto', sortable: true },
+      { name: 'cpf', label: 'CPF', field: 'cpf', sortable: true },
+      { name: 'placa', label: 'Placa', field: 'placa', sortable: true },
+      { name: 'tipo', label: 'Tipo', field: 'tipo', sortable: true },
       { name: 'status', label: 'Status', field: 'status', sortable: true },
-      { name: 'data', label: 'Data', field: 'data', sortable: true }
+      { name: 'data', label: 'Data', field: 'data', sortable: true },
     ]
 
-    const pagination = {
-      rowsPerPage: 10
-    }
-
-    const statusOptions = [
-      { label: 'Pendente', value: 'Pendente' },
-      { label: 'Concluído', value: 'Concluído' },
-      { label: 'Cancelado', value: 'Cancelado' }
-    ]
-
+    const pagination = { rowsPerPage: 10 }
+    const statusOptions = ['Pendente', 'Concluído', 'Cancelado']
     const isMobile = computed(() => window.innerWidth <= 600)
 
     const pedidosFiltrados = computed(() => {
       let result = [...pedidos.value]
 
+      // Filtro por cliente (nome ou CPF)
+      if (filtros.value.cliente) {
+        const busca = filtros.value.cliente.toLowerCase()
+        result = result.filter(p =>
+          p.cliente.toLowerCase().includes(busca) ||
+          p.cpf.toLowerCase().includes(busca)
+        )
+      }
+
+      // Filtro por status
       if (filtros.value.status.length > 0) {
-        result = result.filter(pedido => filtros.value.status.includes(pedido.status))
+        result = result.filter(p => filtros.value.status.includes(p.status))
       }
 
-      if (filtros.value.dataInicio) {
-        result = result.filter(pedido =>
-          date.isSameOrAfter(pedido.data, filtros.value.dataInicio, 'day')
-        )
-      }
+      // Filtro por período
+      const dataInicio = filtros.value.dataInicio ? date.extractDate(filtros.value.dataInicio, 'DD/MM/YYYY') : null
+      const dataFim = filtros.value.dataFim ? date.extractDate(filtros.value.dataFim, 'DD/MM/YYYY') : null
 
-      if (filtros.value.dataFim) {
-        result = result.filter(pedido =>
-          date.isSameOrBefore(pedido.data, filtros.value.dataFim, 'day')
-        )
-      }
+      result = result.filter(p => {
+        const dataPedido = date.extractDate(p.data, 'DD/MM/YYYY')
+        // Usando comparação nativa de JavaScript para datas
+        return (!dataInicio || dataPedido >= dataInicio) &&
+               (!dataFim || dataPedido <= dataFim)
+      })
 
       return result
     })
 
     const getStatusColor = (status) => {
-      switch (status) {
-        case 'Pendente': return 'orange'
-        case 'Concluído': return 'green'
-        case 'Cancelado': return 'red'
-        default: return 'grey'
-      }
+      return { Pendente: 'orange', Concluído: 'green', Cancelado: 'red' }[status] || 'grey'
     }
 
     const carregarPedidos = () => {
       loading.value = true
-      setTimeout(() => {
-        pedidos.value = pedidosIniciais
-        loading.value = false
-      }, 1000)
+      return new Promise(resolve => {
+        setTimeout(() => {
+          pedidos.value = pedidosIniciais
+          loading.value = false
+          resolve()
+        }, 500)
+      })
     }
 
-    const filtrarPedidos = () => {
-      // Filtragem automática via computed
+    const filtrarPedidos = async () => {
+      await carregarPedidos()
     }
 
-    const abrirDialogNovoPedido = () => {
-      dialogNovoPedido.value = true
-      novoPedido.value = { cliente: '', produto: '' }
-    }
-
-    const cadastrarPedido = () => {
-      const novo = {
-        id: pedidos.value.length + 1,
-        cliente: novoPedido.value.cliente,
-        produto: novoPedido.value.produto,
-        status: 'Pendente',
-        data: date.formatDate(new Date(), 'DD/MM/YYYY')
+    const limparFiltros = async () => {
+      filtros.value = {
+        cliente: '',
+        status: [],
+        dataInicio: hoje,
+        dataFim: hoje
       }
-      pedidos.value.push(novo)
-      dialogNovoPedido.value = false
+      await carregarPedidos()
     }
 
-    onMounted(() => {
-      carregarPedidos()
+    onMounted(async () => {
+      await carregarPedidos()
     })
 
     return {
@@ -238,14 +201,11 @@ export default defineComponent({
       pagination,
       filtros,
       statusOptions,
-      dialogNovoPedido,
-      novoPedido,
       isMobile,
       getStatusColor,
       filtrarPedidos,
-      abrirDialogNovoPedido,
-      cadastrarPedido
+      limparFiltros
     }
-  }
+  },
 })
 </script>

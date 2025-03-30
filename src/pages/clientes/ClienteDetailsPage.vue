@@ -2,7 +2,7 @@
 <template>
   <q-page padding>
     <q-card>
-      <q-card-section class="bg-primary">
+      <q-card-section class="bg-accent text-white">
         <div class="text-h6">Detalhes do Cliente</div>
       </q-card-section>
 
@@ -151,7 +151,7 @@ const formatarCPFouCNPJ = (valor) => {
 
 const novoPedido = (veiculo) => {
   router.push({
-    path: '/pedidos/novo',
+    name: 'clientePedido',
     query: {
       clienteId: cliente.value.idCliente,
       veiculoId: veiculo.id // Assumindo que o veículo tem um ID

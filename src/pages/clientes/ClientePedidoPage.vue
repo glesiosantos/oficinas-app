@@ -4,8 +4,8 @@
     <div class="text-h5 q-mb-md" style="color: black">Novo Pedido/Orçamento</div>
 
     <!-- Cabeçalho com dados do cliente e veículo -->
-    <div v-if="cliente.nome" class="q-mb-md">
-      <div class="text-h6 q-my-md" style="color: black">Dados do Pedido</div>
+    <div class="q-mb-md">
+      <div class="text-h6 q-my-md">Dados do Cliente</div>
       <div class="row q-col-gutter-md">
         <div class="col-12 col-md-6">
           <q-input v-model="cliente.nome" label="Nome do Cliente" outlined dense readonly input-style="color: black" />
@@ -21,8 +21,6 @@
         </div>
       </div>
     </div>
-
-    <q-btn color="primary" label="Buscar Cliente" @click="dialogCliente = true" :class="{'full-width': $q.screen.xs}" class="text-black" />
 
     <!-- Tipo de Documento -->
     <div class="q-mb-md">
@@ -175,8 +173,8 @@ import { ref, computed } from 'vue'
 const buscaCliente = ref('')
 const veiculosCliente = ref([])
 const veiculoSelecionado = ref(null)
-const cliente = ref({ nome: '', cpf: '' })
-const veiculo = ref({ placa: '', modelo: '' })
+const cliente = ref({ nome: 'GLESIO SANTOS DA SILVA', cpf: '9654817334' })
+const veiculo = ref({ placa: 'LVW6815', modelo: 'GOL G3 2005 POWER 1.6' })
 const tipoDocumento = ref('Pedido')
 const produtoQuantidade = ref(1)
 const produtoPreco = ref(0)
