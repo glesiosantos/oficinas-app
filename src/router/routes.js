@@ -2,6 +2,7 @@ import authRouter from '../pages/auth/router'
 import fornecedorRouter from '../pages/fornecedor/router'
 import colaboradorRouter from '../pages/colaborador/router'
 import clienteRouter from '../pages/clientes/router'
+import pedidoRouter from '../pages/pedido/router'
 
 const routes = [
   {
@@ -23,7 +24,8 @@ const routes = [
       },
       ...fornecedorRouter,
       ...colaboradorRouter,
-      ...clienteRouter
+      ...clienteRouter,
+      ...pedidoRouter
     ],
   },
 

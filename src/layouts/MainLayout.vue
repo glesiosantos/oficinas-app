@@ -16,7 +16,71 @@
           <span class="text-weight-bold">AutoRevise</span>  PRO
         </q-toolbar-title>
 
-        <q-btn-dropdown :label="authStore.auth.nome" flat class="text-black">
+        <q-btn-group flat class="right-icons">
+
+          <q-btn color="primary" icon="support_agent" class="text-black"/>
+
+          <q-btn-dropdown auto-close color="primary" class="text-black" icon="notifications" no-caret>
+            <!-- dropdown content goes here -->
+            <q-list padding style="width: 250px">
+              <q-item clickable>
+                <q-item-section avatar>
+                  <q-avatar icon="folder" color="purple" text-color="white" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Photos</q-item-label>
+                  <q-item-label caption>February 22, 2016</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon name="info" color="amber" />
+                </q-item-section>
+              </q-item>
+
+              <q-item clickable>
+                <q-item-section avatar>
+                  <q-avatar icon="folder" color="purple" text-color="white" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Videos</q-item-label>
+                  <q-item-label caption>London</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon name="info" color="amber" />
+                </q-item-section>
+              </q-item>
+
+              <q-separator inset />
+              <q-item-label header>Files</q-item-label>
+
+              <q-item clickable>
+                <q-item-section avatar>
+                  <q-avatar icon="assignment" color="teal" text-color="white" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>London</q-item-label>
+                  <q-item-label caption>March 1st, 2018</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon name="info" color="amber" />
+                </q-item-section>
+              </q-item>
+
+              <q-item clickable>
+                <q-item-section avatar>
+                  <q-avatar icon="assignment" color="teal" text-color="white" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Paris</q-item-label>
+                  <q-item-label caption>January 22nd, 2017</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon name="info" color="amber" />
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-btn-dropdown>
+
+          <q-btn-dropdown auto-close icon="person_pin" flat class="text-black" no-icon-animation>
           <q-list>
             <q-item clickable v-close-popup @click="router.push({ name: 'profile'})">
                 <q-item-section>
@@ -30,8 +94,18 @@
             </q-item>
           </q-list>
         </q-btn-dropdown>
+      </q-btn-group>
       </q-toolbar>
     </q-header>
+
+    <q-footer class="small-screen-only">
+      <q-tabs>
+        <q-route-tab exact class="text-black" replace icon="dashboard" label="Dashboard" :to="{name: 'dashboard'}"/>
+        <q-route-tab exact class="text-black" replace icon="manage_accounts" label="Clintes" :to="{name: 'clientes'}"/>
+        <q-route-tab exact class="text-black" replace icon="monitor" label="Pedido" :to="{name: 'pedidos'}"/>
+        <q-route-tab exact class="text-black" replace icon="manage_accounts" label="Perfil"/>
+      </q-tabs>
+    </q-footer>
 
     <q-drawer
       v-model="leftDrawerOpen"
@@ -133,6 +207,12 @@ const linksList = [
     icon: 'group',
     route: {name: 'clientes'}
   },
+  {
+    title: 'Pedidos',
+    caption: 'Pedidos realizado',
+    icon: 'monitor',
+    route: {name: 'pedidos'}
+  },
 ]
 
 const sair = () => {
@@ -151,5 +231,31 @@ function toggleLeftDrawer () {
 <style scoped>
 .header-drawer {
   background-color: #fec842;
+}
+
+@media (max-width: 599px) {
+  .q-toolbar {
+    padding: 0 8px; /* Reduz padding geral em mobile */
+  }
+
+  .q-toolbar-title {
+    font-size: 14px; /* Reduz tamanho da fonte em mobile */
+    margin: 0;
+    padding: 0;
+  }
+
+  .right-icons {
+    margin-left: 8px; /* Espaço mínimo entre título e ícones */
+  }
+
+  .right-icons .q-btn {
+    padding: 4px; /* Reduz padding dos botões */
+    margin-left: 2px; /* Espaçamento mínimo entre ícones */
+  }
+}
+
+/* Estilos gerais */
+.right-icons .q-btn {
+  min-width: 0; /* Remove largura mínima dos botões */
 }
 </style>
