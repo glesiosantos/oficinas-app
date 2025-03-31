@@ -17,7 +17,7 @@
                 </template>
               </q-input>
               <q-space />
-              <q-btn color="primary" label="Adicionar Fornecedor" @click="openDrawer('add')" :class="{'full-width q-mt-sm': $q.screen.xs}"/>
+              <q-btn color="primary" label="Adicionar Fornecedor" @click="openDrawer('add')" :class="{'full-width q-mt-sm': $q.screen.xs}" class="text-black"/>
             </template>
 
             <template v-slot:body-cell-contatos="props">

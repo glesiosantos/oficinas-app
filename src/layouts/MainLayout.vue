@@ -8,16 +8,81 @@
           round
           icon="menu"
           aria-label="Menu"
+          class="text-black"
           @click="toggleLeftDrawer"
         />
 
-        <q-toolbar-title>
-          Auto Revise
+        <q-toolbar-title class="text-black">
+          <span class="text-weight-bold">AutoRevise</span>  PRO
         </q-toolbar-title>
 
-        <q-btn-dropdown :label="authStore.auth.nome" flat>
+        <q-btn-group flat class="right-icons">
+
+          <!-- TODO: configurar um servidor de tickets -->
+          <q-btn color="primary" icon="support_agent" class="text-black"/>
+
+          <!-- <q-btn-dropdown auto-close color="primary" class="text-black" icon="notifications" no-caret>
+            <q-list padding style="width: 250px">
+              <q-item clickable>
+                <q-item-section avatar>
+                  <q-avatar icon="folder" color="purple" text-color="white" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Photos</q-item-label>
+                  <q-item-label caption>February 22, 2016</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon name="info" color="amber" />
+                </q-item-section>
+              </q-item>
+
+              <q-item clickable>
+                <q-item-section avatar>
+                  <q-avatar icon="folder" color="purple" text-color="white" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Videos</q-item-label>
+                  <q-item-label caption>London</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon name="info" color="amber" />
+                </q-item-section>
+              </q-item>
+
+              <q-separator inset />
+              <q-item-label header>Files</q-item-label>
+
+              <q-item clickable>
+                <q-item-section avatar>
+                  <q-avatar icon="assignment" color="teal" text-color="white" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>London</q-item-label>
+                  <q-item-label caption>March 1st, 2018</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon name="info" color="amber" />
+                </q-item-section>
+              </q-item>
+
+              <q-item clickable>
+                <q-item-section avatar>
+                  <q-avatar icon="assignment" color="teal" text-color="white" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Paris</q-item-label>
+                  <q-item-label caption>January 22nd, 2017</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon name="info" color="amber" />
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-btn-dropdown> -->
+
+          <q-btn-dropdown auto-close icon="person_pin" flat class="text-black" no-icon-animation>
           <q-list>
-            <q-item clickable v-close-popup @click="router.push({ name: 'profile'})">
+            <q-item clickable v-close-popup @click="router.push({ name: 'colaboradorPerfil'})">
                 <q-item-section>
                   <q-item-label>Perfil do usuário</q-item-label>
                 </q-item-section>
@@ -29,8 +94,18 @@
             </q-item>
           </q-list>
         </q-btn-dropdown>
+      </q-btn-group>
       </q-toolbar>
     </q-header>
+
+    <q-footer class="small-screen-only">
+      <q-tabs>
+        <q-route-tab exact class="text-black" replace icon="dashboard" label="Dashboard" :to="{name: 'dashboard'}"/>
+        <q-route-tab exact class="text-black" replace icon="groups" label="Clintes" :to="{name: 'clientes'}"/>
+        <q-route-tab exact class="text-black" replace icon="monitor" label="Pedido" :to="{name: 'pedidos'}"/>
+        <q-route-tab exact class="text-black" replace icon="calculate" label="Orçamento" :to="{name: 'criarOrcamentoAvulso'}"/>
+      </q-tabs>
+    </q-footer>
 
     <q-drawer
       v-model="leftDrawerOpen"
@@ -53,8 +128,7 @@
       </q-scroll-area>
 
       <q-img
-  class="absolute-top"
-  src="https://wallpapers.com/images/featured/fundo-azul-liso-pxzqbyisuhs4gu7m.jpg"
+  class="absolute-top header-drawer"
   style="height: 200px"
 >
   <!-- Logo da Empresa e Nome na mesma linha -->
@@ -65,10 +139,10 @@
         alt="Logo da Empresa"
       >
     </q-avatar>
-    <div class="text-weight-bold text-white text-h6">
-      {{authStore.auth.estabelecimento.nomeEstabelecimento}}
+    <div class="text-weight-bold text-h6 text-black">
+      {{authStore.auth.estabelecimento.nome}}
     </div>
-    <span class="text-caption text-uppercase">Plano {{authStore.auth.plano.descricao}}</span>
+    <span class="text-caption text-uppercase text-black">Plano {{authStore.auth.plano.descricao}}</span>
   </div>
 
   <!-- Avatar do Usuário, Nome e Perfil na mesma linha -->
@@ -80,8 +154,8 @@
       >
     </q-avatar>
     <div>
-      <div class="text-weight-bold text-white">{{authStore.auth.nome}}</div>
-      <div class="text-white text-caption">{{authStore.auth.perfil}}</div>
+      <div class="text-black text-weight-bold">{{authStore.auth.nome}}</div>
+      <div class="text-black text-caption">{{authStore.auth.perfil}}</div>
     </div>
   </div>
 </q-img>
@@ -130,8 +204,20 @@ const linksList = [
   {
     title: 'Cliente',
     caption: 'Controle de clientes',
-    icon: 'group',
+    icon: 'groups',
     route: {name: 'clientes'}
+  },
+  {
+    title: 'Pedidos',
+    caption: 'Pedidos realizado',
+    icon: 'monitor',
+    route: {name: 'pedidos'}
+  },
+  {
+    title: 'Estabelecimento',
+    caption: 'Informações do estabelecimento',
+    icon: 'storefront',
+    route: {name: 'estabelecimentoDetails'}
   },
 ]
 
@@ -148,3 +234,34 @@ function toggleLeftDrawer () {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }
 </script>
+<style scoped>
+.header-drawer {
+  background-color: #fec842;
+}
+
+@media (max-width: 599px) {
+  .q-toolbar {
+    padding: 0 8px; /* Reduz padding geral em mobile */
+  }
+
+  .q-toolbar-title {
+    font-size: 14px; /* Reduz tamanho da fonte em mobile */
+    margin: 0;
+    padding: 0;
+  }
+
+  .right-icons {
+    margin-left: 8px; /* Espaço mínimo entre título e ícones */
+  }
+
+  .right-icons .q-btn {
+    padding: 4px; /* Reduz padding dos botões */
+    margin-left: 2px; /* Espaçamento mínimo entre ícones */
+  }
+}
+
+/* Estilos gerais */
+.right-icons .q-btn {
+  min-width: 0; /* Remove largura mínima dos botões */
+}
+</style>

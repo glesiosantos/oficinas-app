@@ -1,7 +1,7 @@
 <template>
   <q-form @submit="$emit('submit', form)" class="column">
     <!-- Cabeçalho -->
-    <q-card-section class="bg-primary text-white">
+    <q-card-section class="bg-primary">
       <div class="row items-center no-wrap">
         <div class="text-h6">
           {{ isEdit ? 'Editar Colaborador' : 'Novo Colaborador' }}
@@ -12,7 +12,6 @@
           round
           dense
           icon="close"
-          color="white"
           @click="$emit('cancel')"
         />
       </div>
@@ -63,6 +62,7 @@
         type="submit"
         color="primary"
         label="Salvar"
+        class="text-black"
       />
     </q-card-section>
   </q-form>

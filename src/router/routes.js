@@ -1,7 +1,9 @@
 import authRouter from '../pages/auth/router'
+import estabelecimentoRouter from '../pages/estabelecimento/router'
 import fornecedorRouter from '../pages/fornecedor/router'
 import colaboradorRouter from '../pages/colaborador/router'
 import clienteRouter from '../pages/clientes/router'
+import pedidoRouter from '../pages/pedido/router'
 
 const routes = [
   {
@@ -21,9 +23,11 @@ const routes = [
         name: 'dashboard',
         component: () => import('src/pages/dashboard/IndexPage.vue'),
       },
+      ...estabelecimentoRouter,
       ...fornecedorRouter,
       ...colaboradorRouter,
-      ...clienteRouter
+      ...clienteRouter,
+      ...pedidoRouter
     ],
   },
 
