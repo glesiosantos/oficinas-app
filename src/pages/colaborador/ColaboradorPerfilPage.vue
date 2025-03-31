@@ -10,7 +10,7 @@
           <q-item>
             <q-item-section>
               <q-item-label overline>Nome</q-item-label>
-              <q-item-label>{{authStore.auth.nome}}</q-item-label>
+              <q-item-label>{{formatarDocumento(authStore.auth.cpf)}} - {{authStore.auth.nome}}</q-item-label>
             </q-item-section>
           </q-item>
 
@@ -49,7 +49,7 @@
           </div>
 
           <div class="row q-gutter-sm">
-            <q-btn label="Alterar Senha" type="submit" color="accent" :class="{'full-width': $q.screen.xs}"/>
+            <q-btn label="Alterar Senha" type="submit" color="accent" :class="{'full-width': $q.screen.xs}" @click="changePassword"/>
             <q-btn label="Cancelar" @click="handleCancelar" size="md" color="red" :class="{'full-width': $q.screen.xs}"/>
           </div>
         </q-form>
@@ -59,29 +59,44 @@
 </template>
 
 <script setup>
+
+import { useFormatarDocumento } from 'src/composables/useFormatarDocumento'
 import { useAuthStore } from 'src/stores/auth.store'
 import { reactive } from 'vue'
+import { colaboradorService } from './services/colaborador_service'
+import useNotify from 'src/composables/useNotify'
 
 const authStore = useAuthStore()
+const { formatarDocumento } = useFormatarDocumento()
+const { alterarSenhaColaborador } = colaboradorService()
 
+const { notifyWarning, notifySuccess } = useNotify()
 
 let form = reactive({
   nova: '',
-  confirmar: ''
+  confirmar: '',
+  cpf: authStore.auth?.cpf || ''
 })
 
 const changePassword = async () => {
 
   if (form.nova !== form.confirmar) {
+    notifyWarning('Senha diferentes! A nova senha deverá ser igual a confirmação de senha')
     return
   }
 
-  form = {}
+  const response = await alterarSenhaColaborador(form)
+
+  if (response.status === 204) {
+    form = {}
+    notifySuccess('Senha alterada com sucesso! Deverá realizar logar novamente com a nova senha')
+  }
 
 }
 
 const handleCancelar = () => {
   form = {}
+  notifyWarning("Operação cancelada pelo usuário")
 }
 
 </script>

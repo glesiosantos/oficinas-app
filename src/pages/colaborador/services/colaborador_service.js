@@ -43,5 +43,12 @@ export const colaboradorService = () => {
     colaboradorStore.setPerfils(response.data)
   }
 
-  return { addColaborador, editarColaborador, removerColaborador, carregarColaboradores, carregarPerfisDoSistema }
+  const alterarSenhaColaborador = async (data) => {
+    const response = await api.post('v1/usuarios/senha/atualizar', data,
+      { headers: {Authorization: `Bearer ${token}`}
+    })
+    return response
+  }
+
+  return { addColaborador, editarColaborador, removerColaborador, carregarColaboradores, carregarPerfisDoSistema, alterarSenhaColaborador }
 }
