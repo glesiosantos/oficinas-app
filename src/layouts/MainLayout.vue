@@ -140,7 +140,7 @@
       >
     </q-avatar>
     <div class="text-weight-bold text-h6 text-black">
-      {{authStore.auth.estabelecimento.nomeEstabelecimento}}
+      {{authStore.auth.estabelecimento.nome}}
     </div>
     <span class="text-caption text-uppercase text-black">Plano {{authStore.auth.plano.descricao}}</span>
   </div>
