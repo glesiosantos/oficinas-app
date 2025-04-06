@@ -3,9 +3,18 @@ import { ref } from 'vue'
 
 export const useServicoStore = defineStore('servicoStore', () => {
 
+  const categoriasEspecialidades = ref([])
+  const especialidades = ref([])
   const servicos = ref([])
 
-  const setServicos = (data) => servicos.value = data
+  const setCategorias = (data) => categoriasEspecialidades.value = data
 
-  return { servicos, setServicos }
+  const setEspecialidades = (data) => especialidades.value = data
+
+  const setServicos = (data) => {
+    console.log('serviços ', data)
+    servicos.value = data
+  }
+
+  return { categoriasEspecialidades, especialidades, servicos, setServicos, setCategorias, setEspecialidades }
 })

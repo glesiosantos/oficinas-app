@@ -5,8 +5,8 @@ import { useAuthStore } from 'src/stores/auth.store'
 const authStore = useAuthStore()
 const colaboradorStore = useColaboradorStore()
 
-const idEstabelecimento = authStore.auth.estabelecimento.idEstabelecimento
-const token = authStore.auth.token
+const idEstabelecimento = authStore.auth?.estabelecimento.idEstabelecimento
+const token = authStore.auth?.token
 
 export const colaboradorService = () => {
 

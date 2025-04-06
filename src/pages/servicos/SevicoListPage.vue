@@ -7,7 +7,7 @@
             flat
             bordered
             :columns="columns"
-            :rows="servicos"
+            :rows="servicoStore.servicos"
             :filter="filter"
           >
             <template v-slot:top>
@@ -27,8 +27,8 @@
 
             <template v-slot:body-cell-actions="props">
               <q-td :props="props" class="q-gutter-x-xs text-center">
-                <q-btn round dense color="primary" size="sm" icon="edit" @click="openDrawer('edit', props.row)" />
-                <q-btn round dense color="red" size="sm" icon="delete" @click="deletar(props.row)"/>
+                <!-- <q-btn round dense color="primary" size="sm" icon="edit" @click="openDrawer('edit', props.row)" /> -->
+                <q-btn round dense color="red" size="sm" icon="delete" @click="handleDelete(props.row)"/>
               </q-td>
             </template>
           </q-table>
@@ -55,35 +55,52 @@ import { useDrawer } from 'src/composables/useDrawer'
 
 import ServicoForm from './components/ServicoForm.vue'
 import useNotify from 'src/composables/useNotify'
+import useCurrency from 'src/composables/useCurrency'
 import { servicoService } from './services/servico_service'
+import { useServicoStore } from 'src/stores/servico.store'
 
 const { drawer, openDrawer,closeDrawer, isEdit, currentData } = useDrawer()
-const { notifyError, notifyWarning } = useNotify()
-const { carregarServicoDoEstabelecimento } = servicoService()
+const { notifyError, notifyWarning, notifySuccess } = useNotify()
+const { carregarCategoriasDosServicos, carregarEspecialidades, carregarServicoDoEstabelecimento, addServicoParaEstabelecimento, deletarServicoDoEstabelecimento } = servicoService()
 
 const filter = ref('')
 
-const servicos = ref([])
+const servicoStore = useServicoStore()
+const { formatToBRL } = useCurrency()
 
 const columns = [
   { label: 'Nome',
-    field: row => row.nome,
-    format: val => `${val}`,
+    field: row => row.descricao,
     align: 'left'
   },
-  { label: 'Categoria', field: row => row.tipo, align: 'left' },
+  { label: 'Categoria', field: row => row.categoria, align: 'left' },
   { label: 'Tipo de Veículo', field: row => row.tipo, align: 'left' },
-  { label: 'Valor', field: row => row.preco, format: val => `${val}`, align: 'left' },
+  { label: 'Valor', field: row => formatToBRL(row.valor), format: val => `${val}`, align: 'left' },
   { label: 'Ações', field: 'actions', name: 'actions', align: 'center' }
 ]
+
+const handleDelete = async (data) => {
+  const response = await deletarServicoDoEstabelecimento(data)
+
+  if(response.status === 204) {
+    notifySuccess('Serviço removido com sucesso!')
+  }
+
+  await carregarServicoDoEstabelecimento()
+}
 
 const handleSubmit = async (formData) => {
   try {
     if (isEdit.value) {
       console.log(formData)
     } else {
-      console.log(formData)
+      const response = await addServicoParaEstabelecimento(formData)
+
+      if(response.status === 201) {
+        notifySuccess('Serviço cadastrado com sucesso!')
+      }
     }
+    await carregarServicoDoEstabelecimento()
     await nextTick()
     closeDrawer()
   } catch (error) {
@@ -102,6 +119,8 @@ const handleSubmit = async (formData) => {
 
 
 onMounted(async () => {
-  carregarServicoDoEstabelecimento()
+  await carregarCategoriasDosServicos()
+  await carregarEspecialidades()
+  await carregarServicoDoEstabelecimento()
 })
 </script>
