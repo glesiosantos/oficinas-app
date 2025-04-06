@@ -12,7 +12,6 @@ export const useServicoStore = defineStore('servicoStore', () => {
   const setEspecialidades = (data) => especialidades.value = data
 
   const setServicos = (data) => {
-    console.log('serviços ', data)
     servicos.value = data
   }
 

@@ -7,13 +7,7 @@
           {{ isEdit ? 'Editar Serviço' : 'Novo Serviço' }}
         </div>
         <q-space />
-        <q-btn
-          flat
-          round
-          dense
-          icon="close"
-          @click="emit('cancel')"
-        />
+        <q-btn flat round dense icon="close" @click="emit('cancel')" />
       </div>
     </q-card-section>
 
@@ -28,6 +22,7 @@
         emit-value
         map-options
         lazy-rules
+        :disable="isEdit"
         :rules="[val => (val && val.length > 0) || 'Categoria é campo obrigatório']"
       />
 
@@ -41,6 +36,7 @@
         emit-value
         map-options
         lazy-rules
+        :disable="isEdit"
         :rules="[val => (val && val.length > 0) || 'Especialidade é campo obrigatório']"
       />
 
@@ -58,25 +54,15 @@
 
     <!-- Rodapé (botões) -->
     <q-card-section class="footer-fixed q-pa-md text-right">
-      <q-btn
-        flat
-        label="Cancelar"
-        color="negative"
-        @click="emit('cancel')"
-      />
-      <q-btn
-        type="submit"
-        color="primary"
-        label="Salvar"
-        class="text-black"
-      />
+      <q-btn flat label="Cancelar" color="negative" @click="emit('cancel')" />
+      <q-btn type="submit" color="primary" label="Salvar" class="text-black" />
     </q-card-section>
   </q-form>
 </template>
 
 <script setup>
 import { useServicoStore } from 'src/stores/servico.store'
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 
 const store = useServicoStore()
 
@@ -88,26 +74,25 @@ const props = defineProps({
 const emit = defineEmits(['submit', 'cancel'])
 
 const form = ref({
+  idServico: null,
   categoria: '',
   idEspecialidade: null,
   valor: 0
 })
 
-const rawValue = ref(0) // Valor numérico bruto
-const inputValue = ref(0) // Valor exibido no input
+const rawValue = ref(0)
+const inputValue = ref('0,00')
 
-// Função para atualizar o rawValue a partir do input
+// Função para formatar o valor
 const updateRawValue = (val) => {
-  const cleanValue = val.replace(/[^\d,]/g, '').replace(',', '.')
-  rawValue.value = parseFloat(cleanValue) || 0
-}
-
-// Sincroniza rawValue com form.valor
-watch(rawValue, (newValue) => {
-  if (newValue !== form.value.valor) {
-    form.value.valor = newValue
+  if (typeof val === 'string') {
+    const cleanValue = val.replace(/[^\d,]/g, '').replace(',', '.')
+    rawValue.value = parseFloat(cleanValue) || 0
+  } else {
+    rawValue.value = val || 0
   }
-})
+  form.value.valor = rawValue.value
+}
 
 // Filtrar especialidades
 const filteredEspecialidades = computed(() => {
@@ -115,31 +100,44 @@ const filteredEspecialidades = computed(() => {
   return store.especialidades.filter(esp => esp.categoria === form.value.categoria)
 })
 
-// Resetar idEspecialidade
-watch(() => form.value.categoria, () => {
-  form.value.idEspecialidade = null
+// Carregar dados iniciais
+const loadInitialData = () => {
+  if (props.initialData) {
+    form.value.idServico = props.initialData.idServico || ''
+    form.value.categoria = props.initialData.categoria || ''
+    form.value.idEspecialidade = String(props.initialData.idEspecialidade || '')
+    form.value.valor = props.initialData.valor || 0
+    rawValue.value = props.initialData.valor || 0
+    inputValue.value = props.initialData.valor
+      ? props.initialData.valor.toFixed(2).replace('.', ',')
+      : '0,00'
+  }
+}
+
+// Carregar ao montar (somente se a store já estiver pronta)
+onMounted(() => {
+  if (store.categoriasEspecialidades.length && store.especialidades.length) {
+    loadInitialData()
+  }
 })
 
-// Carregar initialData
-watch(() => props.initialData, (newData) => {
-  if (newData) {
-    form.value = {
-      categoria: newData.categoria || '',
-      idEspecialidade: newData.idEspecialidade || null,
-      valor: newData.valor || 0
+// Garante que dados da store estejam disponíveis para carregar corretamente no modo de edição
+watch(
+  () => store.especialidades,
+  (especialidades) => {
+    if (especialidades.length > 0 && props.isEdit && props.initialData) {
+      loadInitialData()
     }
-    rawValue.value = newData.valor || 0
-    inputValue.value = newData.valor ? newData.valor.toFixed(2).replace('.', ',') : '0,00'
-  } else {
-    form.value = {
-      categoria: '',
-      idEspecialidade: null,
-      valor: 0
-    }
-    rawValue.value = 0
-    inputValue.value = '0,00'
+  },
+  { immediate: true }
+)
+
+// Resetar idEspecialidade quando categoria mudar (apenas no modo novo)
+watch(() => form.value.categoria, () => {
+  if (!props.isEdit) {
+    form.value.idEspecialidade = null
   }
-}, { immediate: true })
+})
 
 const onSubmit = () => {
   emit('submit', form.value)

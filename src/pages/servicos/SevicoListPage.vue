@@ -27,8 +27,8 @@
 
             <template v-slot:body-cell-actions="props">
               <q-td :props="props" class="q-gutter-x-xs text-center">
-                <!-- <q-btn round dense color="primary" size="sm" icon="edit" @click="openDrawer('edit', props.row)" /> -->
-                <q-btn round dense color="red" size="sm" icon="delete" @click="handleDelete(props.row)"/>
+                <q-btn round dense color="accent" size="sm" icon="edit" @click="openDrawer('edit', props.row)" />
+                <!-- <q-btn round dense color="red" size="sm" icon="delete" @click="handleDelete(props.row)"/> -->
               </q-td>
             </template>
           </q-table>
@@ -61,7 +61,10 @@ import { useServicoStore } from 'src/stores/servico.store'
 
 const { drawer, openDrawer,closeDrawer, isEdit, currentData } = useDrawer()
 const { notifyError, notifyWarning, notifySuccess } = useNotify()
-const { carregarCategoriasDosServicos, carregarEspecialidades, carregarServicoDoEstabelecimento, addServicoParaEstabelecimento, deletarServicoDoEstabelecimento } = servicoService()
+const { carregarCategoriasDosServicos,
+   carregarEspecialidades, carregarServicoDoEstabelecimento, addServicoParaEstabelecimento,
+   editarServicoDoEstabelecimento
+  } = servicoService()
 
 const filter = ref('')
 
@@ -74,25 +77,28 @@ const columns = [
     align: 'left'
   },
   { label: 'Categoria', field: row => row.categoria, align: 'left' },
-  { label: 'Tipo de Veículo', field: row => row.tipo, align: 'left' },
+  { label: 'Tipo de Veículo', field: row => row.servicoPara, align: 'center' },
   { label: 'Valor', field: row => formatToBRL(row.valor), format: val => `${val}`, align: 'left' },
   { label: 'Ações', field: 'actions', name: 'actions', align: 'center' }
 ]
 
-const handleDelete = async (data) => {
-  const response = await deletarServicoDoEstabelecimento(data)
+// const handleDelete = async (data) => {
+//   const response = await deletarServicoDoEstabelecimento(data)
 
-  if(response.status === 204) {
-    notifySuccess('Serviço removido com sucesso!')
-  }
+//   if(response.status === 204) {
+//     notifySuccess('Serviço removido com sucesso!')
+//   }
 
-  await carregarServicoDoEstabelecimento()
-}
+//   await carregarServicoDoEstabelecimento()
+// }
 
 const handleSubmit = async (formData) => {
   try {
     if (isEdit.value) {
-      console.log(formData)
+      const response = await editarServicoDoEstabelecimento(formData)
+      if(response.status === 204) {
+        notifySuccess('Serviço cadastrado com sucesso!')
+      }
     } else {
       const response = await addServicoParaEstabelecimento(formData)
 

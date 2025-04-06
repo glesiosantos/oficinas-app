@@ -29,6 +29,13 @@ export const servicoService = () => {
     return response
   }
 
+  const editarServicoDoEstabelecimento = async (data) => {
+    const response = await api.post(`v1/servicos/editar`, Object.assign({}, data, { idEstabelecimento }), {
+      headers: { Authorization: `Bearer ${authStore.auth.token}` }
+    })
+    return response
+  }
+
   const carregarServicoDoEstabelecimento = async () => {
     const response = await api.get(`v1/servicos/${idEstabelecimento}`, {
       headers: { Authorization: `Bearer ${authStore.auth.token}` }
@@ -43,5 +50,5 @@ export const servicoService = () => {
     return response
   }
 
-  return { carregarCategoriasDosServicos, carregarEspecialidades, carregarServicoDoEstabelecimento, addServicoParaEstabelecimento, deletarServicoDoEstabelecimento }
+  return { carregarCategoriasDosServicos, carregarEspecialidades, carregarServicoDoEstabelecimento, addServicoParaEstabelecimento, deletarServicoDoEstabelecimento, editarServicoDoEstabelecimento }
 }
