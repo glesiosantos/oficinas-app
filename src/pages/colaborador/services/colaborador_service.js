@@ -5,8 +5,8 @@ import { useAuthStore } from 'src/stores/auth.store'
 const authStore = useAuthStore()
 const colaboradorStore = useColaboradorStore()
 
-const idEstabelecimento = authStore.auth.estabelecimento.idEstabelecimento
-const token = authStore.auth.token
+const idEstabelecimento = authStore.auth?.estabelecimento.idEstabelecimento
+const token = authStore.auth?.token
 
 export const colaboradorService = () => {
 
@@ -33,13 +33,13 @@ export const colaboradorService = () => {
   }
 
   const carregarColaboradores = async () => {
-    const response = await api.get(`/v1/usuarios/${idEstabelecimento}`,
+    const response = await api.get(`v1/usuarios/${idEstabelecimento}`,
        {headers: { Authorization: `Bearer ${token}` }})
     colaboradorStore.setColaboradores(response.data)
   }
 
   const carregarPerfisDoSistema = async () => {
-    const response = await api.get('/v1/utils/perfis', {headers: { Authorization: `Bearer ${token}` }})
+    const response = await api.get('v1/utils/perfis', {headers: { Authorization: `Bearer ${token}` }})
     colaboradorStore.setPerfils(response.data)
   }
 

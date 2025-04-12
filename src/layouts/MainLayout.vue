@@ -208,6 +208,18 @@ const linksList = [
     route: {name: 'clientes'}
   },
   {
+    title: 'Serviços',
+    caption: 'Controle de serviços',
+    icon: 'room_preferences',
+    route: {name: 'servicos'}
+  },
+  {
+    title: 'Produtos',
+    caption: 'Controle de produtos',
+    icon: 'trolley',
+    route: {name: 'produtos'}
+  },
+  {
     title: 'Pedidos',
     caption: 'Pedidos realizado',
     icon: 'monitor',

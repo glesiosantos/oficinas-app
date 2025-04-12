@@ -3,7 +3,7 @@ import { api } from '../../../boot/axios'
 import { useAuthStore } from 'src/stores/auth.store'
 
 const authStore = useAuthStore()
-const idEstabelecimento = authStore.auth.estabelecimento.idEstabelecimento
+const idEstabelecimento = authStore.auth?.estabelecimento.idEstabelecimento
 const planoStore = usePlanoStore()
 
 export const planoService = () => {
