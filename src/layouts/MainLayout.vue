@@ -19,7 +19,7 @@
         <q-btn-group flat class="right-icons">
 
           <!-- TODO: configurar um servidor de tickets -->
-          <q-btn color="primary" icon="support_agent" class="text-black"/>
+          <q-btn color="primary" icon="support_agent" class="text-black" @click="enviarMensagemWhatsapp"/>
 
           <!-- <q-btn-dropdown auto-close color="primary" class="text-black" icon="notifications" no-caret>
             <q-list padding style="width: 250px">
@@ -245,6 +245,16 @@ const leftDrawerOpen = ref(false)
 function toggleLeftDrawer () {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }
+
+const enviarMensagemWhatsapp = () => {
+  const phoneNumber = '5586999430423'
+  const formattedMessage = encodeURIComponent(
+    `Olá, sou ${authStore.auth.nome} do estabelecimento ${authStore.auth.estabelecimento.nome}. Preciso de suporte no AutoRevise, poderia me ajudar?`
+  )
+  const whatsappUrl = `https://wa.me/${phoneNumber}?text=${formattedMessage}`;
+  window.open(whatsappUrl, '_blank');
+}
+
 </script>
 <style scoped>
 .header-drawer {

@@ -115,12 +115,12 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useClienteStore } from 'src/stores/cliente.store'
+import { clienteService } from './services/cliente_service'
 
 const route = useRoute()
 const router = useRouter()
-const clienteStore = useClienteStore()
 const cliente = ref(null)
+const { carregarClientePeloId } = clienteService()
 
 const veiculoColumns = [
   { name: 'marca', label: 'Marca', field: 'marca', align: 'left', sortable: true },
@@ -159,9 +159,8 @@ const novoPedido = (veiculo) => {
   })
 }
 
-onMounted(() => {
-  const clienteId = route.params.id
-  cliente.value = clienteStore.clientes.find(c => c.idCliente === Number(clienteId))
+onMounted(async () => {
+  cliente.value = await carregarClientePeloId(route.params.id)
 })
 </script>
 
