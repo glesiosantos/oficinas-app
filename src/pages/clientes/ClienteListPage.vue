@@ -133,7 +133,7 @@ const visualizarCliente = (cliente) => {
 }
 
 const formatarCPF = (cpf) => {
-  if (!cpf) return ''; // Retorna vazio se o CPF for null ou undefined
+  if (!cpf) return '';
   const apenasNumeros = cpf.replace(/\D/g, ''); // Remove tudo que não for número
   if (apenasNumeros.length !== 11) return cpf; // Retorna sem formatação se não tiver 11 dígitos
 
