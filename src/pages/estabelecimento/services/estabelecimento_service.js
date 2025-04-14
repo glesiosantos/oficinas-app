@@ -11,6 +11,7 @@ export const estabelecimentoService = () => {
 
   const carregarEstabelecimento = async () => {
     const response = await api.get(`v1/estabelecimento/${idEstabelecimento}`, { headers: { Authorization: `Bearer ${token}` }})
+    console.log('**** Estabelecimento *** ', response.data)
     estabelecimentoStore.setEstabelecimento(response.data)
   }
 

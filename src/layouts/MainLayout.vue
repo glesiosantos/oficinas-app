@@ -111,7 +111,7 @@
       v-model="leftDrawerOpen"
       show-if-above
     >
-      <q-scroll-area style="height: calc(100% - 150px); margin-top: 150px; border-right: 1px solid #ddd">
+      <q-scroll-area style="height: calc(100% - 150px); margin-top: 150px; border-right: 1px solid #ddd; padding-top: 10px;">
         <q-list>
           <q-item-label
             header
@@ -127,22 +127,23 @@
         </q-list>
       </q-scroll-area>
 
-      <q-img
-  class="absolute-top header-drawer"
-  style="height: 200px"
->
+      <q-img class="absolute-top header-drawer" style="height: 210px" >
   <!-- Logo da Empresa e Nome na mesma linha -->
-  <div class="absolute-top row justify-center items-center q-px-md q-py-sm w-100 bg-transparent">
-    <q-avatar size="60px" class="q-mr-md">
+  <div class="absolute-top column justify-center items-center q-px-md q-py-sm w-100 bg-transparent">
+    <q-avatar size="60px" class="q-mb-md">
       <img
-        :src="authStore.auth.estabelecimento.logo"
+        :src="authStore.auth.estabelecimento.logo || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMFZPmbYdm1bx3zOLIccsFGbjtOBP2ahDmjg&s'"
         alt="Logo da Empresa"
-      >
+      />
     </q-avatar>
-    <div class="text-weight-bold text-h6 text-black">
-      {{authStore.auth.estabelecimento.nome}}
+    <div class="column items-center">
+      <div class="text-weight-bold text-h6 text-black text-center q-mb-xs">
+        {{ authStore.auth.estabelecimento.nome }}
+      </div>
+      <span class="text-caption text-uppercase text-black text-center">
+        {{ authStore.auth.estabelecimento.periodoTeste ? 'Período de Teste': `Plano ${authStore.auth.plano.descricao}` }}
+      </span>
     </div>
-    <span class="text-caption text-uppercase text-black">Plano {{authStore.auth.plano.descricao}}</span>
   </div>
 
   <!-- Avatar do Usuário, Nome e Perfil na mesma linha -->

@@ -39,7 +39,6 @@ export const clienteService = () => {
 
   const carregarClientePeloId = async (data) => {
     const response = await api.get(`/v1/clientes/detalhes/${data}`,{headers: { Authorization: `Bearer ${token}` }})
-    console.log('**** cliente ',response.data)
     return response.data
   }
 
