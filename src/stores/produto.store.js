@@ -5,7 +5,10 @@ export const useProdutoStore = defineStore('produtoStore', () => {
 
   const produtos = ref([])
 
-  const setProdutos = (data) => produtos.value = data
+  const setProdutos = (data) => {
+    console.log('*** **** ', data)
+    produtos.value = data
+  }
 
   return { produtos,setProdutos }
 })

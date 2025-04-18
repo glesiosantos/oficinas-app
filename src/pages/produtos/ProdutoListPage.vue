@@ -7,7 +7,7 @@
             flat
             bordered
             :columns="columns"
-            :rows="produtos"
+            :rows="produtoStore.produtos"
             :filter="filter"
           >
             <template v-slot:top>
@@ -67,26 +67,30 @@ import ProdutoForm from './components/ProdutoForm.vue'
 import useNotify from 'src/composables/useNotify'
 import { useRouter } from 'vue-router'
 import { marcaService } from '../marcas/services/marca_service'
-import { fornecedorService } from '../fornecedor/services/fornecedor_service'
 import { produtoService } from './services/produto_service'
+import { useProdutoStore } from 'src/stores/produto.store'
+import useCalcularPrecoVendas from 'src/composables/usCalcularPrecoVenda'
+import useCurrency from 'src/composables/useCurrency'
 
 const { drawer, openDrawer,closeDrawer, isEdit, currentData } = useDrawer()
 const { notifyError, notifyWarning } = useNotify()
 const { carregarMarcas, carregarModelosDasMarcas } = marcaService()
-const { carregarFornecedores } = fornecedorService()
 const { carregarProdutosDoEstabelecimento } = produtoService()
+const {calcularPrecoVenda} = useCalcularPrecoVendas()
+const {formatToBRL } = useCurrency()
+
+const produtoStore = useProdutoStore()
 
 const filter = ref('')
 const router = useRouter()
-const produtos = ref([])
 
 const columns = [
-  { label: 'Cod. Produto', field: row => row.descricao, align: 'left'},
-  { label: 'Descrição do produto', field: row => row.descricao, align: 'left'},
+  { label: 'Código', field: row => row.codigoProduto, align: 'center'},
+  { label: 'Descrição', field: row => row.descricao, align: 'left'},
   { label: 'Referência', field: row => row.referencia, align: 'left' },
   { label: 'Categoria', field: row => row.categoria, align: 'left' },
-  { label: 'Valor de Venda',  field: row => row.contatos, format: val => `${val}`, sortable: true, align: 'left' },
-  { label: 'Total em estoque',  field: row => row.veiculos.length, align: 'center'},
+  { label: 'Valor de Venda',  field: row =>  formatToBRL(calcularPrecoVenda(row.valorCusto, row.percentualLucro)), sortable: true, align: 'center' },
+  { label: 'Total em estoque',  field: row => row.quantidadeEstoque, align: 'center'},
   { label: 'Ações', field: 'actions', name: 'actions', align: 'center' }
 ]
 
@@ -114,13 +118,12 @@ const handleSubmit = async (formData) => {
 }
 
 const visualizarProduto = (produto) => {
-  router.push({name: 'produtoDetails', params: { id: produto.idCliente }})
+  router.push({name: 'produtoDetails', params: { id: produto.idProduto }})
 }
 
 onMounted(async () => {
   await carregarMarcas()
   await carregarModelosDasMarcas()
-  await carregarFornecedores()
   await carregarProdutosDoEstabelecimento()
 })
 </script>

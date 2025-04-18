@@ -1,7 +1,9 @@
+import { useProdutoStore } from 'src/stores/produto.store'
 import { api } from '../../../boot/axios'
 import { useAuthStore } from 'src/stores/auth.store'
 
 const authStore = useAuthStore()
+const produtoStore = useProdutoStore()
 
 const idEstabelecimento = authStore.auth?.estabelecimento.idEstabelecimento
 const token = authStore.auth?.token
@@ -15,9 +17,13 @@ export const produtoService = () => {
   }
 
   const carregarProdutosDoEstabelecimento = async () => {
-    // const response = await api.get(`v1/produtos/estabelecimento/${idEstabelecimento}`,{ headers: { Authorization: `Bearer ${token}` }})
-    // response.data
-    return null
+    const response = await api.get(`v1/produtos/${idEstabelecimento}`,{ headers: { Authorization: `Bearer ${token}` }})
+    produtoStore.setProdutos(response.data)
+  }
+
+  const carregarProdutoPorIdMaisEstabelecimento = async (data) => {
+    const response = await api.get(`v1/produtos/${data}/${idEstabelecimento}`, {headers: { Authorization: `Bearer ${token}` }})
+    return response.data
   }
 
   const editarProduto = async (data) => {
@@ -26,5 +32,5 @@ export const produtoService = () => {
     return response
   }
 
-  return { addProduto, editarProduto, carregarProdutosDoEstabelecimento}
+  return { addProduto, editarProduto, carregarProdutoPorIdMaisEstabelecimento, carregarProdutosDoEstabelecimento}
 }
