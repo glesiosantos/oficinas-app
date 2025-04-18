@@ -25,6 +25,7 @@
       <q-input
         v-model="form.referencia"
         label="Referência da Peça/Acessório"
+        :style="{ textTransform: 'uppercase' }"
         outlined
         lazy-rules
         :rules="[(val) => (val && val.length > 0) || 'Referência é obrigatória']"
@@ -94,7 +95,7 @@
       <!-- Quantidade em Estoque -->
       <q-input
         v-model.number="form.quantidadeEstoque"
-        label="Quantidade em Estoque"
+        label="Quantidade em Estoque Inicial"
         type="number"
         outlined
         lazy-rules
@@ -109,7 +110,7 @@
         :options="fornecedorStore.fornecedores"
         label="Fornecedor"
         outlined
-        option-label="nome"
+        option-label="nomeFornecedor"
         option-value="id"
         emit-value
         map-options
@@ -166,17 +167,18 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue';
-import { debounce } from 'quasar';
-import useNotify from 'src/composables/useNotify';
-import { useMarcaStore } from 'src/stores/marca.store';
-import { useFornecedorStore } from 'src/stores/fornecedor.store';
-import { useProdutoStore } from 'src/stores/produto.store';
+import { ref, watch, onMounted } from 'vue'
+import { debounce } from 'quasar'
+import useNotify from 'src/composables/useNotify'
+import { useMarcaStore } from 'src/stores/marca.store'
+import { useFornecedorStore } from 'src/stores/fornecedor.store'
+import { produtoService } from '../services/produto_service'
 
 const { notifyError, notifySuccess, notifyWarning } = useNotify()
-const marcaStore = useMarcaStore();
-const fornecedorStore = useFornecedorStore();
-const produtoStore = useProdutoStore();
+const marcaStore = useMarcaStore()
+const fornecedorStore = useFornecedorStore()
+
+const {  carregarProdutoPeloCodigoMaisEstabelecimento } = produtoService()
 
 const props = defineProps({
   isEdit: Boolean,
@@ -214,8 +216,7 @@ const lastFetchedCodigo = ref('');
 
 // Carregar dados iniciais
 onMounted(async () => {
-  await fornecedorStore.fetchFornecedores(); // Carrega fornecedores do store
-  // Note: marcas não são mais necessárias, pois compatibilidade é apenas com modelos
+  await fornecedorStore.fornecedores()
 });
 
 // Cálculo do preço de venda
@@ -247,15 +248,17 @@ const fetchPecaData = debounce(async (codigo) => {
 
   try {
     loading.value = true;
-    const response = await produtoStore.fetchProdutoByCodigo(codigo); // Ajustado para usar um método do store
+    const response = await carregarProdutoPeloCodigoMaisEstabelecimento(codigo)
 
     if (response.status === 200) {
-      populateForm(response.data);
-      lastFetchedCodigo.value = codigo;
+      populateForm(response.data)
+      lastFetchedCodigo.value = codigo
       notifySuccess('Peça encontrada e dados preenchidos!');
     }
   } catch (error) {
-    if (error.response?.data?.status === 400) {
+    console.log('*** **** response ', error.status)
+    if (error.status === 400) {
+      lastFetchedCodigo.value = codigo
       notifyWarning('Peça não encontrada, preencha os dados para cadastrar.');
     } else {
       notifyError('Erro ao buscar peça: ' + (error.message || 'Erro desconhecido'));
@@ -268,18 +271,18 @@ const fetchPecaData = debounce(async (codigo) => {
 // Preenche o formulário com dados
 function populateForm(data) {
   const newFormData = {
-    codigo: data.codigo || '',
+    codigo: data.codigoProduto || lastFetchedCodigo.value,
     referencia: data.referencia || '',
     descricao: data.descricao || '',
     categoria: data.categoria || null,
-    precoCusto: data.precoCusto || null,
+    precoCusto: data.valorCusto || null,
     percentualLucro: data.percentualLucro || null,
     precoVenda: data.precoVenda || null,
     quantidadeEstoque: data.quantidadeEstoque || 0,
     fornecedor: data.fornecedor?.id || data.fornecedor || null,
     compatibilidades:
-      data.compatibilidades && Array.isArray(data.compatibilidades) && data.compatibilidades.length > 0
-        ? data.compatibilidades.map((c) => ({ modelo: c.modelo }))
+      data.modelos && Array.isArray(data.modelos) && data.modelos.length > 0
+        ? data.modelos.map((c) => ({ modelo: c.modelo }))
         : [{ modelo: null }],
   };
   Object.assign(form.value, newFormData);

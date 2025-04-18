@@ -123,7 +123,6 @@ const handleSubmit = async (formData) => {
   }
 }
 
-
 onMounted(async () => {
   await carregarCategoriasDosServicos()
   await carregarEspecialidades()

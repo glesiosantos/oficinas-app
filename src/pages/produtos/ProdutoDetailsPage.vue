@@ -72,6 +72,7 @@
           label="Nova Entrada"
           icon="add"
           @click="openDrawer('add')"
+          :class="{'full-width q-mt-sm': $q.screen.xs}"
         />
 
         <!-- Drawer para o formulário de nova entrada -->
@@ -132,12 +133,12 @@ const produto = ref(null);
 const isLoading = ref(true);
 const errorMessage = ref(null);
 
-const { carregarProdutoPorIdMaisEstabelecimento, adicionarNovaEntrada } = produtoService();
-const { carregarFornecedores } = fornecedorService()
+const { carregarProdutoPorIdMaisEstabelecimento, addProduto } = produtoService();
+const { carregarFornecedores } = fornecedorService();
 
 const entradaColumns = [
   { name: 'data', label: 'Data', field: 'data', align: 'left', sortable: true, format: val => new Date(val).toLocaleDateString() },
-  { name: 'fornecedor', label: 'Fornecedor', field: row => row.fornecedor || 'N/A', align: 'left', sortable: true },
+  { name: 'fornecedor', label: 'Fornecedor', field: row => row.fornecedor?.nomeFornecedor || 'N/A', align: 'left', sortable: true },
   { name: 'precoCusto', label: 'Preço de Custo (R$)', field: 'precoCusto', align: 'left', sortable: true, format: val => val.toFixed(2) },
   { name: 'quantidade', label: 'Quantidade', field: 'quantidade', align: 'center', sortable: true },
   { name: 'estoqueAtual', label: 'Estoque Após Entrada', field: 'estoqueAtual', align: 'center' },
@@ -149,51 +150,26 @@ const pagination = {
   descending: true,
 };
 
-// Função para processar a submissão do formulário
 const handleSubmit = async (formData) => {
-  const precoCusto = parseFloat(formData.precoCusto);
-  const quantidade = parseInt(formData.quantidade);
-  const idFornecedor = formData.fornecedor?.id; // Ajustado para acessar formData.fornecedor.id
-
-  if (!idFornecedor || !precoCusto || !quantidade || isNaN(precoCusto) || isNaN(quantidade)) {
-    $q.notify({
-      type: 'negative',
-      message: 'Preencha todos os campos da nova entrada com valores válidos.',
-    });
-    return;
-  }
-
   try {
-    // Enviar os dados para o backend
-    await adicionarNovaEntrada(produto.value.idProduto, {
-      idFornecedor,
-      precoCusto,
-      quantidade,
-      data: new Date().toISOString(),
-    });
-    isLoading.value = true;
-    // Recarregar o produto para atualizar estoque e histórico
-    produto.value = await carregarProdutoPorIdMaisEstabelecimento(route.params.id);
-    closeDrawer();
-    $q.notify({
-      type: 'positive',
-      message: 'Entrada de estoque adicionada com sucesso!',
-    });
+    if (isEdit.value) {
+      console.log('**** ', formData)
+    } else {
+      await addProduto(formData)
+    }
+
+    closeDrawer()
   } catch (error) {
-    $q.notify({
-      type: 'negative',
-      message: 'Erro ao adicionar entrada de estoque: ' + error.message,
-    });
-  } finally {
-    isLoading.value = false;
+    console.log(error)
+    closeDrawer()
   }
-};
+}
 
 onMounted(async () => {
   isLoading.value = true;
   try {
-    produto.value = await carregarProdutoPorIdMaisEstabelecimento(route.params.id)
-    await carregarFornecedores()
+    produto.value = await carregarProdutoPorIdMaisEstabelecimento(route.params.id);
+    await carregarFornecedores();
     if (!produto.value) {
       errorMessage.value = 'Produto não encontrado.';
     }

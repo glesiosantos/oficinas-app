@@ -12,7 +12,8 @@ export const produtoService = () => {
 
   const addProduto = async (data) => {
     const request = Object.assign({}, data, { idEstabelecimento: idEstabelecimento })
-    const response = await api.post('v1/clientes', request, { headers: { Authorization: `Bearer ${token}` }})
+    console.log('***** add request', request)
+    const response = await api.post('v1/produtos', request, { headers: { Authorization: `Bearer ${token}` }})
     return response
   }
 
@@ -26,11 +27,21 @@ export const produtoService = () => {
     return response.data
   }
 
+  const carregarProdutoPeloCodigoMaisEstabelecimento = async (data) => {
+    const response = await api.get(`v1/produtos/codigo/${data}/${idEstabelecimento}`, {headers: { Authorization: `Bearer ${token}` }})
+    return response
+  }
+
   const editarProduto = async (data) => {
     const request = Object.assign({}, data, { idUsuario: data.idColaborador, idEstabelecimento })
     const response = await api.put('v1/produtos/editar', request,{headers: { Authorization: `Bearer ${token}` }})
     return response
   }
 
-  return { addProduto, editarProduto, carregarProdutoPorIdMaisEstabelecimento, carregarProdutosDoEstabelecimento}
+  return { addProduto,
+    editarProduto,
+    carregarProdutoPorIdMaisEstabelecimento,
+    carregarProdutoPeloCodigoMaisEstabelecimento,
+    carregarProdutosDoEstabelecimento
+  }
 }

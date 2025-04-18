@@ -71,15 +71,18 @@ import { produtoService } from './services/produto_service'
 import { useProdutoStore } from 'src/stores/produto.store'
 import useCalcularPrecoVendas from 'src/composables/usCalcularPrecoVenda'
 import useCurrency from 'src/composables/useCurrency'
+import { fornecedorService } from '../fornecedor/services/fornecedor_service'
 
 const { drawer, openDrawer,closeDrawer, isEdit, currentData } = useDrawer()
 const { notifyError, notifyWarning } = useNotify()
 const { carregarMarcas, carregarModelosDasMarcas } = marcaService()
-const { carregarProdutosDoEstabelecimento } = produtoService()
+const { carregarProdutosDoEstabelecimento, addProduto } = produtoService()
+const { carregarFornecedores } = fornecedorService()
 const {calcularPrecoVenda} = useCalcularPrecoVendas()
 const {formatToBRL } = useCurrency()
 
 const produtoStore = useProdutoStore()
+
 
 const filter = ref('')
 const router = useRouter()
@@ -99,8 +102,8 @@ const handleSubmit = async (formData) => {
     if (isEdit.value) {
       console.log('**** ', formData)
     } else {
-      console.log('**** ', formData)
-
+      const response = await addProduto(formData)
+      console.log('***** response', response)
     }
     await nextTick()
     closeDrawer()
@@ -111,7 +114,7 @@ const handleSubmit = async (formData) => {
     } else {
       notifyError('Erro ao salvar cliente: ' + (error.message || 'Erro desconhecido'))
     }
-
+    await carregarProdutosDoEstabelecimento()
     await nextTick()
     closeDrawer()
   }
@@ -125,5 +128,6 @@ onMounted(async () => {
   await carregarMarcas()
   await carregarModelosDasMarcas()
   await carregarProdutosDoEstabelecimento()
+  await carregarFornecedores()
 })
 </script>

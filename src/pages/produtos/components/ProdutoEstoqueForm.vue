@@ -65,17 +65,17 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
-import { useQuasar } from 'quasar';
-import { useFornecedorStore } from 'src/stores/fornecedor.store';
+import { ref, watch } from 'vue'
+import { useQuasar } from 'quasar'
+import { useFornecedorStore } from 'src/stores/fornecedor.store'
 
-const fornecedorStore = useFornecedorStore();
-const $q = useQuasar();
+const fornecedorStore = useFornecedorStore()
+const $q = useQuasar()
 const props = defineProps({
   isEdit: Boolean,
   initialData: Object,
 });
-const emit = defineEmits(['submit', 'cancel']);
+const emit = defineEmits(['submit', 'cancel'])
 
 const formData = ref({
   fornecedor: null,
@@ -98,7 +98,6 @@ watch(
 // Função para buscar fornecedores dinamicamente
 const buscarFornecedores = async (val, update) => {
   try {
-    await fornecedorStore.fetchFornecedores(val || '');
     update(() => {
       fornecedoresOptions.value = fornecedorStore.fornecedores.map(f => ({
         id: f.id,
@@ -113,10 +112,9 @@ const buscarFornecedores = async (val, update) => {
   }
 };
 
-// Função para submissão do formulário
-const onSubmit = () => {
+const onSubmit = async () => {
   emit('submit', { ...formData.value });
-};
+}
 </script>
 
 <style scoped>
