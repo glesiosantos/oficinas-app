@@ -4,11 +4,11 @@ import { ref } from 'vue'
 export const useProdutoStore = defineStore('produtoStore', () => {
 
   const produtos = ref([])
+  const categoriaProdutos = ref([])
 
-  const setProdutos = (data) => {
-    console.log('*** **** ', data)
-    produtos.value = data
-  }
+  const setProdutos = (data) => produtos.value = data
 
-  return { produtos,setProdutos }
+  const setCategoria = (data) => categoriaProdutos.value = data
+
+  return { produtos, categoriaProdutos, setProdutos, setCategoria }
 })

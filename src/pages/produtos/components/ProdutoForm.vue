@@ -44,8 +44,10 @@
       <!-- Categoria -->
       <q-select
         v-model="form.categoria"
-        :options="categorias"
+        :options="produtoStore.categoriaProdutos"
         label="Categoria"
+        option-label="descricao"
+        option-value="codigo"
         outlined
         emit-value
         map-options
@@ -94,7 +96,18 @@
 
       <!-- Quantidade em Estoque -->
       <q-input
-        v-model.number="form.quantidadeEstoque"
+        v-model.number="form.quantidadeMinimaEstoque"
+        label="Quantidade Minima Estoque"
+        type="number"
+        outlined
+        lazy-rules
+        :rules="[
+          (val) => (val !== null && val >= 0) || 'Quantidade é obrigatória e deve ser maior ou igual a zero',
+        ]"
+      />
+
+      <q-input
+        v-model.number="form.quantidadeAtualEstoque"
         label="Quantidade em Estoque Inicial"
         type="number"
         outlined
@@ -104,27 +117,13 @@
         ]"
       />
 
-      <!-- Fornecedor -->
-      <q-select
-        v-model="form.fornecedor"
-        :options="fornecedorStore.fornecedores"
-        label="Fornecedor"
-        outlined
-        option-label="nomeFornecedor"
-        option-value="id"
-        emit-value
-        map-options
-        lazy-rules
-        :rules="[(val) => !!val || 'Fornecedor é obrigatório']"
-      />
-
       <!-- Compatibilidade com Modelos -->
       <div class="q-mt-md">
         <div class="text-subtitle1 q-mb-sm">Compatibilidade com Modelos</div>
-        <div v-for="(compatibilidade, index) in form.compatibilidades" :key="index" class="row q-mb-sm">
+        <div v-for="(compatibilidade, index) in form.modelos" :key="index" class="row q-mb-sm">
           <div class="col">
             <q-select
-              v-model="form.compatibilidades[index].modelo"
+              v-model="form.modelos[index]"
               :options="marcaStore.modelos"
               label="Modelo"
               outlined
@@ -167,16 +166,16 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import { debounce } from 'quasar'
 import useNotify from 'src/composables/useNotify'
 import { useMarcaStore } from 'src/stores/marca.store'
-import { useFornecedorStore } from 'src/stores/fornecedor.store'
 import { produtoService } from '../services/produto_service'
+import { useProdutoStore } from 'src/stores/produto.store'
 
 const { notifyError, notifySuccess, notifyWarning } = useNotify()
 const marcaStore = useMarcaStore()
-const fornecedorStore = useFornecedorStore()
+const produtoStore = useProdutoStore()
 
 const {  carregarProdutoPeloCodigoMaisEstabelecimento } = produtoService()
 
@@ -188,16 +187,6 @@ const props = defineProps({
 
 defineEmits(['submit', 'cancel']);
 
-const categorias = ref([
-  'Motor',
-  'Suspensão',
-  'Freios',
-  'Elétrica',
-  'Acessórios',
-  'Refrigeração',
-  'Outros',
-]);
-
 const form = ref({
   codigo: '',
   referencia: '',
@@ -206,18 +195,13 @@ const form = ref({
   precoCusto: null,
   percentualLucro: null,
   precoVenda: null,
-  quantidadeEstoque: 0,
-  fornecedor: null,
-  compatibilidades: [{ modelo: null }],
+  quantidadeMinimaEstoque: 0,
+  quantidadeAtualEstoque: 0,
+  modelos: [null],
 });
 
 const loading = ref(false);
 const lastFetchedCodigo = ref('');
-
-// Carregar dados iniciais
-onMounted(async () => {
-  await fornecedorStore.fornecedores()
-});
 
 // Cálculo do preço de venda
 const calcularPrecoVenda = () => {
@@ -278,12 +262,12 @@ function populateForm(data) {
     precoCusto: data.valorCusto || null,
     percentualLucro: data.percentualLucro || null,
     precoVenda: data.precoVenda || null,
-    quantidadeEstoque: data.quantidadeEstoque || 0,
-    fornecedor: data.fornecedor?.id || data.fornecedor || null,
-    compatibilidades:
+    quantidadeMinimaEstoque: data.quantidadeMinimaEstoque || 0,
+    quantidadeAtualEstoque: data.quantidadeAtualEstoque || 0,
+    modelos:
       data.modelos && Array.isArray(data.modelos) && data.modelos.length > 0
-        ? data.modelos.map((c) => ({ modelo: c.modelo }))
-        : [{ modelo: null }],
+        ? data.modelos.map(c => c.modelo)
+        : [],
   };
   Object.assign(form.value, newFormData);
   calcularPrecoVenda();
@@ -291,12 +275,12 @@ function populateForm(data) {
 
 // Funções auxiliares para compatibilidade
 function addCompatibilidade() {
-  form.value.compatibilidades.push({ modelo: null });
+  form.value.modelos.push({ modelo: null });
 }
 
 function removeCompatibilidade(index) {
-  if (form.value.compatibilidades.length > 1) {
-    form.value.compatibilidades.splice(index, 1);
+  if (form.value.modelos.length > 1) {
+    form.value.modelos.splice(index, 1);
   }
 }
 

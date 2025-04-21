@@ -12,9 +12,8 @@ export const produtoService = () => {
 
   const addProduto = async (data) => {
     const request = Object.assign({}, data, { idEstabelecimento: idEstabelecimento })
-    console.log('***** add request', request)
     const response = await api.post('v1/produtos', request, { headers: { Authorization: `Bearer ${token}` }})
-    return response
+    return response.data
   }
 
   const carregarProdutosDoEstabelecimento = async () => {

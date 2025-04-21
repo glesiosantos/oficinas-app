@@ -39,6 +39,8 @@
                   @click="visualizarProduto(props.row)"
                   title="Visualizar Produto"
                 />
+
+                <q-btn round dense color="accent" size="md" icon="edit" @click="openDrawer('edit', props.row)" />
               </q-td>
             </template>
           </q-table>
@@ -74,7 +76,7 @@ import useCurrency from 'src/composables/useCurrency'
 import { fornecedorService } from '../fornecedor/services/fornecedor_service'
 
 const { drawer, openDrawer,closeDrawer, isEdit, currentData } = useDrawer()
-const { notifyError, notifyWarning } = useNotify()
+const { notifyError, notifySuccess } = useNotify()
 const { carregarMarcas, carregarModelosDasMarcas } = marcaService()
 const { carregarProdutosDoEstabelecimento, addProduto } = produtoService()
 const { carregarFornecedores } = fornecedorService()
@@ -82,7 +84,6 @@ const {calcularPrecoVenda} = useCalcularPrecoVendas()
 const {formatToBRL } = useCurrency()
 
 const produtoStore = useProdutoStore()
-
 
 const filter = ref('')
 const router = useRouter()
@@ -93,7 +94,8 @@ const columns = [
   { label: 'Referência', field: row => row.referencia, align: 'left' },
   { label: 'Categoria', field: row => row.categoria, align: 'left' },
   { label: 'Valor de Venda',  field: row =>  formatToBRL(calcularPrecoVenda(row.valorCusto, row.percentualLucro)), sortable: true, align: 'center' },
-  { label: 'Total em estoque',  field: row => row.quantidadeEstoque, align: 'center'},
+  { label: 'Quant. Minima',  field: row => row.quantidadeMinimaEstoque, align: 'center'},
+  { label: 'Quant. Atual',  field: row => row.quantidadeEstoque, align: 'center'},
   { label: 'Ações', field: 'actions', name: 'actions', align: 'center' }
 ]
 
@@ -102,17 +104,20 @@ const handleSubmit = async (formData) => {
     if (isEdit.value) {
       console.log('**** ', formData)
     } else {
-      const response = await addProduto(formData)
-      console.log('***** response', response)
+      console.log('**** add ', formData)
+      await addProduto(formData)
+      notifySuccess('Produto cadastrado com sucesso!')
     }
+    await carregarProdutosDoEstabelecimento()
     await nextTick()
     closeDrawer()
   } catch (error) {
 
-    if(error.response.data.status === 400) {
-      notifyWarning(error.response.data.mensagem);
+    if(error.status === 400) {
+      // notifyWarning(`Error`)
+      console.log(error)
     } else {
-      notifyError('Erro ao salvar cliente: ' + (error.message || 'Erro desconhecido'))
+      notifyError('Erro ao salvar produto: ' + (error.message || 'Erro desconhecido'))
     }
     await carregarProdutosDoEstabelecimento()
     await nextTick()
@@ -129,5 +134,6 @@ onMounted(async () => {
   await carregarModelosDasMarcas()
   await carregarProdutosDoEstabelecimento()
   await carregarFornecedores()
+
 })
 </script>

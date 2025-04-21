@@ -113,6 +113,15 @@
           {{ errorMessage || 'Erro desconhecido ao carregar o produto.' }}
         </div>
       </q-card-section>
+
+      <q-card-actions align="right">
+        <q-btn
+          flat
+          color="primary"
+          label="Voltar"
+          @click="$router.push('/produtos')"
+        />
+      </q-card-actions>
     </q-card>
   </q-page>
 </template>
