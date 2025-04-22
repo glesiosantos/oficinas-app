@@ -98,8 +98,18 @@
       </q-toolbar>
     </q-header>
 
-    <q-footer class="small-screen-only">
-      <q-tabs>
+
+    <q-footer>
+      <q-banner inline-actions dense class="bg-orange text-black">
+        Deseja instalar AutoRevise PRO?
+
+        <template v-slot:action>
+          <q-btn flat label="Sim" />
+          <q-btn flat label="Não" />
+        </template>
+      </q-banner>
+
+      <q-tabs class="small-screen-only">
         <q-route-tab exact class="text-black" replace icon="dashboard" label="Dashboard" :to="{name: 'dashboard'}"/>
         <q-route-tab exact class="text-black" replace icon="groups" label="Clintes" :to="{name: 'clientes'}"/>
         <q-route-tab exact class="text-black" replace icon="monitor" label="Pedido" :to="{name: 'pedidos'}"/>
