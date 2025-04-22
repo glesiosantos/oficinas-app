@@ -5,6 +5,7 @@ import colaboradorRouter from '../pages/colaborador/router'
 import clienteRouter from '../pages/clientes/router'
 import pedidoRouter from '../pages/pedido/router'
 import servicoRouter from '../pages/servicos/router'
+import produtoRouter from '../pages/produtos/router'
 
 const routes = [
   {
@@ -29,7 +30,8 @@ const routes = [
       ...colaboradorRouter,
       ...clienteRouter,
       ...pedidoRouter,
-      ...servicoRouter
+      ...servicoRouter,
+      ...produtoRouter
     ],
   },
 
