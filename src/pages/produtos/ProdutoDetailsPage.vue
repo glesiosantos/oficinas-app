@@ -64,6 +64,23 @@
               </q-item>
             </q-list>
           </div>
+
+          <!-- Nova seção para Modelos Compatíveis -->
+          <div class="col-12">
+            <q-list bordered>
+              <q-item>
+                <q-item-section>
+                  <q-item-label caption>Modelos Compatíveis</q-item-label>
+                  <q-item-label>
+                    <span v-if="produto.modelos && produto.modelos.length > 0">
+                      {{ produto.modelos.map(modelo => modelo.modelo || 'Modelo Desconhecido').join(', ') }}
+                    </span>
+                    <span v-else>Nenhum modelo compatível</span>
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </div>
         </div>
 
         <q-btn
@@ -162,23 +179,30 @@ const pagination = {
 const handleSubmit = async (formData) => {
   try {
     if (isEdit.value) {
-      console.log('**** ', formData)
+      console.log('Editando:', formData);
     } else {
-      await adicionarEstoqueProduto(Object.assign({}, formData, {idProduto: route.params.id}))
-      produto.value = await carregarProdutoPorIdMaisEstabelecimento(route.params.id)
+      await adicionarEstoqueProduto({
+        ...formData,
+        idProduto: route.params.id,
+      });
+      produto.value = await carregarProdutoPorIdMaisEstabelecimento(route.params.id);
     }
-
-    closeDrawer()
+    closeDrawer();
   } catch (error) {
-    console.log(error)
-    closeDrawer()
+    console.error('Erro ao salvar entrada:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'Erro ao salvar entrada: ' + error.message,
+    });
+    closeDrawer();
   }
-}
+};
 
 onMounted(async () => {
   isLoading.value = true;
   try {
-    produto.value = await carregarProdutoPorIdMaisEstabelecimento(route.params.id)
+    produto.value = await carregarProdutoPorIdMaisEstabelecimento(route.params.id);
+    console.log('Produto carregado:', produto.value); // Log para depuração
     await carregarFornecedores();
     if (!produto.value) {
       errorMessage.value = 'Produto não encontrado.';

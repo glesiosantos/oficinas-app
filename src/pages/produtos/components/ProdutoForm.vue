@@ -199,7 +199,7 @@ const form = ref({
   precoVenda: null,
   quantidadeMinimaEstoque: 0,
   quantidadeEstoque: 0,
-  modelos: [null],
+  modelos: [],
 });
 
 const loading = ref(false);
@@ -260,8 +260,10 @@ function populateForm(data) {
     quantidadeEstoque: data.quantidadeEstoque || 0,
     modelos:
       data.modelos && Array.isArray(data.modelos) && data.modelos.length > 0
-        ? data.modelos.map((c) => c.modelo)
-        : [null],
+        ? data.modelos
+            .map((c) => c.modelo)
+            .filter((modelo) => modelo != null) // Filtra valores nulos ou indefinidos
+        : [], // Usa array vazio como valor padrão
   };
   Object.assign(form.value, newFormData);
   calcularPrecoVenda();

@@ -105,6 +105,7 @@ const handleSubmit = async (formData) => {
       await editarProduto(formData)
       notifySuccess('Produto atualizado com sucesso!')
     } else {
+      console.log('*** *** ', formData)
       await addProduto(formData)
       notifySuccess('Produto cadastrado com sucesso!')
     }
