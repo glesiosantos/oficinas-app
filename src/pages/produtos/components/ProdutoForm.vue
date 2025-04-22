@@ -59,6 +59,7 @@
       <q-input
         v-model.number="form.precoCusto"
         label="Preço de Custo (R$)"
+        :disable="isEdit"
         type="number"
         outlined
         step="0.01"
@@ -97,6 +98,7 @@
       <!-- Quantidade em Estoque -->
       <q-input
         v-model.number="form.quantidadeMinimaEstoque"
+        :disable="isEdit"
         label="Quantidade Minima Estoque"
         type="number"
         outlined
@@ -107,7 +109,8 @@
       />
 
       <q-input
-        v-model.number="form.quantidadeAtualEstoque"
+        v-model.number="form.quantidadeEstoque"
+        :disable="isEdit"
         label="Quantidade em Estoque Inicial"
         type="number"
         outlined
@@ -132,7 +135,6 @@
               emit-value
               map-options
               lazy-rules
-              :rules="[(val) => !!val || 'Modelo é obrigatório']"
             />
           </div>
           <q-btn
@@ -166,28 +168,28 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
-import { debounce } from 'quasar'
-import useNotify from 'src/composables/useNotify'
-import { useMarcaStore } from 'src/stores/marca.store'
-import { produtoService } from '../services/produto_service'
-import { useProdutoStore } from 'src/stores/produto.store'
+import { ref, watch } from 'vue';
+import { debounce } from 'quasar';
+import useNotify from 'src/composables/useNotify';
+import { useMarcaStore } from 'src/stores/marca.store';
+import { produtoService } from '../services/produto_service';
+import { useProdutoStore } from 'src/stores/produto.store';
 
-const { notifyError, notifySuccess, notifyWarning } = useNotify()
-const marcaStore = useMarcaStore()
-const produtoStore = useProdutoStore()
-
-const {  carregarProdutoPeloCodigoMaisEstabelecimento } = produtoService()
+const { notifyError, notifySuccess, notifyWarning } = useNotify();
+const marcaStore = useMarcaStore();
+const produtoStore = useProdutoStore();
+const { carregarProdutoPeloCodigoMaisEstabelecimento } = produtoService();
 
 const props = defineProps({
   isEdit: Boolean,
   initialData: Object,
-  modelos: Array, // Lista de modelos disponíveis
+  modelos: Array,
 });
 
 defineEmits(['submit', 'cancel']);
 
 const form = ref({
+  idProduto: '',
   codigo: '',
   referencia: '',
   descricao: '',
@@ -196,14 +198,13 @@ const form = ref({
   percentualLucro: null,
   precoVenda: null,
   quantidadeMinimaEstoque: 0,
-  quantidadeAtualEstoque: 0,
+  quantidadeEstoque: 0,
   modelos: [null],
 });
 
 const loading = ref(false);
 const lastFetchedCodigo = ref('');
 
-// Cálculo do preço de venda
 const calcularPrecoVenda = () => {
   const custo = form.value.precoCusto || 0;
   const percentual = form.value.percentualLucro || 0;
@@ -211,38 +212,22 @@ const calcularPrecoVenda = () => {
   form.value.precoVenda = Number(precoVenda.toFixed(2));
 };
 
-// Watchers para atualizar o preço de venda automaticamente
-watch(
-  () => form.value.precoCusto,
-  () => {
-    calcularPrecoVenda();
-  }
-);
+watch(() => form.value.precoCusto, calcularPrecoVenda);
+watch(() => form.value.percentualLucro, calcularPrecoVenda);
 
-watch(
-  () => form.value.percentualLucro,
-  () => {
-    calcularPrecoVenda();
-  }
-);
-
-// Função para buscar dados na API com debounce
 const fetchPecaData = debounce(async (codigo) => {
   if (!codigo || loading.value || props.isEdit || lastFetchedCodigo.value === codigo) return;
-
   try {
     loading.value = true;
-    const response = await carregarProdutoPeloCodigoMaisEstabelecimento(codigo)
-
+    const response = await carregarProdutoPeloCodigoMaisEstabelecimento(codigo);
     if (response.status === 200) {
-      populateForm(response.data)
-      lastFetchedCodigo.value = codigo
+      populateForm(response.data);
+      lastFetchedCodigo.value = codigo;
       notifySuccess('Peça encontrada e dados preenchidos!');
     }
   } catch (error) {
-    console.log('*** **** response ', error.status)
-    if (error.status === 400) {
-      lastFetchedCodigo.value = codigo
+    if (error.response?.status === 400) {
+      lastFetchedCodigo.value = codigo;
       notifyWarning('Peça não encontrada, preencha os dados para cadastrar.');
     } else {
       notifyError('Erro ao buscar peça: ' + (error.message || 'Erro desconhecido'));
@@ -252,30 +237,38 @@ const fetchPecaData = debounce(async (codigo) => {
   }
 }, 500);
 
-// Preenche o formulário com dados
 function populateForm(data) {
+  // Mapear a descrição da categoria para o código correspondente
+  const categoriaSelecionada = produtoStore.categoriaProdutos.find(
+    (cat) => cat.descricao === data.categoria || cat.codigo === data.categoria
+  );
+
+  if (!categoriaSelecionada && data.categoria) {
+    notifyWarning(`Categoria "${data.categoria}" não encontrada nas opções disponíveis.`);
+  }
+
   const newFormData = {
+    idProduto: data.idProduto || null,
     codigo: data.codigoProduto || lastFetchedCodigo.value,
     referencia: data.referencia || '',
     descricao: data.descricao || '',
-    categoria: data.categoria || null,
+    categoria: categoriaSelecionada ? categoriaSelecionada.codigo : null, // Armazena o código (ex.: "SU")
     precoCusto: data.valorCusto || null,
     percentualLucro: data.percentualLucro || null,
     precoVenda: data.precoVenda || null,
     quantidadeMinimaEstoque: data.quantidadeMinimaEstoque || 0,
-    quantidadeAtualEstoque: data.quantidadeAtualEstoque || 0,
+    quantidadeEstoque: data.quantidadeEstoque || 0,
     modelos:
       data.modelos && Array.isArray(data.modelos) && data.modelos.length > 0
-        ? data.modelos.map(c => c.modelo)
-        : [],
+        ? data.modelos.map((c) => c.modelo)
+        : [null],
   };
   Object.assign(form.value, newFormData);
   calcularPrecoVenda();
 }
 
-// Funções auxiliares para compatibilidade
 function addCompatibilidade() {
-  form.value.modelos.push({ modelo: null });
+  form.value.modelos.push(null);
 }
 
 function removeCompatibilidade(index) {
@@ -284,7 +277,6 @@ function removeCompatibilidade(index) {
   }
 }
 
-// Watchers
 watch(
   () => form.value.codigo,
   (newVal, oldVal) => {

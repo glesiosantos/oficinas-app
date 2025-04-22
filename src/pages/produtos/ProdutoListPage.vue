@@ -76,9 +76,9 @@ import useCurrency from 'src/composables/useCurrency'
 import { fornecedorService } from '../fornecedor/services/fornecedor_service'
 
 const { drawer, openDrawer,closeDrawer, isEdit, currentData } = useDrawer()
-const { notifyError, notifySuccess } = useNotify()
+const { notifyError, notifySuccess, notifyWarning } = useNotify()
 const { carregarMarcas, carregarModelosDasMarcas } = marcaService()
-const { carregarProdutosDoEstabelecimento, addProduto } = produtoService()
+const { carregarProdutosDoEstabelecimento, addProduto, editarProduto } = produtoService()
 const { carregarFornecedores } = fornecedorService()
 const {calcularPrecoVenda} = useCalcularPrecoVendas()
 const {formatToBRL } = useCurrency()
@@ -102,9 +102,9 @@ const columns = [
 const handleSubmit = async (formData) => {
   try {
     if (isEdit.value) {
-      console.log('**** ', formData)
+      await editarProduto(formData)
+      notifySuccess('Produto atualizado com sucesso!')
     } else {
-      console.log('**** add ', formData)
       await addProduto(formData)
       notifySuccess('Produto cadastrado com sucesso!')
     }
@@ -112,10 +112,9 @@ const handleSubmit = async (formData) => {
     await nextTick()
     closeDrawer()
   } catch (error) {
-
+    console.log('error: ', error)
     if(error.status === 400) {
-      // notifyWarning(`Error`)
-      console.log(error)
+      notifyWarning(error.response.data.mensagem)
     } else {
       notifyError('Erro ao salvar produto: ' + (error.message || 'Erro desconhecido'))
     }

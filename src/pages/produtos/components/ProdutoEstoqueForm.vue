@@ -1,67 +1,69 @@
 <template>
-  <q-card style="height: 100%;">
-    <q-card-section class="bg-primary text-white">
-      <div class="text-h6">{{ isEdit ? 'Editar Entrada' : 'Nova Entrada de Estoque' }}</div>
-    </q-card-section>
-    <q-card-section>
-      <q-form @submit="onSubmit">
-        <q-select
-          v-model="formData.fornecedor"
-          :options="fornecedoresOptions"
-          label="Fornecedor"
-          option-label="nomeFornecedor"
-          option-value="id"
-          filled
-          use-input
-          input-debounce="300"
-          @filter="buscarFornecedores"
-          :rules="[val => !!val || 'Selecione um fornecedor']"
-          class="q-mb-md"
-        >
-          <template v-slot:no-option>
-            <q-item>
-              <q-item-section class="text-grey">
-                Nenhum fornecedor encontrado
-              </q-item-section>
-            </q-item>
-          </template>
-        </q-select>
-        <q-input
-          v-model="formData.precoCusto"
-          type="text"
-          inputmode="numeric"
-          label="Preço de Custo (R$)"
-          filled
-          lazy-rules
-          :rules="[val => (val && parseFloat(val) > 0) || 'Preço deve ser maior que zero']"
-          class="q-mb-md"
-        />
-        <q-input
-          v-model="formData.quantidade"
-          type="text"
-          inputmode="numeric"
-          label="Quantidade"
-          filled
-          lazy-rules
-          :rules="[val => (val && parseInt(val) > 0) || 'Quantidade deve ser maior que zero']"
-          class="q-mb-md"
-        />
-        <div class="q-mt-md">
-          <q-btn
-            color="primary"
-            type="submit"
-            label="Adicionar Entrada"
-            class="q-mr-sm"
+  <q-form @submit="onSubmit" class="column">
+    <q-card style="height: 100%;">
+      <q-card-section class="bg-primary text-black">
+        <div class="text-h6">{{ isEdit ? 'Editar Entrada' : 'Nova Entrada de Estoque' }}</div>
+      </q-card-section>
+        <q-card-section class="flex-1">
+          <q-select
+            v-model="formData.idFornecedor"
+            :options="fornecedoresOptions"
+            label="Fornecedor"
+            option-label="nomeFornecedor"
+            option-value="id"
+            filled
+            emit-value
+            map-options
+            input-debounce="300"
+            @filter="buscarFornecedores"
+            :rules="[val => !!val || 'Selecione um fornecedor']"
+            class="q-mb-md"
+          >
+            <template v-slot:no-option>
+              <q-item>
+                <q-item-section class="text-grey">
+                  Nenhum fornecedor encontrado
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
+          <q-input
+            v-model="formData.precoCusto"
+            type="text"
+            inputmode="numeric"
+            label="Preço de Custo (R$)"
+            filled
+            lazy-rules
+            :rules="[val => (val && parseFloat(val) > 0) || 'Preço deve ser maior que zero']"
+            class="q-mb-md"
           />
-          <q-btn
-            color="negative"
-            label="Cancelar"
-            @click="$emit('cancel')"
+          <q-input
+            v-model="formData.quantidade"
+            type="text"
+            inputmode="numeric"
+            label="Quantidade"
+            filled
+            lazy-rules
+            :rules="[val => (val && parseInt(val) > 0) || 'Quantidade deve ser maior que zero']"
+            class="q-mb-md"
           />
-        </div>
-      </q-form>
-    </q-card-section>
-  </q-card>
+        </q-card-section>
+        <q-card-section class="footer-fixed q-pa-md text-right">
+          <q-btn
+              color="primary"
+              type="submit"
+              label="Adicionar Entrada"
+              class="q-mr-sm text-black"
+            />
+            <q-btn
+              color="negative"
+              label="Cancelar"
+              @click="$emit('cancel')"
+            />
+
+        </q-card-section>
+    </q-card>
+  </q-form>
 </template>
 
 <script setup>
@@ -78,7 +80,7 @@ const props = defineProps({
 const emit = defineEmits(['submit', 'cancel'])
 
 const formData = ref({
-  fornecedor: null,
+  idFornecedor: null,
   precoCusto: null,
   quantidade: null,
 });

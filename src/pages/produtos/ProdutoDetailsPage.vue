@@ -95,7 +95,7 @@
           flat
           bordered
           :columns="entradaColumns"
-          :rows="produto.entradas || []"
+          :rows="produto.registros || []"
           row-key="id"
           :pagination="pagination"
         >
@@ -142,15 +142,15 @@ const produto = ref(null);
 const isLoading = ref(true);
 const errorMessage = ref(null);
 
-const { carregarProdutoPorIdMaisEstabelecimento, addProduto } = produtoService();
+const { carregarProdutoPorIdMaisEstabelecimento, adicionarEstoqueProduto } = produtoService();
 const { carregarFornecedores } = fornecedorService();
 
 const entradaColumns = [
-  { name: 'data', label: 'Data', field: 'data', align: 'left', sortable: true, format: val => new Date(val).toLocaleDateString() },
-  { name: 'fornecedor', label: 'Fornecedor', field: row => row.fornecedor?.nomeFornecedor || 'N/A', align: 'left', sortable: true },
-  { name: 'precoCusto', label: 'Preço de Custo (R$)', field: 'precoCusto', align: 'left', sortable: true, format: val => val.toFixed(2) },
-  { name: 'quantidade', label: 'Quantidade', field: 'quantidade', align: 'center', sortable: true },
-  { name: 'estoqueAtual', label: 'Estoque Após Entrada', field: 'estoqueAtual', align: 'center' },
+  { name: 'data', label: 'Data', field: 'dataRegistro', align: 'left', sortable: true, format: val => new Date(val).toLocaleDateString() },
+  { name: 'fornecedor', label: 'Fornecedor', field: row => row.fornecedor || 'N/A', align: 'left', sortable: true },
+  { name: 'precoCusto', label: 'Preço de Custo (R$)', field: 'precoCustoAdquirido', align: 'left', sortable: true, format: val => val.toFixed(2) },
+  { name: 'quantidade', label: 'Quant. Adquirida', field: 'qtdAdquirida', align: 'center', sortable: true },
+  { name: 'estoqueAtual', label: 'Quant. Anterior', field: 'qtdAntes', align: 'center' },
 ];
 
 const pagination = {
@@ -164,7 +164,8 @@ const handleSubmit = async (formData) => {
     if (isEdit.value) {
       console.log('**** ', formData)
     } else {
-      await addProduto(formData)
+      await adicionarEstoqueProduto(Object.assign({}, formData, {idProduto: route.params.id}))
+      produto.value = await carregarProdutoPorIdMaisEstabelecimento(route.params.id)
     }
 
     closeDrawer()
@@ -177,7 +178,7 @@ const handleSubmit = async (formData) => {
 onMounted(async () => {
   isLoading.value = true;
   try {
-    produto.value = await carregarProdutoPorIdMaisEstabelecimento(route.params.id);
+    produto.value = await carregarProdutoPorIdMaisEstabelecimento(route.params.id)
     await carregarFornecedores();
     if (!produto.value) {
       errorMessage.value = 'Produto não encontrado.';

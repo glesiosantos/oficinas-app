@@ -32,8 +32,14 @@ export const produtoService = () => {
   }
 
   const editarProduto = async (data) => {
-    const request = Object.assign({}, data, { idUsuario: data.idColaborador, idEstabelecimento })
-    const response = await api.put('v1/produtos/editar', request,{headers: { Authorization: `Bearer ${token}` }})
+    const request = Object.assign({}, data, { idEstabelecimento })
+    const response = await api.post('v1/produtos/editar', request, {headers: { Authorization: `Bearer ${token}` }})
+    return response
+  }
+
+  const adicionarEstoqueProduto = async (data) => {
+    const request = Object.assign({}, data, { idEstabelecimento })
+    const response = await api.post('v1/estoques', request, {headers: { Authorization: `Bearer ${token}` }})
     return response
   }
 
@@ -41,6 +47,7 @@ export const produtoService = () => {
     editarProduto,
     carregarProdutoPorIdMaisEstabelecimento,
     carregarProdutoPeloCodigoMaisEstabelecimento,
-    carregarProdutosDoEstabelecimento
+    carregarProdutosDoEstabelecimento,
+    adicionarEstoqueProduto
   }
 }
