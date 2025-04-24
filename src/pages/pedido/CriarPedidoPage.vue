@@ -6,41 +6,7 @@
         <div class="text-h6">Gerar Pedido/Orçamento</div>
       </q-card-section>
 
-      <!-- 1. Identificação do Estabelecimento -->
-      <q-card-section>
-        <div class="text-subtitle1 q-mb-sm">Estabelecimento</div>
-        <div class="row q-col-gutter-md">
-          <div class="col-12 col-md-4">
-            <q-input
-              v-model="form.estabelecimento.fantasia"
-              label="Nome do Estabelecimento"
-              outlined
-              dense
-              readonly
-            />
-          </div>
-          <div class="col-12 col-md-4">
-            <q-input
-              v-model="form.estabelecimento.documento"
-              label="CNPJ"
-              outlined
-              dense
-              mask="##.###.###/####-##"
-              readonly
-            />
-          </div>
-          <div class="col-12 col-md-4">
-            <q-input
-              v-model="form.ordem.numero"
-              label="Nº Pedido/Orçamento"
-              outlined
-              dense
-            />
-          </div>
-        </div>
-      </q-card-section>
-
-      <!-- 2. Identificação do Cliente -->
+      <!-- 1. Identificação do Cliente -->
       <q-card-section>
         <div class="text-subtitle1 q-mb-sm">Cliente</div>
         <div class="row q-col-gutter-md items-center">
@@ -75,13 +41,22 @@
         </div>
       </q-card-section>
 
-      <!-- 3. Identificação do Veículo -->
+      <!-- 2. Identificação do Veículo -->
       <q-card-section>
         <div class="text-subtitle1 q-mb-sm">Veículo</div>
-        <div class="row q-col-gutter-md">
+        <div class="row items-center q-col-gutter-md">
           <div class="col-12 col-md-4">
             <q-input
-              v-model="form.vehicle.brand"
+              v-model="form.veiculo.placa"
+              label="Placa"
+              outlined
+              dense
+              readonly
+            />
+          </div>
+          <div class="col-12 col-md-4">
+            <q-input
+              v-model="form.veiculo.marca"
               label="Marca"
               outlined
               dense
@@ -90,27 +65,26 @@
           </div>
           <div class="col-12 col-md-4">
             <q-input
-              v-model="form.vehicle.model"
+              v-model="form.veiculo.modelo"
               label="Modelo"
               outlined
               dense
               readonly
             />
           </div>
-          <div class="col-12 col-md-4">
-            <q-input
-              v-model="form.vehicle.plate"
-              label="Placa"
-              outlined
+          <div class="col-12 col-md-3">
+            <q-btn
+              color="primary"
+              label="Buscar Veículo"
+              class="full-width"
               dense
-              mask="AAA-####"
-              readonly
+              @click="openVeiculoDrawer"
             />
           </div>
         </div>
       </q-card-section>
 
-      <!-- 4. Observações Gerais -->
+      <!-- 3. Observações Gerais -->
       <q-card-section>
         <div class="text-subtitle1 q-mb-sm">Observações Gerais</div>
         <q-input
@@ -122,7 +96,7 @@
         />
       </q-card-section>
 
-      <!-- 5. Produtos Selecionados -->
+      <!-- 4. Produtos Selecionados -->
       <q-card-section>
         <div class="text-subtitle1 q-mb-sm">Produtos Selecionados</div>
         <q-table
@@ -174,7 +148,7 @@
         </q-table>
       </q-card-section>
 
-      <!-- 6. Serviços Selecionados -->
+      <!-- 5. Serviços Selecionados -->
       <q-card-section>
         <div class="text-subtitle1 q-mb-sm">Serviços Selecionados</div>
         <q-table
@@ -197,7 +171,7 @@
               <q-td key="description" :props="props">
                 {{ props.row.description }}
               </q-td>
-              <q-td key="price" :props="props">
+              <q-td key="price" :props="sprops">
                 R$ {{ props.row.price.toFixed(2) }}
               </q-td>
               <q-td key="actions" :props="props">
@@ -214,7 +188,7 @@
         </q-table>
       </q-card-section>
 
-      <!-- 7. Dados do Pedido -->
+      <!-- 6. Dados do Pedido -->
       <q-card-section>
         <div class="text-subtitle1 q-mb-sm">Dados do Pedido</div>
         <div class="row q-col-gutter-md">
@@ -302,21 +276,31 @@
         />
       </q-scroll-area>
     </q-drawer>
+
+    <!-- Drawer para Busca de Veículo -->
+    <q-drawer v-model="veiculoDrawer" side="right" overlay elevated :width="400">
+      <q-scroll-area class="fit">
+        <buscar-veiculo
+          v-if="veiculoDrawer"
+          @submit="handleVeiculoSubmit"
+          @cancel="closeVeiculoDrawer"
+        />
+      </q-scroll-area>
+    </q-drawer>
   </q-page>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useQuasar } from 'quasar'
+import { ref, computed, onMounted } from 'vue';
+import { useQuasar } from 'quasar';
 import BuscarClientePedido from './components/BuscarClientePedido.vue'
 import BuscarProduto from './components/BuscarProdutoPedido.vue'
 import BuscarServico from './components/BuscarServicoPedido.vue'
-import { useAuthStore } from 'src/stores/auth.store'
+import BuscarVeiculo from './components/BuscaVeiculoPedido.vue'
+import { useAuthStore } from 'src/stores/auth.store';
 
-const authStore = useAuthStore()
-
-// Inicialização do Quasar
 const $q = useQuasar();
+const authStore = useAuthStore();
 
 // Estado do formulário
 const form = ref({
@@ -335,10 +319,11 @@ const form = ref({
     name: '',
     cpf: '',
   },
-  vehicle: {
-    brand: '',
-    model: '',
-    plate: '',
+  veiculo: {
+    idVeiculo: null,
+    placa: '',
+    marca: '',
+    modelo: '',
   },
   observations: '',
   products: [],
@@ -349,6 +334,7 @@ const form = ref({
 const clientDrawer = ref(false);
 const productDrawer = ref(false);
 const serviceDrawer = ref(false);
+const veiculoDrawer = ref(false);
 
 // Colunas para tabelas
 const productColumns = [
@@ -384,15 +370,14 @@ const total = computed(() => {
 // Carregar dados do estabelecimento
 onMounted(async () => {
   try {
-    console.log('**** ',authStore.auth)
-    form.value.estabelecimento.id = authStore.auth.estabelecimento.id
+    form.value.estabelecimento.id = authStore.auth.estabelecimento.id;
     form.value.estabelecimento.fantasia = authStore.auth.estabelecimento.nome;
     form.value.estabelecimento.documento = authStore.auth.estabelecimento.documento;
     form.value.ordem.responsavel = authStore.auth.nome;
   } catch (error) {
     $q.notify({
       type: 'negative',
-      message: 'Erro ao carregar dados do estabelecimento.'+error,
+      message: 'Erro ao carregar dados do estabelecimento: ' + error.message,
     });
   }
 });
@@ -422,13 +407,18 @@ const closeServiceDrawer = () => {
   serviceDrawer.value = false;
 };
 
+const openVeiculoDrawer = () => {
+  veiculoDrawer.value = true;
+};
+
+const closeVeiculoDrawer = () => {
+  veiculoDrawer.value = false;
+};
+
 // Funções para manipulação de cliente
 const handleClientSubmit = (clientData) => {
   form.value.client.name = clientData.nome;
   form.value.client.cpf = clientData.cpfOuCnpj;
-  form.value.vehicle.brand = clientData.veiculo?.marca || '';
-  form.value.vehicle.model = clientData.veiculo?.modelo || '';
-  form.value.vehicle.plate = clientData.veiculo?.placa || '';
   closeClientDrawer();
   $q.notify({
     type: 'positive',
@@ -436,10 +426,25 @@ const handleClientSubmit = (clientData) => {
   });
 };
 
+// Funções para manipulação de veículo
+const handleVeiculoSubmit = (vehicleData) => {
+  form.value.veiculo = {
+    idVeiculo: vehicleData.idVeiculo,
+    placa: vehicleData.placa,
+    marca: vehicleData.marca,
+    modelo: vehicleData.modelo,
+  };
+  closeVeiculoDrawer();
+  $q.notify({
+    type: 'positive',
+    message: 'Veículo selecionado com sucesso!',
+  });
+};
+
 // Funções para manipulação de produtos
 const addProduct = (product) => {
   form.value.products.push({
-    id: null,
+    id: product.id || null,
     description: product.name,
     quantity: 1,
     unitPrice: product.price,
@@ -462,7 +467,7 @@ const removeProduct = (id) => {
 // Funções para manipulação de serviços
 const addService = (service) => {
   form.value.services.push({
-    id: null,
+    id: service.id || null,
     description: service.name,
     price: service.price,
   });
@@ -485,17 +490,18 @@ const removeService = (id) => {
 const resetForm = () => {
   form.value = {
     estabelecimento: {
-      name: form.value.estabelecimento.name,
-      document: form.value.estabelecimento.document,
+      id: form.value.estabelecimento.id,
+      fantasia: form.value.estabelecimento.fantasia,
+      documento: form.value.estabelecimento.documento,
     },
-    order: {
+    ordem: {
       numero: '',
       desconto: 0,
       formaPagamento: '',
       responsavel: form.value.ordem.responsavel,
     },
     client: { name: '', cpf: '' },
-    vehicle: { brand: '', model: '', plate: '' },
+    veiculo: { idVeiculo: null, placa: '', marca: '', modelo: '' },
     observations: '',
     products: [],
     services: [],
@@ -505,14 +511,15 @@ const resetForm = () => {
 const submitOrder = () => {
   // Validação básica
   if (
-    !form.value.estabelecimento.name ||
+    !form.value.estabelecimento.fantasia ||
     !form.value.client.name ||
+    !form.value.veiculo.idVeiculo ||
     !form.value.ordem.formaPagamento ||
     !form.value.ordem.responsavel
   ) {
     $q.notify({
       type: 'negative',
-      message: 'Por favor, preencha todos os campos obrigatórios.',
+      message: 'Por favor, preencha todos os campos obrigatórios, incluindo cliente e veículo.',
     });
     return;
   }

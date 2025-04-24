@@ -10,7 +10,7 @@
     </q-card-section>
 
     <!-- Corpo -->
-    <q-card-section class="flex-1">
+    <q-card-section class="flex-1 q-pa-md">
       <!-- Campo de Busca -->
       <q-input
         v-model="searchTerm"
@@ -30,22 +30,31 @@
         dense
         :loading="loading"
         :rows-per-page-options="[10, 20, 50]"
-        class="client-table"
+        class="client-table full-width"
+        hide-header
+        flat
+        bordered
+        grid
       >
-        <template v-slot:body="props">
-          <q-tr :props="props">
-            <q-td key="nome" :props="props">{{ props.row.nome }}</q-td>
-            <q-td key="cpfOuCnpj" :props="props">{{ props.row.cpfOuCnpj }}</q-td>
-            <q-td key="placa" :props="props">{{ props.row.veiculo?.placa || 'Sem placa' }}</q-td>
-            <q-td key="actions" :props="props">
-              <q-btn
-                color="primary"
-                label="Selecionar"
-                dense
-                @click="selectClient(props.row)"
-              />
-            </q-td>
-          </q-tr>
+        <template v-slot:item="props">
+          <div class="q-pa-sm col-xs-12 col-sm-12 col-md-12">
+            <q-card flat bordered class="client-card">
+              <q-card-section>
+                <div class="text-subtitle2">{{ props.row.nome }}</div>
+                <div class="text-caption">{{ props.row.cpfOuCnpj }}</div>
+              </q-card-section>
+              <q-card-actions>
+                <q-btn
+                  color="primary"
+                  label="Selecionar"
+                  dense
+                  flat
+                  class="full-width"
+                  @click="selectClient(props.row)"
+                />
+              </q-card-actions>
+            </q-card>
+          </div>
         </template>
         <template v-slot:no-data>
           <q-item>
@@ -80,12 +89,10 @@ const allClients = ref([]);
 const filteredClients = ref([]);
 const loading = ref(false);
 
-// Colunas da tabela
+// Colunas da tabela (apenas para compatibilidade, mas não exibidas diretamente no modo grid)
 const columns = [
-  { name: 'nome', label: 'Nome', field: 'nome', align: 'left', sortable: true },
   { name: 'cpfOuCnpj', label: 'CPF/CNPJ', field: 'cpfOuCnpj', align: 'left', sortable: true },
-  { name: 'placa', label: 'Placa do Veículo', field: row => row.veiculo?.placa || 'Sem placa', align: 'left', sortable: true },
-  { name: 'actions', label: 'Ações', field: 'actions', align: 'center' },
+  { name: 'nome', label: 'Nome', field: 'nome', align: 'left', sortable: true },
 ];
 
 // Carregar todos os clientes do Pinia ao montar o componente
@@ -97,7 +104,6 @@ onMounted(() => {
 const loadAllClients = () => {
   try {
     loading.value = true;
-    // Acessar diretamente a lista de clientes do store
     allClients.value = clienteStore.clientes || [];
     filteredClients.value = allClients.value;
     if (!allClients.value.length) {
@@ -132,12 +138,10 @@ const filterClients = (term) => {
 // Função para selecionar um cliente
 const selectClient = (client) => {
   try {
-    // Validar os dados do cliente
     if (!client || !client.idCliente || !client.nome || !client.cpfOuCnpj) {
       throw new Error('Dados do cliente inválidos ou incompletos');
     }
 
-    // Formatar os dados do cliente
     const clientData = {
       idCliente: client.idCliente,
       nome: client.nome,
@@ -155,13 +159,8 @@ const selectClient = (client) => {
       },
     };
 
-    // Log para depuração
     console.log('Emitting clientData:', clientData);
-
-    // Emitir o evento
     emit('submit', clientData);
-
-    // Notificação de sucesso
     notifySuccess('Cliente selecionado com sucesso!');
   } catch (error) {
     console.error('Erro ao emitir submit:', error);
@@ -176,7 +175,17 @@ const selectClient = (client) => {
 }
 
 .client-table {
+  width: 100%;
   max-height: 60vh;
+}
+
+.client-card {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.full-width {
+  width: 100% !important;
 }
 
 .q-card-section {
@@ -192,9 +201,12 @@ const selectClient = (client) => {
     padding: 12px;
   }
 
-  .q-btn {
-    width: 100%;
-    margin-bottom: 8px;
+  .client-card {
+    font-size: 12px;
+  }
+
+  .full-width {
+    width: 100% !important;
   }
 }
 </style>
