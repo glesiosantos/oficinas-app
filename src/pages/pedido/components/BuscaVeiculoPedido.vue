@@ -1,5 +1,5 @@
 <template>
-  <q-form class="column full-height" @submit="handleSubmit">
+  <q-form class="column full-height" @submit.prevent="handleSubmit">
     <!-- Cabeçalho -->
     <q-card-section class="bg-primary text-white q-py-sm">
       <div class="row items-center no-wrap">
@@ -11,7 +11,7 @@
 
     <!-- Corpo -->
     <q-card-section class="flex-1 q-pa-md">
-      <!-- Campo de Busca por Placa -->
+      <!-- Campo de Busca -->
       <q-input
         v-model="searchPlaca"
         label="Digite a Placa"
@@ -19,10 +19,10 @@
         dense
         clearable
         class="q-mb-md"
-        @update:model-value="searchVehicle"
+        @input="formatPlaca"
       />
 
-      <!-- Resultados da Busca -->
+      <!-- Resultados -->
       <q-table
         v-if="searchResults.length"
         :rows="searchResults"
@@ -37,7 +37,7 @@
         grid
       >
         <template v-slot:item="props">
-          <div class="q-pa-sm col-xs-12 col-sm-12 col-md-12">
+          <div class="q-pa-sm col-12">
             <q-card flat bordered class="vehicle-card">
               <q-card-section>
                 <div class="text-subtitle2">{{ props.row.placa }}</div>
@@ -65,37 +65,43 @@
         </template>
       </q-table>
 
-      <!-- Formulário para Novo Veículo -->
-      <div v-if="!searchResults.length && searchPlaca" class="q-mt-md">
+      <div v-if="showNewVehicleForm" class="q-mt-md">
         <q-card flat bordered>
           <q-card-section>
             <div class="text-h6">Cadastrar Novo Veículo</div>
           </q-card-section>
-          <q-card-section>
+          <q-card-section class="q-gutter-md">
             <q-input
               v-model="newVehicle.placa"
               label="Placa"
               outlined
               dense
               readonly
-              class="q-mb-md"
             />
-            <q-input
+
+            <q-select
               v-model="newVehicle.marca"
+              :options="marcaStore.marcas"
               label="Marca"
               outlined
               dense
-              class="q-mb-md"
+              option-label="nome"
+              option-value="id"
+              emit-value
+              map-options
               :rules="[val => !!val || 'Marca é obrigatória']"
+              use-input
+              fill-input
+              clearable
             />
+
             <q-input
               v-model="newVehicle.modelo"
               label="Modelo"
               outlined
               dense
-              class="q-mb-md"
               :rules="[val => !!val || 'Modelo é obrigatório']"
-              @update:model-value="checkModelo"
+              @blur="() => checkModelo(newVehicle.modelo)"
             />
             <q-btn
               v-if="modeloExists === false"
@@ -103,19 +109,36 @@
               label="Cadastrar Novo Modelo"
               dense
               flat
-              class="q-mb-md"
               @click="createModelo"
+            />
+
+            <q-input
+              v-model="newVehicle.ano"
+              label="Ano"
+              outlined
+              dense
+              type="number"
+              :rules="[val => !!val || 'Ano é obrigatório']"
+            />
+
+            <q-input
+              v-model="newVehicle.cor"
+              label="Cor"
+              outlined
+              dense
+              :rules="[val => !!val || 'Cor é obrigatória']"
             />
           </q-card-section>
         </q-card>
       </div>
+
     </q-card-section>
 
     <!-- Rodapé -->
     <q-card-section class="q-pa-md text-right">
       <q-btn flat label="Cancelar" color="negative" @click="$emit('cancel')" />
       <q-btn
-        v-if="!searchResults.length && searchPlaca"
+        v-if="showNewVehicleForm"
         type="submit"
         color="primary"
         label="Cadastrar Veículo"
@@ -126,23 +149,29 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import useNotify from 'src/composables/useNotify'
+import { ref, watch } from 'vue';
+import { debounce } from 'lodash';
+import useNotify from 'src/composables/useNotify';
+import { useVeiculoStore } from 'src/stores/veiculo.store';
+import { useMarcaStore } from 'src/stores/marca.store';
 
 const { notifyError, notifySuccess } = useNotify()
-// const modeloStore = useModeloStore();
+const veiculoStore = useVeiculoStore()
+const marcaStore = useMarcaStore()
 
-const emit = defineEmits(['submit', 'cancel']);
+const emit = defineEmits(['submit', 'cancel'])
 
-const searchPlaca = ref('');
-const searchResults = ref([]);
-const loading = ref(false);
+const searchPlaca = ref('')
+const searchResults = ref([])
+const loading = ref(false)
+const showNewVehicleForm = ref(false)
+
 const newVehicle = ref({
   placa: '',
   marca: '',
   modelo: '',
 });
-const modeloExists = ref(null);
+const modeloExists = ref(null)
 
 const columns = [
   { name: 'placa', label: 'Placa', field: 'placa', align: 'left', sortable: true },
@@ -150,62 +179,50 @@ const columns = [
   { name: 'modelo', label: 'Modelo', field: 'modelo', align: 'left', sortable: true },
 ];
 
-// Buscar veículo por placa
-const searchVehicle = async (placa) => {
-  if (!placa) {
+// Deixar caixa alta e sem caracteres inválidos
+const formatPlaca = () => {
+  if (searchPlaca.value) {
+    searchPlaca.value = searchPlaca.value.toUpperCase().replace(/[^A-Z0-9]/g, '')
+  }
+};
+
+// Buscar veículo na lista carregada
+const buscarNaLista = async (placa) => {
+  if (!placa || placa.length !== 7) {
     searchResults.value = [];
+    showNewVehicleForm.value = false;
     newVehicle.value = { placa: '', marca: '', modelo: '' };
     modeloExists.value = null;
     return;
   }
 
-  try {
-    loading.value = true;
-    newVehicle.value.placa = placa;
-    const vehicle = null //await veiculoStore.buscarPorPlaca(placa);
-    if (vehicle) {
-      searchResults.value = [vehicle];
-      modeloExists.value = true;
-    } else {
-      searchResults.value = [];
-      modeloExists.value = null;
-    }
-  } catch (error) {
-    notifyError('Erro ao buscar veículo: ' + (error.message || 'Erro desconhecido'));
-    searchResults.value = [];
-  } finally {
-    loading.value = false;
-  }
-};
+  const placaNormalizada = placa.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const todosVeiculos = veiculoStore.veiculos || [];
 
-// Verificar se o modelo existe
-const checkModelo = async (modelo) => {
-  if (!modelo) {
-    modeloExists.value = null;
-    return;
-  }
+  const encontrados = todosVeiculos.filter(v =>
+    (v.placa || '').replace(/[^A-Z0-9]/g, '').toUpperCase() === placaNormalizada
+  );
 
-  try {
-    const exists = null //await modeloStore.verificarModelo(modelo);
-    modeloExists.value = exists;
-  } catch (error) {
-    notifyError('Erro ao verificar modelo: ' + (error.message || 'Erro desconhecido'));
-    modeloExists.value = null;
-  }
-};
-
-// Cadastrar novo modelo
-const createModelo = async () => {
-  try {
-    // await modeloStore.cadastrarModelo(newVehicle.value.modelo);
+  if (encontrados.length) {
+    searchResults.value = encontrados;
+    showNewVehicleForm.value = false;
     modeloExists.value = true;
-    notifySuccess('Modelo cadastrado com sucesso!');
-  } catch (error) {
-    notifyError('Erro ao cadastrar modelo: ' + error.message);
+  } else {
+    searchResults.value = [];
+    showNewVehicleForm.value = true;
+    newVehicle.value.placa = placaNormalizada;
+    modeloExists.value = null;
   }
 };
 
-// Selecionar veículo
+// Debounced search
+const debouncedBuscarNaLista = debounce(buscarNaLista, 500);
+
+watch(searchPlaca, (novaPlaca) => {
+  debouncedBuscarNaLista(novaPlaca);
+});
+
+
 const selectVehicle = (vehicle) => {
   const vehicleData = {
     idVeiculo: vehicle.idVeiculo,
@@ -224,23 +241,23 @@ const handleSubmit = async () => {
     return;
   }
 
-  if (modeloExists.value === false) {
-    notifyError('O modelo precisa ser cadastrado primeiro.');
-    return;
-  }
-
   try {
     const vehicleData = {
       placa: newVehicle.value.placa,
       marca: newVehicle.value.marca,
       modelo: newVehicle.value.modelo,
-    };
-    const newVehicleId = null //await veiculoStore.cadastrarVeiculo(vehicleData);
-    vehicleData.idVeiculo = newVehicleId
+    }
     emit('submit', vehicleData)
-    notifySuccess('Veículo cadastrado com sucesso!')
+    notifySuccess('Veículo cadastrado com sucesso!');
+
+    // Resetar
+    searchPlaca.value = '';
+    newVehicle.value = { placa: '', marca: '', modelo: '' };
+    searchResults.value = [];
+    modeloExists.value = null;
+    showNewVehicleForm.value = false;
   } catch (error) {
-    notifyError('Erro ao cadastrar veículo: ' + error.message)
+    notifyError('Erro ao cadastrar veículo: ' + error.message);
   }
 };
 </script>
@@ -249,40 +266,20 @@ const handleSubmit = async () => {
 .full-height {
   height: 100%;
 }
-
 .vehicle-table {
   width: 100%;
   max-height: 60vh;
 }
-
 .vehicle-card {
   width: 100%;
   margin-bottom: 8px;
 }
-
 .full-width {
   width: 100% !important;
 }
-
-.q-card-section {
-  padding: 16px;
-}
-
-.q-mb-md {
-  margin-bottom: 16px;
-}
-
 @media (max-width: 600px) {
-  .q-card-section {
-    padding: 12px;
-  }
-
   .vehicle-card {
     font-size: 12px;
-  }
-
-  .full-width {
-    width: 100% !important;
   }
 }
 </style>

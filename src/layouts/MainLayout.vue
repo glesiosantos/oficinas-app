@@ -191,7 +191,7 @@ import { utilService } from 'src/pages/geral/services/util_service'
 const { logout } = authService()
 const authStore = useAuthStore()
 
-const { carregarCategoriasDosProdutos, carregarClientes } = utilService()
+const { carregarCategoriasDosProdutos, carregarClientes, carregarVeiculosRegistrado, carregarMarcas } = utilService()
 
 const router = useRouter()
 const { notifySuccess } = useNotify()
@@ -271,7 +271,9 @@ const enviarMensagemWhatsapp = () => {
 
 onMounted(async () => {
   await carregarCategoriasDosProdutos()
+  await carregarVeiculosRegistrado()
   await carregarClientes()
+  await carregarMarcas()
 })
 
 </script>
