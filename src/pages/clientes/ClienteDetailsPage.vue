@@ -71,7 +71,7 @@
           flat
           bordered
           :columns="veiculoColumns"
-          :rows="cliente.veiculos"
+          :rows="veiculos"
           row-key="id"
           :pagination="pagination"
         >
@@ -148,6 +148,8 @@ const formatarCPFouCNPJ = (valor) => {
   }
   return valor
 }
+
+const veiculos = []
 
 const novoPedido = (veiculo) => {
   router.push({

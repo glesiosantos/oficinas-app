@@ -191,7 +191,7 @@ import { utilService } from 'src/pages/geral/services/util_service'
 const { logout } = authService()
 const authStore = useAuthStore()
 
-const { carregarCategoriasDosProdutos, carregarClientes, carregarVeiculosRegistrado, carregarMarcas } = utilService()
+const { carregarCategoriasDosProdutos, carregarClientes, carregarVeiculosRegistrado, carregarMarcas, carregarProdutosDoEstabelecimento, carregarServicoDoEstabelecimento } = utilService()
 
 const router = useRouter()
 const { notifySuccess } = useNotify()
@@ -274,6 +274,8 @@ onMounted(async () => {
   await carregarVeiculosRegistrado()
   await carregarClientes()
   await carregarMarcas()
+  await carregarProdutosDoEstabelecimento()
+  await carregarServicoDoEstabelecimento()
 })
 
 </script>

@@ -1,7 +1,7 @@
 <template>
   <q-form class="column full-height" @submit.prevent="handleSubmit">
     <!-- Cabeçalho -->
-    <q-card-section class="bg-primary q-py-sm">
+    <q-card-section class="bg-primary text-white q-py-sm">
       <div class="row items-center no-wrap">
         <div class="text-h6">Buscar ou Cadastrar Veículo</div>
         <q-space />
@@ -45,7 +45,7 @@
               </q-card-section>
               <q-card-actions>
                 <q-btn
-                  color="accent"
+                  color="primary"
                   label="Selecionar"
                   dense
                   flat

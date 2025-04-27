@@ -1,8 +1,8 @@
 <template>
-  <q-page class="q-pa-md">
-    <q-card flat bordered class="order-card">
+  <q-page padding style="height: 100vh; display: flex; flex-direction: column;">
+    <q-card flat bordered class="order-card flex-grow-1">
       <!-- Cabeçalho -->
-      <q-card-section class="bg-primary text-white q-py-sm">
+      <q-card-section class="bg-accent text-white q-py-sm">
         <div class="text-h6">Gerar Pedido/Orçamento</div>
       </q-card-section>
 
@@ -10,7 +10,7 @@
       <q-card-section>
         <div class="text-subtitle1 q-mb-sm">Cliente</div>
         <div class="row q-col-gutter-md items-center">
-          <div class="col-12 col-md-5">
+          <div class="col-12 col-md-6">
             <q-input
               v-model="form.client.name"
               label="Nome do Cliente"
@@ -19,7 +19,7 @@
               readonly
             />
           </div>
-          <div class="col-12 col-md-4">
+          <div class="col-12 col-md-6">
             <q-input
               v-model="form.client.cpf"
               label="CPF"
@@ -29,22 +29,23 @@
               readonly
             />
           </div>
-          <div class="col-12 col-md-3">
+        </div>
+
+        <div class="col-12 col-md-6 q-mt-md">
             <q-btn
-              color="primary"
+              color="accent"
               label="Buscar Cliente"
               class="full-width"
               dense
               @click="openClientDrawer"
             />
           </div>
-        </div>
       </q-card-section>
 
       <!-- 2. Identificação do Veículo -->
       <q-card-section>
         <div class="text-subtitle1 q-mb-sm">Veículo</div>
-        <div class="row items-center q-col-gutter-md">
+        <div class="row q-col-gutter-md items-center">
           <div class="col-12 col-md-4">
             <q-input
               v-model="form.veiculo.placa"
@@ -72,16 +73,17 @@
               readonly
             />
           </div>
-          <div class="col-12 col-md-3">
+        </div>
+
+        <div class="col-12 col-md-3 q-mt-md">
             <q-btn
-              color="primary"
+              color="accent"
               label="Buscar Veículo"
               class="full-width"
               dense
               @click="openVeiculoDrawer"
             />
           </div>
-        </div>
       </q-card-section>
 
       <!-- 3. Observações Gerais -->
@@ -100,52 +102,33 @@
       <q-card-section>
         <div class="text-subtitle1 q-mb-sm">Produtos Selecionados</div>
         <q-table
-          :rows="form.products"
-          :columns="productColumns"
-          row-key="id"
-          dense
-          class="q-mb-md"
-        >
-          <template v-slot:top>
-            <q-btn
-              color="primary"
-              label="Buscar Produto"
-              dense
-              @click="openProductDrawer"
-            />
-          </template>
-          <template v-slot:body="props">
-            <q-tr :props="props">
-              <q-td key="description" :props="props">
-                {{ props.row.description }}
-              </q-td>
-              <q-td key="quantity" :props="props">
-                <q-input
-                  v-model.number="props.row.quantity"
-                  type="number"
-                  dense
-                  borderless
-                  :rules="[(val) => val > 0 || 'Quantidade deve ser maior que 0']"
-                />
-              </q-td>
-              <q-td key="unitPrice" :props="props">
-                R$ {{ props.row.unitPrice.toFixed(2) }}
-              </q-td>
-              <q-td key="total" :props="props">
-                R$ {{ (props.row.quantity * props.row.unitPrice).toFixed(2) }}
-              </q-td>
-              <q-td key="actions" :props="props">
-                <q-btn
+            flat
+            bordered
+            :columns="productColumns"
+            :rows="form.products"
+          >
+          <template v-slot:body-cell-actions="props">
+            <q-td :props="props" class="q-gutter-x-xs text-center">
+              <q-btn
                   color="negative"
                   icon="delete"
                   dense
                   flat
                   @click="removeProduct(props.row.id)"
                 />
-              </q-td>
-            </q-tr>
+            </q-td>
           </template>
-        </q-table>
+          </q-table>
+          <div class="col-12 col-md-6 q-mt-md">
+            <q-btn
+              class="full-width"
+              color="accent"
+              label="Buscar Produto"
+              dense
+              @click="openProductDrawer"
+            />
+          </div>
+
       </q-card-section>
 
       <!-- 5. Serviços Selecionados -->
@@ -158,23 +141,13 @@
           dense
           class="q-mb-md"
         >
-          <template v-slot:top>
-            <q-btn
-              color="primary"
-              label="Buscar Serviço"
-              dense
-              @click="openServiceDrawer"
-            />
-          </template>
           <template v-slot:body="props">
             <q-tr :props="props">
-              <q-td key="description" :props="props">
-                {{ props.row.description }}
-              </q-td>
-              <q-td key="price" :props="sprops">
+              <q-td key="description" class="width: 85%;">{{ props.row.description }}</q-td>
+              <q-td key="price" class="width: 10%; text-center">
                 R$ {{ props.row.price.toFixed(2) }}
               </q-td>
-              <q-td key="actions" :props="props">
+              <q-td key="actions" class="width: 5%; text-center">
                 <q-btn
                   color="negative"
                   icon="delete"
@@ -186,6 +159,16 @@
             </q-tr>
           </template>
         </q-table>
+
+        <div class="col-12 col-md-6 q-mt-md">
+            <q-btn
+              class="full-width"
+              color="accent"
+              label="Buscar Serviços"
+              dense
+              @click="openServiceDrawer"
+            />
+          </div>
       </q-card-section>
 
       <!-- 6. Dados do Pedido -->
@@ -195,12 +178,12 @@
           <div class="col-12 col-md-4">
             <q-input
               v-model.number="form.ordem.desconto"
-              label="Desconto"
+              label="Desconto (%)"
               outlined
               dense
               type="number"
-              prefix="R$"
-              :rules="[(val) => val >= 0 || 'Desconto não pode ser negativo']"
+              suffix="%"
+              :rules="[(val) => val >= 0 && val <= 100 || 'Desconto não pode ser negativo ou maior que 100%']"
             />
           </div>
           <div class="col-12 col-md-4">
@@ -210,41 +193,54 @@
               label="Forma de Pagamento"
               outlined
               dense
-              :rules="[(val) => !!val || 'Forma de pagamento é obrigatória']"
             />
           </div>
           <div class="col-12 col-md-4">
             <q-input
               v-model="form.ordem.responsavel"
-              label="Responsável pelo Orçamento"
+              label="Responsável"
               outlined
               dense
-              :rules="[(val) => !!val || 'Responsável é obrigatório']"
             />
           </div>
         </div>
-        <div class="q-mt-md text-weight-bold">
+
+        <!-- Tipo da Proposta -->
+        <div class="row q-col-gutter-md">
+          <div class="col-12 col-md-4">
+            <q-select
+              v-model="form.ordem.tipoProposta"
+              :options="['Orçamento', 'Pedido']"
+              label="Tipo da Proposta"
+              outlined
+              dense
+            />
+          </div>
+          <!-- Status do Pedido -->
+          <div class="col-12 col-md-4">
+            <q-select
+              v-model="form.ordem.statusPedido"
+              :options="['Em Andamento', 'Concluído', 'Cancelado']"
+              label="Status do Pedido"
+              outlined
+              dense
+            />
+          </div>
+        </div>
+
+        <div class="q-mt-md text-weight-bold text-h6" style="color: #ff4081;">
           Total: R$ {{ total.toFixed(2) }}
         </div>
       </q-card-section>
 
-      <!-- Botões de Ação -->
+      <!-- Botões -->
       <q-card-actions align="right" class="q-pa-md">
-        <q-btn
-          label="Cancelar"
-          color="negative"
-          flat
-          @click="resetForm"
-        />
-        <q-btn
-          label="Gerar Pedido"
-          color="primary"
-          @click="submitOrder"
-        />
+        <q-btn label="Cancelar" color="negative" flat @click="resetForm" />
+        <q-btn label="Gerar Pedido" color="accent" @click="submitOrder" />
       </q-card-actions>
     </q-card>
 
-    <!-- Drawer para Busca de Cliente -->
+    <!-- Drawers -->
     <q-drawer v-model="clientDrawer" side="right" overlay elevated :width="400">
       <q-scroll-area class="fit">
         <buscar-cliente-pedido
@@ -255,8 +251,7 @@
       </q-scroll-area>
     </q-drawer>
 
-    <!-- Drawer para Busca de Produtos -->
-    <q-drawer v-model="productDrawer" side="right" overlay elevated :width="600">
+    <q-drawer v-model="productDrawer" side="right" overlay elevated :width="400">
       <q-scroll-area class="fit">
         <buscar-produto
           v-if="productDrawer"
@@ -266,8 +261,7 @@
       </q-scroll-area>
     </q-drawer>
 
-    <!-- Drawer para Busca de Serviços -->
-    <q-drawer v-model="serviceDrawer" side="right" overlay elevated :width="600">
+    <q-drawer v-model="serviceDrawer" side="right" overlay elevated :width="400">
       <q-scroll-area class="fit">
         <buscar-servico
           v-if="serviceDrawer"
@@ -277,7 +271,6 @@
       </q-scroll-area>
     </q-drawer>
 
-    <!-- Drawer para Busca de Veículo -->
     <q-drawer v-model="veiculoDrawer" side="right" overlay elevated :width="400">
       <q-scroll-area class="fit">
         <buscar-veiculo
@@ -297,7 +290,7 @@ import BuscarClientePedido from './components/BuscarClientePedido.vue'
 import BuscarProduto from './components/BuscarProdutoPedido.vue'
 import BuscarServico from './components/BuscarServicoPedido.vue'
 import BuscarVeiculo from './components/BuscaVeiculoPedido.vue'
-import { useAuthStore } from 'src/stores/auth.store';
+import { useAuthStore } from 'src/stores/auth.store'
 
 const $q = useQuasar();
 const authStore = useAuthStore();
@@ -348,7 +341,7 @@ const productColumns = [
 const serviceColumns = [
   { name: 'description', label: 'Descrição', field: 'description', align: 'left' },
   { name: 'price', label: 'Preço', field: 'price', align: 'center' },
-  { name: 'actions', label: 'Ações', field: 'actions', align: 'center' },
+  { name: 'actions', label: 'Ações', field: 'actions', align: 'rigth' },
 ];
 
 // Opções de formas de pagamento
@@ -364,9 +357,14 @@ const total = computed(() => {
     (sum, service) => sum + service.price,
     0
   );
-  return productsTotal + servicesTotal - (form.value.ordem.desconto || 0);
-});
 
+  const subtotal = productsTotal + servicesTotal;
+
+  // Calculando o desconto
+  const discountAmount = (form.value.ordem.desconto / 100) * subtotal;
+
+  return subtotal - discountAmount;
+});
 // Carregar dados do estabelecimento
 onMounted(async () => {
   try {
@@ -380,7 +378,7 @@ onMounted(async () => {
       message: 'Erro ao carregar dados do estabelecimento: ' + error.message,
     });
   }
-});
+})
 
 // Funções para manipulação de drawers
 const openClientDrawer = () => {
@@ -444,10 +442,10 @@ const handleVeiculoSubmit = (vehicleData) => {
 // Funções para manipulação de produtos
 const addProduct = (product) => {
   form.value.products.push({
-    id: product.id || null,
-    description: product.name,
+    id: product.idProduto || null,
+    description: product.descricao,
     quantity: 1,
-    unitPrice: product.price,
+    unitPrice: product.precoVenda,
   });
   closeProductDrawer();
   $q.notify({
@@ -467,9 +465,9 @@ const removeProduct = (id) => {
 // Funções para manipulação de serviços
 const addService = (service) => {
   form.value.services.push({
-    id: service.id || null,
-    description: service.name,
-    price: service.price,
+    id: service.idServico || null,
+    description: service.descricao,
+    price: service.valor,
   });
   closeServiceDrawer();
   $q.notify({
@@ -557,6 +555,66 @@ const submitOrder = () => {
   text-transform: none;
 }
 
+/* Estilização da tabela de produtos */
+:deep(.q-table th) {
+  font-weight: 600;
+  background-color: #f5f5f5;
+  text-align: center !important;
+}
+
+:deep(.q-table td) {
+  vertical-align: middle;
+}
+
+/* Definir larguras específicas para as colunas da tabela de produtos */
+:deep(.q-table thead tr th:nth-child(1)) {
+  width: 50%; /* Descrição */
+}
+:deep(.q-table tbody tr td:nth-child(1)) {
+  width: 50%;
+}
+
+:deep(.q-table thead tr th:nth-child(2)) {
+  width: 15%; /* Quantidade */
+}
+:deep(.q-table tbody tr td:nth-child(2)) {
+  width: 15%;
+}
+
+:deep(.q-table thead tr th:nth-child(3)) {
+  width: 15%; /* Preço Unitário */
+}
+:deep(.q-table tbody tr td:nth-child(3)) {
+  width: 15%;
+}
+
+:deep(.q-table thead tr th:nth-child(4)) {
+  width: 15%; /* Total */
+}
+:deep(.q-table tbody tr td:nth-child(4)) {
+  width: 15%;
+}
+
+:deep(.q-table thead tr th:nth-child(5)) {
+  width: 5%; /* Ações */
+}
+:deep(.q-table tbody tr td:nth-child(5)) {
+  width: 5%;
+}
+
+/* Ajustar o tamanho e centralizar o input de quantidade */
+:deep(.q-table td .q-field__control) {
+  text-align: center;
+  width: 35px; /* Reduzir o tamanho do input */
+  padding: 0;
+}
+
+:deep(.q-table td .q-field__native) {
+  text-align: center;
+  font-size: 12px;
+  padding: 2px;
+}
+
 @media (max-width: 768px) {
   .q-card-section {
     padding: 12px;
@@ -572,6 +630,47 @@ const submitOrder = () => {
 
   .order-card {
     margin: 0 8px;
+  }
+
+  /* Ajustar larguras para telas menores */
+  :deep(.q-table thead tr th:nth-child(1)) {
+    width: 40%;
+  }
+  :deep(.q-table tbody tr td:nth-child(1)) {
+    width: 40%;
+  }
+
+  :deep(.q-table thead tr th:nth-child(2)) {
+    width: 20%;
+  }
+  :deep(.q-table tbody tr td:nth-child(2)) {
+    width: 20%;
+  }
+
+  :deep(.q-table thead tr th:nth-child(3)) {
+    width: 20%;
+  }
+  :deep(.q-table tbody tr td:nth-child(3)) {
+    width: 20%;
+  }
+
+  :deep(.q-table thead tr th:nth-child(4)) {
+    width: 15%;
+  }
+  :deep(.q-table tbody tr td:nth-child(4)) {
+    width: 15%;
+  }
+
+  :deep(.q-table thead tr th:nth-child(5)) {
+    width: 5%;
+  }
+  :deep(.q-table tbody tr td:nth-child(5)) {
+    width: 5%;
+  }
+
+  /* Ajustar input de quantidade para telas menores */
+  :deep(.q-table td .q-field__control) {
+    width: 50px;
   }
 }
 

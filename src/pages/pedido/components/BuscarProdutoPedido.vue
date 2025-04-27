@@ -1,96 +1,208 @@
 <template>
-  <q-page padding>
-    <q-card>
-      <q-card-section class="bg-primary text-white">
-        <div class="row items-center no-wrap">
-          <div class="text-h6">Buscar Produto</div>
-          <q-space />
-          <q-btn flat round dense icon="close" @click="$emit('cancel')" />
-        </div>
-      </q-card-section>
+  <q-form class="column full-height">
+    <!-- Cabeçalho -->
+    <q-card-section class="bg-primary q-py-sm">
+      <div class="row items-center no-wrap">
+        <div class="text-h6">Buscar Produto</div>
+        <q-space />
+        <q-btn flat round dense icon="close" @click="$emit('cancel')" />
+      </div>
+    </q-card-section>
 
-      <q-card-section>
-        <q-input
-          v-model="searchTerm"
-          label="Buscar por Nome ou Referência"
-          outlined
-          dense
-          clearable
-          @update:model-value="searchProducts"
-        />
-      </q-card-section>
+    <!-- Corpo -->
+    <q-card-section class="flex-1 q-pa-md">
+      <!-- Campo de Busca -->
+      <q-input
+        v-model="searchTerm"
+        label="Buscar por Nome ou Referência"
+        outlined
+        dense
+        clearable
+        class="q-mb-md"
+        @update:model-value="filterProducts"
+        debounce="300"
+      />
 
-      <q-card-section>
-        <q-table
-          :rows="searchResults"
-          :columns="columns"
-          row-key="id"
-          dense
-          :loading="loading"
-        >
-          <template v-slot:body="props">
-            <q-tr :props="props">
-              <q-td key="name" :props="props">{{ props.row.name }}</q-td>
-              <q-td key="reference" :props="props">{{ props.row.reference }}</q-td>
-              <q-td key="price" :props="props">R$ {{ props.row.price.toFixed(2) }}</q-td>
-              <q-td key="actions" :props="props">
+      <!-- Tabela de Produtos -->
+      <q-table
+        :rows="filteredProducts"
+        :columns="columns"
+        row-key="id"
+        dense
+        :loading="loading"
+        :rows-per-page-options="[10, 20, 50]"
+        class="product-table full-width"
+        hide-header
+        flat
+        bordered
+        grid
+      >
+        <template v-slot:item="props">
+          <div class="q-pa-sm col-xs-12 col-sm-12 col-md-12">
+            <q-card flat bordered class="product-card">
+              <q-card-section>
+                <div class="text-subtitle2">{{ props.row.descricao }}</div>
+                <div class="text-caption">Ref: {{ props.row.referencia }}</div>
+                <div class="text-caption">Preço: R$ {{ calcularPrecoVenda(props.row).toFixed(2) }}</div>
+              </q-card-section>
+              <q-card-actions>
                 <q-btn
-                  color="primary"
+                  color="accent"
                   label="Selecionar"
                   dense
-                  @click="$emit('select', props.row)"
+                  flat
+                  class="full-width"
+                  @click="selectProduct(props.row)"
                 />
-              </q-td>
-            </q-tr>
-          </template>
-        </q-table>
-      </q-card-section>
-    </q-card>
-  </q-page>
+              </q-card-actions>
+            </q-card>
+          </div>
+        </template>
+        <template v-slot:no-data>
+          <q-item>
+            <q-item-section>
+              <q-item-label>Nenhum produto encontrado</q-item-label>
+            </q-item-section>
+          </q-item>
+        </template>
+      </q-table>
+    </q-card-section>
+
+    <q-card-section class="q-pa-md text-right q-mt-lg">
+      <q-btn flat label="Cancelar" color="negative" @click="$emit('cancel')" />
+    </q-card-section>
+  </q-form>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
+import { useProdutoStore } from 'src/stores/produto.store'
+
+const produtoStore = useProdutoStore()
 
 const $q = useQuasar();
+const emit = defineEmits(['select', 'cancel']);
+
 const searchTerm = ref('');
-const searchResults = ref([]);
+const allProducts = ref([]);
+const filteredProducts = ref([]);
 const loading = ref(false);
 
+// Colunas (não aparecem no grid, mas são necessárias para o QTable)
 const columns = [
-  { name: 'name', label: 'Nome', field: 'name', align: 'left' },
-  { name: 'reference', label: 'Referência', field: 'reference', align: 'left' },
-  { name: 'price', label: 'Preço', field: 'price', align: 'center' },
-  { name: 'actions', label: 'Ações', field: 'actions', align: 'center' },
-];
+  { name: 'descricao', label: 'Descrição do prdouto', field: 'descricao', align: 'left' },
+  { name: 'referencia', label: 'Referência', field: 'referencia', align: 'left' },
+  { name: 'valorCusto', label: 'Preço', field: 'valorCusto', align: 'right' },
+]
 
-const searchProducts = async () => {
-  if (!searchTerm.value || searchTerm.value.length < 3) {
-    searchResults.value = [];
-    return;
-  }
+const calcularPrecoVenda = (produto) => {
+  const valorCusto = produto.valorCusto || 0;
+  const percentualLucro = produto.percentualLucro || 0;
+  return valorCusto * (1 + percentualLucro / 100);
+}
 
+onMounted(() => {
+  loadAllProducts();
+});
+
+// Carregar todos os produtos
+const loadAllProducts = async () => {
   try {
     loading.value = true;
-    const response = null
-    searchResults.value = response.data;
+    // Simulação de chamada a API:
+    // const response = await api.get('/produtos');
+    // allProducts.value = response.data;
+
+    // Exemplo fictício:
+    allProducts.value = produtoStore.produtos
+
+    filteredProducts.value = allProducts.value;
   } catch (error) {
     $q.notify({
       type: 'negative',
-      message: 'Erro ao buscar produtos.'+error,
+      message: 'Erro ao carregar produtos: ' + (error.message || 'Erro desconhecido'),
     });
-    searchResults.value = [];
+    allProducts.value = [];
+    filteredProducts.value = [];
   } finally {
     loading.value = false;
   }
+}
+
+// Filtrar produtos conforme o termo
+const filterProducts = (term) => {
+  if (!term) {
+    filteredProducts.value = allProducts.value;
+    return;
+  }
+  const lowerTerm = term.toLowerCase();
+  filteredProducts.value = allProducts.value.filter(product => {
+    return (
+      (product.descricao && product.descricao.toLowerCase().includes(lowerTerm)) ||
+      (product.referencia && product.referencia.toLowerCase().includes(lowerTerm))
+    );
+  });
 };
 
-defineEmits(['select', 'cancel']);
+// Emitir produto selecionado
+const selectProduct = (product) => {
+  try {
+    if (!product || !product.idProduto) {
+      throw new Error('Produto inválido');
+    }
+    emit('select', product);
+    $q.notify({
+      type: 'positive',
+      message: 'Produto selecionado com sucesso!',
+    });
+  } catch (error) {
+    $q.notify({
+      type: 'negative',
+      message: 'Erro ao selecionar produto: ' + (error.message || 'Erro desconhecido'),
+    });
+  }
+};
 </script>
 
 <style scoped>
-.q-card {
-  min-width: 100%;
+.full-height {
+  height: 100%;
+}
+
+.product-table {
+  width: 100%;
+  max-height: 60vh;
+}
+
+.product-card {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.full-width {
+  width: 100% !important;
+}
+
+.q-card-section {
+  padding: 16px;
+}
+
+.q-mb-md {
+  margin-bottom: 16px;
+}
+
+@media (max-width: 600px) {
+  .q-card-section {
+    padding: 12px;
+  }
+
+  .product-card {
+    font-size: 12px;
+  }
+
+  .full-width {
+    width: 100% !important;
+  }
 }
 </style>

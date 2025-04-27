@@ -120,7 +120,7 @@
         ]"
       />
 
-      <!-- Compatibilidade com Modelos -->
+      <!-- Compatibilidade com Modelos
       <div class="q-mt-md">
         <div class="text-subtitle1 q-mb-sm">Compatibilidade com Modelos</div>
         <div v-for="(compatibilidade, index) in form.modelos" :key="index" class="row q-mb-sm">
@@ -156,7 +156,7 @@
           @click="addCompatibilidade"
           class="q-my-sm"
         />
-      </div>
+      </div> -->
     </q-card-section>
 
     <!-- Rodapé (botões) -->
@@ -171,12 +171,10 @@
 import { ref, watch } from 'vue';
 import { debounce } from 'quasar';
 import useNotify from 'src/composables/useNotify';
-import { useMarcaStore } from 'src/stores/marca.store';
 import { produtoService } from '../services/produto_service';
 import { useProdutoStore } from 'src/stores/produto.store';
 
-const { notifyError, notifySuccess, notifyWarning } = useNotify();
-const marcaStore = useMarcaStore();
+const { notifyError, notifySuccess, notifyWarning } = useNotify()
 const produtoStore = useProdutoStore();
 const { carregarProdutoPeloCodigoMaisEstabelecimento } = produtoService();
 
@@ -210,7 +208,7 @@ const calcularPrecoVenda = () => {
   const percentual = form.value.percentualLucro || 0;
   const precoVenda = custo * (1 + percentual / 100);
   form.value.precoVenda = Number(precoVenda.toFixed(2));
-};
+}
 
 watch(() => form.value.precoCusto, calcularPrecoVenda);
 watch(() => form.value.percentualLucro, calcularPrecoVenda);
@@ -267,16 +265,6 @@ function populateForm(data) {
   };
   Object.assign(form.value, newFormData);
   calcularPrecoVenda();
-}
-
-function addCompatibilidade() {
-  form.value.modelos.push(null);
-}
-
-function removeCompatibilidade(index) {
-  if (form.value.modelos.length > 1) {
-    form.value.modelos.splice(index, 1);
-  }
 }
 
 watch(

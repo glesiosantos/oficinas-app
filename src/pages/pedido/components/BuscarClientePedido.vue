@@ -1,7 +1,7 @@
 <template>
   <q-form class="column full-height">
     <!-- Cabeçalho -->
-    <q-card-section class="bg-primary text-white q-py-sm">
+    <q-card-section class="bg-primary q-py-sm">
       <div class="row items-center no-wrap">
         <div class="text-h6">Buscar Cliente</div>
         <q-space />
