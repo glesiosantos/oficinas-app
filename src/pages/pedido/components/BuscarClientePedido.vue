@@ -146,17 +146,7 @@ const selectClient = (client) => {
       idCliente: client.idCliente,
       nome: client.nome,
       cpfOuCnpj: client.cpfOuCnpj,
-      razao: client.razao || client.nome,
-      tipoCliente: client.tipo === 'Pessoa Física' ? 'PF' : 'PJ',
-      contatos: client.contatos && Array.isArray(client.contatos) ? [...client.contatos] : [''],
-      veiculo: {
-        tipoVeiculo: client.veiculo?.tipoVeiculo || '',
-        cor: client.veiculo?.cor || '',
-        placa: client.veiculo?.placa || '',
-        ano: client.veiculo?.ano || null,
-        marca: client.veiculo?.marca || null,
-        modelo: client.veiculo?.modelo || null,
-      },
+      razao: client.razao || client.nome
     };
 
     console.log('Emitting clientData:', clientData);

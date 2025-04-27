@@ -26,6 +26,7 @@ export const utilService = () => {
 
   const carregarClientes = async () => {
       const response = await api.get(`/v1/estabelecimento/clientes/${idEstabelecimento}`,{headers: { Authorization: `Bearer ${token}` }})
+      console.log('*** **** clientes: ', response.data)
       clienteStore.setClientes(response.data)
   }
 

@@ -1,6 +1,6 @@
 <template>
-  <q-page padding style="height: 100vh; display: flex; flex-direction: column;">
-    <q-card flat bordered class="order-card flex-grow-1">
+  <q-page padding style="min-height: 100vh;">
+    <q-card flat bordered class="order-card flex-grow">
       <!-- Cabeçalho -->
       <q-card-section class="bg-accent text-white q-py-sm">
         <div class="text-h6">Gerar Pedido/Orçamento</div>
@@ -11,35 +11,15 @@
         <div class="text-subtitle1 q-mb-sm">Cliente</div>
         <div class="row q-col-gutter-md items-center">
           <div class="col-12 col-md-6">
-            <q-input
-              v-model="form.client.name"
-              label="Nome do Cliente"
-              outlined
-              dense
-              readonly
-            />
+            <q-input v-model="form.client.name" label="Nome do Cliente" outlined dense readonly />
           </div>
           <div class="col-12 col-md-6">
-            <q-input
-              v-model="form.client.cpf"
-              label="CPF"
-              outlined
-              dense
-              mask="###.###.###-##"
-              readonly
-            />
+            <q-input v-model="form.client.cpf" label="CPF" outlined dense mask="###.###.###-##" readonly />
           </div>
         </div>
-
-        <div class="col-12 col-md-6 q-mt-md">
-            <q-btn
-              color="accent"
-              label="Buscar Cliente"
-              class="full-width"
-              dense
-              @click="openClientDrawer"
-            />
-          </div>
+        <div class="col-12 q-mt-md">
+          <q-btn color="accent" label="Buscar Cliente" class="full-width" dense @click="openClientDrawer" />
+        </div>
       </q-card-section>
 
       <!-- 2. Identificação do Veículo -->
@@ -47,43 +27,18 @@
         <div class="text-subtitle1 q-mb-sm">Veículo</div>
         <div class="row q-col-gutter-md items-center">
           <div class="col-12 col-md-4">
-            <q-input
-              v-model="form.veiculo.placa"
-              label="Placa"
-              outlined
-              dense
-              readonly
-            />
+            <q-input v-model="form.veiculo.placa" label="Placa" outlined dense readonly />
           </div>
           <div class="col-12 col-md-4">
-            <q-input
-              v-model="form.veiculo.marca"
-              label="Marca"
-              outlined
-              dense
-              readonly
-            />
+            <q-input v-model="form.veiculo.marca" label="Marca" outlined dense readonly />
           </div>
           <div class="col-12 col-md-4">
-            <q-input
-              v-model="form.veiculo.modelo"
-              label="Modelo"
-              outlined
-              dense
-              readonly
-            />
+            <q-input v-model="form.veiculo.modelo" label="Modelo" outlined dense readonly />
           </div>
         </div>
-
-        <div class="col-12 col-md-3 q-mt-md">
-            <q-btn
-              color="accent"
-              label="Buscar Veículo"
-              class="full-width"
-              dense
-              @click="openVeiculoDrawer"
-            />
-          </div>
+        <div class="col-12 q-mt-md">
+          <q-btn color="accent" label="Buscar Veículo" class="full-width" dense @click="openVeiculoDrawer" />
+        </div>
       </q-card-section>
 
       <!-- 3. Observações Gerais -->
@@ -102,33 +57,43 @@
       <q-card-section>
         <div class="text-subtitle1 q-mb-sm">Produtos Selecionados</div>
         <q-table
-            flat
-            bordered
-            :columns="productColumns"
-            :rows="form.products"
-          >
-          <template v-slot:body-cell-actions="props">
-            <q-td :props="props" class="q-gutter-x-xs text-center">
-              <q-btn
-                  color="negative"
-                  icon="delete"
-                  dense
-                  flat
-                  @click="removeProduct(props.row.id)"
-                />
-            </q-td>
-          </template>
-          </q-table>
-          <div class="col-12 col-md-6 q-mt-md">
+          :rows="form.products"
+          :columns="productColumns"
+          flat
+          bordered
+          dense
+          row-key="idProduto"
+        >
+        <template v-slot:body-cell-quantity="props">
+          <div class="flex items-center justify-center gap-2">
             <q-btn
-              class="full-width"
-              color="accent"
-              label="Buscar Produto"
               dense
-              @click="openProductDrawer"
+              flat
+              round
+              icon="remove"
+              color="primary"
+              @click="decreaseQuantity(props.row)"
+            />
+            <div>{{ props.row.quantidade }}</div>
+            <q-btn
+              dense
+              flat
+              round
+              icon="add"
+              color="primary"
+              @click="increaseQuantity(props.row)"
             />
           </div>
-
+        </template>
+          <template v-slot:body-cell-actions="props">
+            <q-td align="center">
+              <q-btn icon="delete" color="negative" dense flat @click="removeProduct(props.row.idProduto)" />
+            </q-td>
+          </template>
+        </q-table>
+        <div class="col-12 q-mt-md">
+          <q-btn color="accent" label="Buscar Produto" class="full-width" dense @click="openProductDrawer" />
+        </div>
       </q-card-section>
 
       <!-- 5. Serviços Selecionados -->
@@ -137,38 +102,20 @@
         <q-table
           :rows="form.services"
           :columns="serviceColumns"
-          row-key="id"
+          flat
+          bordered
           dense
-          class="q-mb-md"
+          row-key="idServico"
         >
-          <template v-slot:body="props">
-            <q-tr :props="props">
-              <q-td key="description" class="width: 85%;">{{ props.row.description }}</q-td>
-              <q-td key="price" class="width: 10%; text-center">
-                R$ {{ props.row.price.toFixed(2) }}
-              </q-td>
-              <q-td key="actions" class="width: 5%; text-center">
-                <q-btn
-                  color="negative"
-                  icon="delete"
-                  dense
-                  flat
-                  @click="removeService(props.row.id)"
-                />
-              </q-td>
-            </q-tr>
+          <template v-slot:body-cell-actions="props">
+            <q-td align="center">
+              <q-btn icon="delete" color="negative" dense flat @click="removeService(props.row.idServico)" />
+            </q-td>
           </template>
         </q-table>
-
-        <div class="col-12 col-md-6 q-mt-md">
-            <q-btn
-              class="full-width"
-              color="accent"
-              label="Buscar Serviços"
-              dense
-              @click="openServiceDrawer"
-            />
-          </div>
+        <div class="col-12 q-mt-md">
+          <q-btn color="accent" label="Buscar Serviço" class="full-width" dense @click="openServiceDrawer" />
+        </div>
       </q-card-section>
 
       <!-- 6. Dados do Pedido -->
@@ -179,11 +126,11 @@
             <q-input
               v-model.number="form.ordem.desconto"
               label="Desconto (%)"
+              type="number"
               outlined
               dense
-              type="number"
               suffix="%"
-              :rules="[(val) => val >= 0 && val <= 100 || 'Desconto não pode ser negativo ou maior que 100%']"
+              :rules="[val => val >= 0 && val <= 100 || 'Desconto inválido']"
             />
           </div>
           <div class="col-12 col-md-4">
@@ -196,40 +143,33 @@
             />
           </div>
           <div class="col-12 col-md-4">
-            <q-input
-              v-model="form.ordem.responsavel"
-              label="Responsável"
-              outlined
-              dense
-            />
+            <q-input v-model="form.ordem.responsavel" label="Responsável" outlined dense />
           </div>
         </div>
 
-        <!-- Tipo da Proposta -->
-        <div class="row q-col-gutter-md">
-          <div class="col-12 col-md-4">
+        <div class="row q-col-gutter-md q-mt-md">
+          <div class="col-12 col-md-6">
             <q-select
               v-model="form.ordem.tipoProposta"
               :options="['Orçamento', 'Pedido']"
-              label="Tipo da Proposta"
+              label="Tipo de Proposta"
               outlined
               dense
             />
           </div>
-          <!-- Status do Pedido -->
-          <div class="col-12 col-md-4">
+          <div class="col-12 col-md-6">
             <q-select
               v-model="form.ordem.statusPedido"
               :options="['Em Andamento', 'Concluído', 'Cancelado']"
-              label="Status do Pedido"
+              label="Status"
               outlined
               dense
             />
           </div>
         </div>
 
-        <div class="q-mt-md text-weight-bold text-h6" style="color: #ff4081;">
-          Total: R$ {{ total.toFixed(2) }}
+        <div class="q-mt-md text-right text-h4 text-weight-bold">
+          Total: {{ formatToBRL(total)  }}
         </div>
       </q-card-section>
 
@@ -243,41 +183,25 @@
     <!-- Drawers -->
     <q-drawer v-model="clientDrawer" side="right" overlay elevated :width="400">
       <q-scroll-area class="fit">
-        <buscar-cliente-pedido
-          v-if="clientDrawer"
-          @submit="handleClientSubmit"
-          @cancel="closeClientDrawer"
-        />
+        <buscar-cliente-pedido v-if="clientDrawer" @submit="handleClientSubmit" @cancel="closeClientDrawer" />
       </q-scroll-area>
     </q-drawer>
 
     <q-drawer v-model="productDrawer" side="right" overlay elevated :width="400">
       <q-scroll-area class="fit">
-        <buscar-produto
-          v-if="productDrawer"
-          @select="addProduct"
-          @cancel="closeProductDrawer"
-        />
+        <buscar-produto v-if="productDrawer" @select="addProduct" @cancel="closeProductDrawer" />
       </q-scroll-area>
     </q-drawer>
 
     <q-drawer v-model="serviceDrawer" side="right" overlay elevated :width="400">
       <q-scroll-area class="fit">
-        <buscar-servico
-          v-if="serviceDrawer"
-          @select="addService"
-          @cancel="closeServiceDrawer"
-        />
+        <buscar-servico v-if="serviceDrawer" @select="addService" @cancel="closeServiceDrawer" />
       </q-scroll-area>
     </q-drawer>
 
     <q-drawer v-model="veiculoDrawer" side="right" overlay elevated :width="400">
       <q-scroll-area class="fit">
-        <buscar-veiculo
-          v-if="veiculoDrawer"
-          @submit="handleVeiculoSubmit"
-          @cancel="closeVeiculoDrawer"
-        />
+        <buscar-veiculo v-if="veiculoDrawer" @submit="handleVeiculoSubmit" @cancel="closeVeiculoDrawer" />
       </q-scroll-area>
     </q-drawer>
   </q-page>
@@ -291,17 +215,15 @@ import BuscarProduto from './components/BuscarProdutoPedido.vue'
 import BuscarServico from './components/BuscarServicoPedido.vue'
 import BuscarVeiculo from './components/BuscaVeiculoPedido.vue'
 import { useAuthStore } from 'src/stores/auth.store'
+import useCurrency from 'src/composables/useCurrency';
 
 const $q = useQuasar();
+const {formatToBRL } = useCurrency()
 const authStore = useAuthStore();
 
 // Estado do formulário
 const form = ref({
-  estabelecimento: {
-    id: '',
-    fantasia: '',
-    documento: '',
-  },
+  idEstabelecimento: "",
   ordem: {
     numero: '',
     desconto: 0,
@@ -331,16 +253,16 @@ const veiculoDrawer = ref(false);
 
 // Colunas para tabelas
 const productColumns = [
-  { name: 'description', label: 'Descrição', field: 'description', align: 'left' },
-  { name: 'quantity', label: 'Quantidade', field: 'quantity', align: 'center' },
-  { name: 'unitPrice', label: 'Preço Unitário', field: 'unitPrice', align: 'center' },
-  { name: 'total', label: 'Total', field: row => row.quantity * row.unitPrice, align: 'center' },
+  { name: 'description', label: 'Descrição', field: 'descricao', align: 'left' },
+  { name: 'quantity', label: 'Quantidade', field: 'quantidade', align: 'center' },
+  { name: 'unitPrice', label: 'Preço Unitário', field: row => formatToBRL(row.precoUnitario), align: 'center' },
+  { name: 'total', label: 'Total', field: row => formatToBRL(row.quantidade * row.precoUnitario), align: 'center' },
   { name: 'actions', label: 'Ações', field: 'actions', align: 'center' },
 ];
 
 const serviceColumns = [
-  { name: 'description', label: 'Descrição', field: 'description', align: 'left' },
-  { name: 'price', label: 'Preço', field: 'price', align: 'center' },
+  { name: 'description', label: 'Descrição', field: 'descricao', align: 'left' },
+  { name: 'price', label: 'Preço', field: row => formatToBRL(row.valorServico), align: 'center' },
   { name: 'actions', label: 'Ações', field: 'actions', align: 'rigth' },
 ];
 
@@ -350,11 +272,11 @@ const paymentMethods = ['Dinheiro', 'Cartão de Crédito', 'Cartão de Débito',
 // Cálculo do total
 const total = computed(() => {
   const productsTotal = form.value.products.reduce(
-    (sum, product) => sum + product.quantity * product.unitPrice,
+    (sum, product) => sum + product.quantidade * product.precoUnitario,
     0
   );
   const servicesTotal = form.value.services.reduce(
-    (sum, service) => sum + service.price,
+    (sum, service) => sum + service.valorServico,
     0
   );
 
@@ -364,14 +286,24 @@ const total = computed(() => {
   const discountAmount = (form.value.ordem.desconto / 100) * subtotal;
 
   return subtotal - discountAmount;
-});
+})
+
+const increaseQuantity = (product) => {
+  product.quantidade += 1;
+}
+
+const decreaseQuantity = (product) => {
+  if (product.quantidade > 1) {
+    product.quantidade -= 1;
+  }
+}
 // Carregar dados do estabelecimento
 onMounted(async () => {
   try {
-    form.value.estabelecimento.id = authStore.auth.estabelecimento.id;
-    form.value.estabelecimento.fantasia = authStore.auth.estabelecimento.nome;
-    form.value.estabelecimento.documento = authStore.auth.estabelecimento.documento;
-    form.value.ordem.responsavel = authStore.auth.nome;
+    form.value.idEstabelecimento = authStore.auth.estabelecimento.id
+    // form.value.estabelecimento.fantasia = authStore.auth.estabelecimento.nome;
+    // form.value.estabelecimento.documento = authStore.auth.estabelecimento.documento;
+    form.value.ordem.responsavel = authStore.auth.nome
   } catch (error) {
     $q.notify({
       type: 'negative',
@@ -415,13 +347,9 @@ const closeVeiculoDrawer = () => {
 
 // Funções para manipulação de cliente
 const handleClientSubmit = (clientData) => {
-  form.value.client.name = clientData.nome;
-  form.value.client.cpf = clientData.cpfOuCnpj;
-  closeClientDrawer();
-  $q.notify({
-    type: 'positive',
-    message: 'Cliente selecionado com sucesso!',
-  });
+  form.value.client.name = clientData.nome
+  form.value.client.cpf = clientData.cpfOuCnpj
+  closeClientDrawer()
 };
 
 // Funções para manipulação de veículo
@@ -431,27 +359,20 @@ const handleVeiculoSubmit = (vehicleData) => {
     placa: vehicleData.placa,
     marca: vehicleData.marca,
     modelo: vehicleData.modelo,
-  };
-  closeVeiculoDrawer();
-  $q.notify({
-    type: 'positive',
-    message: 'Veículo selecionado com sucesso!',
-  });
+  }
+  closeVeiculoDrawer()
 };
 
 // Funções para manipulação de produtos
 const addProduct = (product) => {
   form.value.products.push({
-    id: product.idProduto || null,
-    description: product.descricao,
-    quantity: 1,
-    unitPrice: product.precoVenda,
+    idProduto: product.idProduto || null,
+    descricao: product.descricao,
+    quantidade: 1,
+    precoUnitario: product.precoVenda,
   });
-  closeProductDrawer();
-  $q.notify({
-    type: 'positive',
-    message: 'Produto adicionado com sucesso!',
-  });
+  closeProductDrawer()
+
 };
 
 const removeProduct = (id) => {
@@ -465,15 +386,11 @@ const removeProduct = (id) => {
 // Funções para manipulação de serviços
 const addService = (service) => {
   form.value.services.push({
-    id: service.idServico || null,
-    description: service.descricao,
-    price: service.valor,
+    idServico: service.idServico || null,
+    descricao: service.descricao,
+    valorServico: service.valor,
   });
-  closeServiceDrawer();
-  $q.notify({
-    type: 'positive',
-    message: 'Serviço adicionado com sucesso!',
-  });
+  closeServiceDrawer()
 };
 
 const removeService = (id) => {
