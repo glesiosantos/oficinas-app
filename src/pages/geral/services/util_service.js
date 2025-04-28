@@ -26,7 +26,6 @@ export const utilService = () => {
 
   const carregarClientes = async () => {
       const response = await api.get(`/v1/estabelecimento/clientes/${idEstabelecimento}`,{headers: { Authorization: `Bearer ${token}` }})
-      console.log('*** **** clientes: ', response.data)
       clienteStore.setClientes(response.data)
   }
 
@@ -37,7 +36,6 @@ export const utilService = () => {
 
   const carregarProdutosDoEstabelecimento = async () => {
       const response = await api.get(`v1/produtos/${idEstabelecimento}`,{ headers: { Authorization: `Bearer ${token}` }})
-      console.log('*** **** produtos: ', response.data)
       produtoStore.setProdutos(response.data)
   }
 
@@ -45,7 +43,6 @@ export const utilService = () => {
       const response = await api.get(`v1/servicos/${idEstabelecimento}`, {
         headers: { Authorization: `Bearer ${authStore.auth.token}` }
       })
-      console.log('*** **** servicos: ', response.data)
       servicoStore.setServicos(response.data)
     }
 

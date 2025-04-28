@@ -64,27 +64,27 @@
           dense
           row-key="idProduto"
         >
-        <template v-slot:body-cell-quantity="props">
-          <div class="flex items-center justify-center gap-2">
-            <q-btn
-              dense
-              flat
-              round
-              icon="remove"
-              color="primary"
-              @click="decreaseQuantity(props.row)"
-            />
-            <div>{{ props.row.quantidade }}</div>
-            <q-btn
-              dense
-              flat
-              round
-              icon="add"
-              color="primary"
-              @click="increaseQuantity(props.row)"
-            />
-          </div>
-        </template>
+          <template v-slot:body-cell-quantity="props">
+            <div class="flex items-center justify-center gap-2">
+              <q-btn
+                dense
+                flat
+                round
+                icon="remove"
+                color="primary"
+                @click="decreaseQuantity(props.row)"
+              />
+              <div>{{ props.row.quantidade }}</div>
+              <q-btn
+                dense
+                flat
+                round
+                icon="add"
+                color="primary"
+                @click="increaseQuantity(props.row)"
+              />
+            </div>
+          </template>
           <template v-slot:body-cell-actions="props">
             <q-td align="center">
               <q-btn icon="delete" color="negative" dense flat @click="removeProduct(props.row.idProduto)" />
@@ -121,6 +121,7 @@
       <!-- 6. Dados do Pedido -->
       <q-card-section>
         <div class="text-subtitle1 q-mb-sm">Dados do Pedido</div>
+
         <div class="row q-col-gutter-md">
           <div class="col-12 col-md-4">
             <q-input
@@ -136,10 +137,15 @@
           <div class="col-12 col-md-4">
             <q-select
               v-model="form.ordem.formaPagamento"
-              :options="paymentMethods"
+              :options="metodoPagamento"
               label="Forma de Pagamento"
+              option-label="descricao"
+              option-value="sigla"
+              map-options
+              emit-value
               outlined
               dense
+              @update:model-value="handlePaymentMethodChange"
             />
           </div>
           <div class="col-12 col-md-4">
@@ -151,25 +157,84 @@
           <div class="col-12 col-md-6">
             <q-select
               v-model="form.ordem.tipoProposta"
-              :options="['Orçamento', 'Pedido']"
+              :options="tipoProposta"
               label="Tipo de Proposta"
+              option-label="descricao"
+              option-value="sigla"
+              map-options
+              emit-value
               outlined
               dense
+              @update:model-value="handleTipoPropostaChange"
             />
           </div>
+
           <div class="col-12 col-md-6">
             <q-select
               v-model="form.ordem.statusPedido"
-              :options="['Em Andamento', 'Concluído', 'Cancelado']"
-              label="Status"
+              :options="filteredStatusProposta"
+              label="Situação do pedido"
+              option-value="sigla"
+              option-label="descricao"
               outlined
               dense
             />
           </div>
         </div>
 
-        <div class="q-mt-md text-right text-h4 text-weight-bold">
-          Total: {{ formatToBRL(total)  }}
+        <!-- Campos condicionalmente exibidos -->
+        <div v-if="form.ordem.formaPagamento === 'CC'" class="q-mt-md">
+          <div class="row q-col-gutter-md">
+            <div class="col-12 col-md-6">
+              <q-input
+                v-model.number="form.ordem.valorEntrada"
+                label="Valor de Entrada"
+                type="number"
+                outlined
+                dense
+                :rules="[val => val >= 0 && val <= total || 'Valor de entrada deve ser menor ou igual ao total']"
+              />
+            </div>
+            <div class="col-12 col-md-6">
+              <q-input
+                v-model.number="form.ordem.parcelas"
+                label="Quantidade de Parcelas"
+                type="number"
+                outlined
+                dense
+                :rules="[val => val >= 1 || 'Quantidade de parcelas inválida']"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div v-if="form.ordem.tipoProposta === 'O'" class="q-mt-md">
+          <div class="row q-col-gutter-md">
+            <div class="col-12 col-md-6">
+              <q-input
+                v-model.number="form.ordem.diasValidade"
+                label="Dias de Validade"
+                type="number"
+                outlined
+                dense
+                :rules="[val => val >= 1 || 'Número de dias inválido']"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Resumo da negociação -->
+        <div class="q-mt-md text-h6">
+          <div><strong>Subtotal: </strong>{{ formatToBRL(subtotal) }}</div>
+          <div><strong>Desconto: </strong>{{ formatToBRL(discountAmount) }}</div>
+          <div><strong>Total: </strong>{{ formatToBRL(total) }}</div>
+          <div v-if="form.ordem.formaPagamento === 'CC' && form.ordem.parcelas > 0">
+            <strong>Valor de Entrada: </strong>{{ formatToBRL(form.ordem.valorEntrada) }}<br />
+            <strong>Parcelas ({{ form.ordem.parcelas }}x): </strong>
+            <div v-for="i in form.ordem.parcelas" :key="i">
+              {{ i }}ª parcela: {{ formatToBRL(installmentAmount) }}
+            </div>
+          </div>
         </div>
       </q-card-section>
 
@@ -177,6 +242,13 @@
       <q-card-actions align="right" class="q-pa-md">
         <q-btn label="Cancelar" color="negative" flat @click="resetForm" />
         <q-btn label="Gerar Pedido" color="accent" @click="submitOrder" />
+        <q-btn
+          label="Compartilhar no WhatsApp"
+          color="green"
+          icon="share"
+          :to="whatsappLink"
+          target="_blank"
+        />
       </q-card-actions>
     </q-card>
 
@@ -210,25 +282,36 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
-import BuscarClientePedido from './components/BuscarClientePedido.vue'
-import BuscarProduto from './components/BuscarProdutoPedido.vue'
-import BuscarServico from './components/BuscarServicoPedido.vue'
-import BuscarVeiculo from './components/BuscaVeiculoPedido.vue'
-import { useAuthStore } from 'src/stores/auth.store'
+import BuscarClientePedido from './components/BuscarClientePedido.vue';
+import BuscarProduto from './components/BuscarProdutoPedido.vue';
+import BuscarServico from './components/BuscarServicoPedido.vue';
+import BuscarVeiculo from './components/BuscaVeiculoPedido.vue';
+import { useAuthStore } from 'src/stores/auth.store';
 import useCurrency from 'src/composables/useCurrency';
+import { usePedidoStore } from 'src/stores/pedido.store';
+import { pedidoService } from './services/pedido_service';
 
 const $q = useQuasar();
-const {formatToBRL } = useCurrency()
+const { carregarStatusProposta } = pedidoService();
+const { formatToBRL } = useCurrency();
 const authStore = useAuthStore();
+const pedidoStore = usePedidoStore();
 
 // Estado do formulário
 const form = ref({
-  idEstabelecimento: "",
+  idEstabelecimento: '',
+  valorEntrada: 0,
+  parcelas: 0,
+  diasValidade: 0,
   ordem: {
     numero: '',
     desconto: 0,
     formaPagamento: '',
     responsavel: '',
+    tipoProposta: '',
+    statusPedido: '',
+    valorEntrada: 0,
+    parcelas: 0,
   },
   client: {
     name: '',
@@ -263,14 +346,31 @@ const productColumns = [
 const serviceColumns = [
   { name: 'description', label: 'Descrição', field: 'descricao', align: 'left' },
   { name: 'price', label: 'Preço', field: row => formatToBRL(row.valorServico), align: 'center' },
-  { name: 'actions', label: 'Ações', field: 'actions', align: 'rigth' },
+  { name: 'actions', label: 'Ações', field: 'actions', align: 'right' },
 ];
 
 // Opções de formas de pagamento
-const paymentMethods = ['Dinheiro', 'Cartão de Crédito', 'Cartão de Débito', 'Pix'];
+const metodoPagamento = [
+  { sigla: 'DI', descricao: 'Dinheiro' },
+  { sigla: 'CC', descricao: 'Cartão de Crédito' },
+  { sigla: 'CD', descricao: 'Cartão de Débito' },
+  { sigla: 'PX', descricao: 'Pix' },
+];
 
-// Cálculo do total
-const total = computed(() => {
+const tipoProposta = [
+  { sigla: 'O', descricao: 'Orçamento' },
+  { sigla: 'P', descricao: 'Pedido' },
+];
+
+// Filtro dinâmico para statusProposta baseado no tipoProposta
+const filteredStatusProposta = computed(() => {
+  const tipo = form.value.ordem.tipoProposta;
+  if (!tipo) return [];
+  return pedidoStore.statusProposta.filter(status => status.para === tipo);
+});
+
+// Cálculo do subtotal
+const subtotal = computed(() => {
   const productsTotal = form.value.products.reduce(
     (sum, product) => sum + product.quantidade * product.precoUnitario,
     0
@@ -279,38 +379,66 @@ const total = computed(() => {
     (sum, service) => sum + service.valorServico,
     0
   );
+  return productsTotal + servicesTotal;
+});
 
-  const subtotal = productsTotal + servicesTotal;
+// Cálculo do desconto
+const discountAmount = computed(() => {
+  const desconto = form.value.ordem.desconto || 0;
+  return (desconto / 100) * subtotal.value;
+});
 
-  // Calculando o desconto
-  const discountAmount = (form.value.ordem.desconto / 100) * subtotal;
+// Cálculo do total
+const total = computed(() => {
+  return subtotal.value - discountAmount.value;
+});
 
-  return subtotal - discountAmount;
-})
+// Cálculo do valor das parcelas
+const installmentAmount = computed(() => {
+  if (form.value.ordem.formaPagamento !== 'CC' || !form.value.ordem.parcelas) return 0;
+  const valorEntrada = form.value.ordem.valorEntrada || 0;
+  const remainingAmount = total.value - valorEntrada;
+  return remainingAmount > 0 ? remainingAmount / form.value.ordem.parcelas : 0;
+});
 
+// Funções para manipulação de quantidade
 const increaseQuantity = (product) => {
   product.quantidade += 1;
-}
+};
 
 const decreaseQuantity = (product) => {
   if (product.quantidade > 1) {
     product.quantidade -= 1;
   }
-}
+};
+
+// Manipulador para mudança no tipo de proposta
+const handleTipoPropostaChange = () => {
+  // Reseta o status do pedido ao mudar o tipo de proposta
+  form.value.ordem.statusPedido = '';
+};
+
+// Manipulador para mudança na forma de pagamento
+const handlePaymentMethodChange = () => {
+  if (form.value.ordem.formaPagamento !== 'CC') {
+    form.value.ordem.valorEntrada = 0;
+    form.value.ordem.parcelas = 0;
+  }
+};
+
 // Carregar dados do estabelecimento
 onMounted(async () => {
   try {
-    form.value.idEstabelecimento = authStore.auth.estabelecimento.id
-    // form.value.estabelecimento.fantasia = authStore.auth.estabelecimento.nome;
-    // form.value.estabelecimento.documento = authStore.auth.estabelecimento.documento;
-    form.value.ordem.responsavel = authStore.auth.nome
+    form.value.idEstabelecimento = authStore.auth.estabelecimento.id;
+    form.value.ordem.responsavel = authStore.auth.nome;
+    await carregarStatusProposta();
   } catch (error) {
     $q.notify({
       type: 'negative',
       message: 'Erro ao carregar dados do estabelecimento: ' + error.message,
     });
   }
-})
+});
 
 // Funções para manipulação de drawers
 const openClientDrawer = () => {
@@ -347,9 +475,9 @@ const closeVeiculoDrawer = () => {
 
 // Funções para manipulação de cliente
 const handleClientSubmit = (clientData) => {
-  form.value.client.name = clientData.nome
-  form.value.client.cpf = clientData.cpfOuCnpj
-  closeClientDrawer()
+  form.value.client.name = clientData.nome;
+  form.value.client.cpf = clientData.cpfOuCnpj;
+  closeClientDrawer();
 };
 
 // Funções para manipulação de veículo
@@ -359,8 +487,8 @@ const handleVeiculoSubmit = (vehicleData) => {
     placa: vehicleData.placa,
     marca: vehicleData.marca,
     modelo: vehicleData.modelo,
-  }
-  closeVeiculoDrawer()
+  };
+  closeVeiculoDrawer();
 };
 
 // Funções para manipulação de produtos
@@ -371,12 +499,11 @@ const addProduct = (product) => {
     quantidade: 1,
     precoUnitario: product.precoVenda,
   });
-  closeProductDrawer()
-
+  closeProductDrawer();
 };
 
 const removeProduct = (id) => {
-  form.value.products = form.value.products.filter(product => product.id !== id);
+  form.value.products = form.value.products.filter(product => product.idProduto !== id);
   $q.notify({
     type: 'positive',
     message: 'Produto removido com sucesso!',
@@ -390,11 +517,11 @@ const addService = (service) => {
     descricao: service.descricao,
     valorServico: service.valor,
   });
-  closeServiceDrawer()
+  closeServiceDrawer();
 };
 
 const removeService = (id) => {
-  form.value.services = form.value.services.filter(service => service.id !== id);
+  form.value.services = form.value.services.filter(service => service.idServico !== id);
   $q.notify({
     type: 'positive',
     message: 'Serviço removido com sucesso!',
@@ -404,16 +531,19 @@ const removeService = (id) => {
 // Funções de ação do formulário
 const resetForm = () => {
   form.value = {
-    estabelecimento: {
-      id: form.value.estabelecimento.id,
-      fantasia: form.value.estabelecimento.fantasia,
-      documento: form.value.estabelecimento.documento,
-    },
+    idEstabelecimento: form.value.idEstabelecimento,
+    valorEntrada: 0,
+    parcelas: 0,
+    diasValidade: 0,
     ordem: {
       numero: '',
       desconto: 0,
       formaPagamento: '',
       responsavel: form.value.ordem.responsavel,
+      tipoProposta: '',
+      statusPedido: '',
+      valorEntrada: 0,
+      parcelas: 0,
     },
     client: { name: '', cpf: '' },
     veiculo: { idVeiculo: null, placa: '', marca: '', modelo: '' },
@@ -426,17 +556,36 @@ const resetForm = () => {
 const submitOrder = () => {
   // Validação básica
   if (
-    !form.value.estabelecimento.fantasia ||
+    !form.value.idEstabelecimento ||
     !form.value.client.name ||
     !form.value.veiculo.idVeiculo ||
     !form.value.ordem.formaPagamento ||
-    !form.value.ordem.responsavel
+    !form.value.ordem.responsavel ||
+    !form.value.ordem.tipoProposta ||
+    !form.value.ordem.statusPedido
   ) {
     $q.notify({
       type: 'negative',
-      message: 'Por favor, preencha todos os campos obrigatórios, incluindo cliente e veículo.',
+      message: 'Por favor, preencha todos os campos obrigatórios, incluindo cliente, veículo, tipo de proposta e situação do pedido.',
     });
     return;
+  }
+
+  if (form.value.ordem.formaPagamento === 'CC') {
+    if (form.value.ordem.valorEntrada > total.value) {
+      $q.notify({
+        type: 'negative',
+        message: 'O valor de entrada não pode ser maior que o total do pedido.',
+      });
+      return;
+    }
+    if (form.value.ordem.parcelas < 1) {
+      $q.notify({
+        type: 'negative',
+        message: 'A quantidade de parcelas deve ser pelo menos 1.',
+      });
+      return;
+    }
   }
 
   // Aqui você pode adicionar a lógica para enviar o pedido para uma API
@@ -448,6 +597,11 @@ const submitOrder = () => {
   console.log('Form Data:', form.value);
   resetForm();
 };
+
+// Link para compartilhamento no WhatsApp (exemplo, precisa ser implementado conforme necessidade)
+const whatsappLink = computed(() => {
+  return '#'; // Implementar lógica real para gerar o link do WhatsApp
+});
 </script>
 
 <style scoped>
@@ -484,7 +638,7 @@ const submitOrder = () => {
 }
 
 /* Definir larguras específicas para as colunas da tabela de produtos */
-:deep(.q-table thead tr th:nth-child(1)) {
+:deep(.q-tableEXIT thead tr th:nth-child(1)) {
   width: 50%; /* Descrição */
 }
 :deep(.q-table tbody tr td:nth-child(1)) {

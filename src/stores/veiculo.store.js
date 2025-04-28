@@ -8,7 +8,6 @@ export const useVeiculoStore = defineStore('veiculoStore', () => {
   const setVeiculos = (data) => veiculos.value = data
 
   const buscarPorPlaca = (placa) => {
-    console.log('**** ', placa)
     if (!placa) return null;
     const veiculo = this.veiculos.find(
       (v) => v.placa === placa
