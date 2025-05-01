@@ -170,6 +170,7 @@ const newVehicle = ref({
   placa: '',
   marca: '',
   modelo: '',
+  ano: 0
 });
 const modeloExists = ref(null)
 
@@ -229,6 +230,7 @@ const selectVehicle = (vehicle) => {
     placa: vehicle.placa,
     marca: vehicle.marca,
     modelo: vehicle.modelo,
+    ano: vehicle.ano
   };
   emit('submit', vehicleData);
   notifySuccess('Veículo selecionado com sucesso!');
@@ -246,6 +248,7 @@ const handleSubmit = async () => {
       placa: newVehicle.value.placa,
       marca: newVehicle.value.marca,
       modelo: newVehicle.value.modelo,
+      ano: newVehicle.value.ano
     }
     emit('submit', vehicleData)
     notifySuccess('Veículo cadastrado com sucesso!');

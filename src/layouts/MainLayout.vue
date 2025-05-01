@@ -187,11 +187,20 @@ import { authService } from 'src/pages/auth/services/auth_service'
 import useNotify from 'src/composables/useNotify'
 import { useAuthStore } from 'src/stores/auth.store'
 import { utilService } from 'src/pages/geral/services/util_service'
+import { pedidoService } from 'src/pages/pedido/services/pedido_service'
 
 const { logout } = authService()
 const authStore = useAuthStore()
 
-const { carregarCategoriasDosProdutos, carregarClientes, carregarVeiculosRegistrado, carregarMarcas, carregarProdutosDoEstabelecimento, carregarServicoDoEstabelecimento } = utilService()
+const { carregarCategoriasDosProdutos,
+        carregarClientes,
+        carregarVeiculosRegistrado,
+        carregarMarcas,
+        carregarProdutosDoEstabelecimento,
+        carregarServicoDoEstabelecimento
+} = utilService()
+
+const { carregarTodasAsOrdensDoEstabelecimento } = pedidoService()
 
 const router = useRouter()
 const { notifySuccess } = useNotify()
@@ -276,6 +285,7 @@ onMounted(async () => {
   await carregarMarcas()
   await carregarProdutosDoEstabelecimento()
   await carregarServicoDoEstabelecimento()
+  await carregarTodasAsOrdensDoEstabelecimento()
 })
 
 </script>

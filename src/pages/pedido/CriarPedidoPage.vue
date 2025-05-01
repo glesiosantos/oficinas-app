@@ -11,10 +11,10 @@
         <div class="text-subtitle1 q-mb-sm">Cliente</div>
         <div class="row q-col-gutter-md items-center">
           <div class="col-12 col-md-6">
-            <q-input v-model="form.client.name" label="Nome do Cliente" outlined dense readonly />
+            <q-input v-model="form.nomeCliente" label="Nome do Cliente" outlined dense readonly />
           </div>
           <div class="col-12 col-md-6">
-            <q-input v-model="form.client.cpf" label="CPF" outlined dense mask="###.###.###-##" readonly />
+            <q-input v-model="form.cpfCnpjCliente" label="CPF ou CNPJ" outlined dense readonly/>
           </div>
         </div>
         <div class="col-12 q-mt-md">
@@ -45,7 +45,7 @@
       <q-card-section>
         <div class="text-subtitle1 q-mb-sm">Observações Gerais</div>
         <q-input
-          v-model="form.observations"
+          v-model="form.observacoes"
           type="textarea"
           outlined
           dense
@@ -57,7 +57,7 @@
       <q-card-section>
         <div class="text-subtitle1 q-mb-sm">Produtos Selecionados</div>
         <q-table
-          :rows="form.products"
+          :rows="form.produtos"
           :columns="productColumns"
           flat
           bordered
@@ -100,7 +100,7 @@
       <q-card-section>
         <div class="text-subtitle1 q-mb-sm">Serviços Selecionados</div>
         <q-table
-          :rows="form.services"
+          :rows="form.servicos"
           :columns="serviceColumns"
           flat
           bordered
@@ -125,7 +125,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12 col-md-4">
             <q-input
-              v-model.number="form.ordem.desconto"
+              v-model.number="form.desconto"
               label="Desconto (%)"
               type="number"
               outlined
@@ -136,7 +136,7 @@
           </div>
           <div class="col-12 col-md-4">
             <q-select
-              v-model="form.ordem.formaPagamento"
+              v-model="form.formaPagamento"
               :options="metodoPagamento"
               label="Forma de Pagamento"
               option-label="descricao"
@@ -149,14 +149,14 @@
             />
           </div>
           <div class="col-12 col-md-4">
-            <q-input v-model="form.ordem.responsavel" label="Responsável" outlined dense />
+            <q-input v-model="form.responsavel" label="Responsável" outlined dense disable />
           </div>
         </div>
 
         <div class="row q-col-gutter-md q-mt-md">
           <div class="col-12 col-md-6">
             <q-select
-              v-model="form.ordem.tipoProposta"
+              v-model="form.tipoProposta"
               :options="tipoProposta"
               label="Tipo de Proposta"
               option-label="descricao"
@@ -171,23 +171,25 @@
 
           <div class="col-12 col-md-6">
             <q-select
-              v-model="form.ordem.statusPedido"
+              v-model="form.statusPedido"
               :options="filteredStatusProposta"
               label="Situação do pedido"
               option-value="sigla"
               option-label="descricao"
               outlined
+              map-options
+              emit-value
               dense
             />
           </div>
         </div>
 
         <!-- Campos condicionalmente exibidos -->
-        <div v-if="form.ordem.formaPagamento === 'CC'" class="q-mt-md">
+        <div v-if="form.formaPagamento === 'CC'" class="q-mt-md">
           <div class="row q-col-gutter-md">
             <div class="col-12 col-md-6">
               <q-input
-                v-model.number="form.ordem.valorEntrada"
+                v-model.number="form.valorEntrada"
                 label="Valor de Entrada"
                 type="number"
                 outlined
@@ -197,7 +199,7 @@
             </div>
             <div class="col-12 col-md-6">
               <q-input
-                v-model.number="form.ordem.parcelas"
+                v-model.number="form.parcelas"
                 label="Quantidade de Parcelas"
                 type="number"
                 outlined
@@ -208,11 +210,11 @@
           </div>
         </div>
 
-        <div v-if="form.ordem.tipoProposta === 'O'" class="q-mt-md">
+        <div v-if="form.tipoProposta === 'O'" class="q-mt-md">
           <div class="row q-col-gutter-md">
             <div class="col-12 col-md-6">
               <q-input
-                v-model.number="form.ordem.diasValidade"
+                v-model.number="form.diasValidade"
                 label="Dias de Validade"
                 type="number"
                 outlined
@@ -228,10 +230,10 @@
           <div><strong>Subtotal: </strong>{{ formatToBRL(subtotal) }}</div>
           <div><strong>Desconto: </strong>{{ formatToBRL(discountAmount) }}</div>
           <div><strong>Total: </strong>{{ formatToBRL(total) }}</div>
-          <div v-if="form.ordem.formaPagamento === 'CC' && form.ordem.parcelas > 0">
-            <strong>Valor de Entrada: </strong>{{ formatToBRL(form.ordem.valorEntrada) }}<br />
-            <strong>Parcelas ({{ form.ordem.parcelas }}x): </strong>
-            <div v-for="i in form.ordem.parcelas" :key="i">
+          <div v-if="form.formaPagamento === 'CC' && form.parcelas > 0">
+            <strong>Valor de Entrada: </strong>{{ formatToBRL(form.valorEntrada) }}<br />
+            <strong>Parcelas ({{ form.parcelas }}x): </strong>
+            <div v-for="i in form.parcelas" :key="i">
               {{ i }}ª parcela: {{ formatToBRL(installmentAmount) }}
             </div>
           </div>
@@ -242,13 +244,13 @@
       <q-card-actions align="right" class="q-pa-md">
         <q-btn label="Cancelar" color="negative" flat @click="resetForm" />
         <q-btn label="Gerar Pedido" color="accent" @click="submitOrder" />
-        <q-btn
+        <!-- <q-btn
           label="Compartilhar no WhatsApp"
           color="green"
           icon="share"
           :to="whatsappLink"
           target="_blank"
-        />
+        /> -->
       </q-card-actions>
     </q-card>
 
@@ -280,20 +282,22 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useQuasar } from 'quasar';
-import BuscarClientePedido from './components/BuscarClientePedido.vue';
-import BuscarProduto from './components/BuscarProdutoPedido.vue';
-import BuscarServico from './components/BuscarServicoPedido.vue';
-import BuscarVeiculo from './components/BuscaVeiculoPedido.vue';
-import { useAuthStore } from 'src/stores/auth.store';
-import useCurrency from 'src/composables/useCurrency';
-import { usePedidoStore } from 'src/stores/pedido.store';
-import { pedidoService } from './services/pedido_service';
+import { ref, computed, onMounted } from 'vue'
+import { useQuasar } from 'quasar'
+import BuscarClientePedido from './components/BuscarClientePedido.vue'
+import BuscarProduto from './components/BuscarProdutoPedido.vue'
+import BuscarServico from './components/BuscarServicoPedido.vue'
+import BuscarVeiculo from './components/BuscaVeiculoPedido.vue'
+import { useAuthStore } from 'src/stores/auth.store'
+import useCurrency from 'src/composables/useCurrency'
+import { usePedidoStore } from 'src/stores/pedido.store'
+import { pedidoService } from './services/pedido_service'
 
 const $q = useQuasar();
 const { carregarStatusProposta } = pedidoService();
 const { formatToBRL } = useCurrency();
+
+const { registrarOrdemEstabelecimento } = pedidoService()
 const authStore = useAuthStore();
 const pedidoStore = usePedidoStore();
 
@@ -303,29 +307,25 @@ const form = ref({
   valorEntrada: 0,
   parcelas: 0,
   diasValidade: 0,
-  ordem: {
-    numero: '',
-    desconto: 0,
-    formaPagamento: '',
-    responsavel: '',
-    tipoProposta: '',
-    statusPedido: '',
-    valorEntrada: 0,
-    parcelas: 0,
-  },
-  client: {
-    name: '',
-    cpf: '',
-  },
+  desconto: 0,
+  formaPagamento: '',
+  tipoProposta: '',
+  statusPedido: '',
+  idCliente: '',
+  nomeCliente: '',
+  cpfCnpjCliente: '',
   veiculo: {
     idVeiculo: null,
     placa: '',
     marca: '',
     modelo: '',
+    ano: 0
   },
-  observations: '',
-  products: [],
-  services: [],
+  observacoes: '',
+  produtos: [],
+  servicos: [],
+  cpfResponsavel: '',
+  responsavel: ''
 });
 
 // Estado dos drawers
@@ -364,27 +364,27 @@ const tipoProposta = [
 
 // Filtro dinâmico para statusProposta baseado no tipoProposta
 const filteredStatusProposta = computed(() => {
-  const tipo = form.value.ordem.tipoProposta;
+  const tipo = form.value.tipoProposta;
   if (!tipo) return [];
   return pedidoStore.statusProposta.filter(status => status.para === tipo);
 });
 
 // Cálculo do subtotal
 const subtotal = computed(() => {
-  const productsTotal = form.value.products.reduce(
+  const produtosTotal = form.value.produtos.reduce(
     (sum, product) => sum + product.quantidade * product.precoUnitario,
     0
   );
-  const servicesTotal = form.value.services.reduce(
+  const servicosTotal = form.value.servicos.reduce(
     (sum, service) => sum + service.valorServico,
     0
   );
-  return productsTotal + servicesTotal;
+  return produtosTotal + servicosTotal;
 });
 
 // Cálculo do desconto
 const discountAmount = computed(() => {
-  const desconto = form.value.ordem.desconto || 0;
+  const desconto = form.value.desconto || 0;
   return (desconto / 100) * subtotal.value;
 });
 
@@ -395,10 +395,10 @@ const total = computed(() => {
 
 // Cálculo do valor das parcelas
 const installmentAmount = computed(() => {
-  if (form.value.ordem.formaPagamento !== 'CC' || !form.value.ordem.parcelas) return 0;
-  const valorEntrada = form.value.ordem.valorEntrada || 0;
+  if (form.value.formaPagamento !== 'CC' || !form.value.parcelas) return 0;
+  const valorEntrada = form.value.valorEntrada || 0;
   const remainingAmount = total.value - valorEntrada;
-  return remainingAmount > 0 ? remainingAmount / form.value.ordem.parcelas : 0;
+  return remainingAmount > 0 ? remainingAmount / form.value.parcelas : 0;
 });
 
 // Funções para manipulação de quantidade
@@ -408,76 +408,78 @@ const increaseQuantity = (product) => {
 
 const decreaseQuantity = (product) => {
   if (product.quantidade > 1) {
-    product.quantidade -= 1;
+    product.quantidade -= 1
   }
 };
 
 // Manipulador para mudança no tipo de proposta
 const handleTipoPropostaChange = () => {
   // Reseta o status do pedido ao mudar o tipo de proposta
-  form.value.ordem.statusPedido = '';
+  form.value.statusPedido = ''
 };
 
 // Manipulador para mudança na forma de pagamento
 const handlePaymentMethodChange = () => {
-  if (form.value.ordem.formaPagamento !== 'CC') {
-    form.value.ordem.valorEntrada = 0;
-    form.value.ordem.parcelas = 0;
+  if (form.value.formaPagamento !== 'CC') {
+    form.value.valorEntrada = 0
+    form.value.parcelas = 0
   }
 };
 
 // Carregar dados do estabelecimento
 onMounted(async () => {
   try {
-    form.value.idEstabelecimento = authStore.auth.estabelecimento.id;
-    form.value.ordem.responsavel = authStore.auth.nome;
+    form.value.idEstabelecimento = authStore.auth.estabelecimento.idEstabelecimento
+    form.value.responsavel = authStore.auth.nome
+    form.value.cpfResponsavel = authStore.auth.cpf
     await carregarStatusProposta();
   } catch (error) {
     $q.notify({
       type: 'negative',
       message: 'Erro ao carregar dados do estabelecimento: ' + error.message,
-    });
+    })
   }
-});
+})
 
 // Funções para manipulação de drawers
 const openClientDrawer = () => {
-  clientDrawer.value = true;
+  clientDrawer.value = true
 };
 
 const closeClientDrawer = () => {
-  clientDrawer.value = false;
+  clientDrawer.value = false
 };
 
 const openProductDrawer = () => {
-  productDrawer.value = true;
+  productDrawer.value = true
 };
 
 const closeProductDrawer = () => {
-  productDrawer.value = false;
+  productDrawer.value = false
 };
 
 const openServiceDrawer = () => {
-  serviceDrawer.value = true;
+  serviceDrawer.value = true
 };
 
 const closeServiceDrawer = () => {
-  serviceDrawer.value = false;
+  serviceDrawer.value = false
 };
 
 const openVeiculoDrawer = () => {
-  veiculoDrawer.value = true;
+  veiculoDrawer.value = true
 };
 
 const closeVeiculoDrawer = () => {
-  veiculoDrawer.value = false;
+  veiculoDrawer.value = false
 };
 
 // Funções para manipulação de cliente
 const handleClientSubmit = (clientData) => {
-  form.value.client.name = clientData.nome;
-  form.value.client.cpf = clientData.cpfOuCnpj;
-  closeClientDrawer();
+  form.value.nomeCliente = clientData.nome
+  form.value.cpfCnpjCliente = clientData.cpfOuCnpj
+  form.value.idCliente = clientData.idCliente
+  closeClientDrawer()
 };
 
 // Funções para manipulação de veículo
@@ -487,41 +489,42 @@ const handleVeiculoSubmit = (vehicleData) => {
     placa: vehicleData.placa,
     marca: vehicleData.marca,
     modelo: vehicleData.modelo,
+    ano: vehicleData.ano
   };
-  closeVeiculoDrawer();
+  closeVeiculoDrawer()
 };
 
 // Funções para manipulação de produtos
 const addProduct = (product) => {
-  form.value.products.push({
+  form.value.produtos.push({
     idProduto: product.idProduto || null,
     descricao: product.descricao,
     quantidade: 1,
     precoUnitario: product.precoVenda,
   });
-  closeProductDrawer();
+  closeProductDrawer()
 };
 
 const removeProduct = (id) => {
-  form.value.products = form.value.products.filter(product => product.idProduto !== id);
+  form.value.produtos = form.value.produtos.filter(product => product.idProduto !== id)
   $q.notify({
     type: 'positive',
     message: 'Produto removido com sucesso!',
-  });
+  })
 };
 
 // Funções para manipulação de serviços
 const addService = (service) => {
-  form.value.services.push({
+  form.value.servicos.push({
     idServico: service.idServico || null,
     descricao: service.descricao,
     valorServico: service.valor,
   });
-  closeServiceDrawer();
+  closeServiceDrawer()
 };
 
 const removeService = (id) => {
-  form.value.services = form.value.services.filter(service => service.idServico !== id);
+  form.value.servicos = form.value.servicos.filter(service => service.idServico !== id)
   $q.notify({
     type: 'positive',
     message: 'Serviço removido com sucesso!',
@@ -535,34 +538,33 @@ const resetForm = () => {
     valorEntrada: 0,
     parcelas: 0,
     diasValidade: 0,
-    ordem: {
-      numero: '',
-      desconto: 0,
-      formaPagamento: '',
-      responsavel: form.value.ordem.responsavel,
-      tipoProposta: '',
-      statusPedido: '',
-      valorEntrada: 0,
-      parcelas: 0,
-    },
-    client: { name: '', cpf: '' },
-    veiculo: { idVeiculo: null, placa: '', marca: '', modelo: '' },
-    observations: '',
-    products: [],
-    services: [],
+    numero: '',
+    desconto: 0,
+    formaPagamento: '',
+    responsavel: form.value.responsavel,
+    cpfResponsavel: form.value.cpfResponsavel,
+    tipoProposta: '',
+    statusPedido: '',
+    idCliente: '',
+    nomeCliente: '',
+    cpfCnpjCliente: '',
+    veiculo: { idVeiculo: null, placa: '', marca: '', modelo: '', ano: 0 },
+    observacoes: '',
+    produtos: [],
+    servicos: [],
   };
 };
 
-const submitOrder = () => {
-  // Validação básica
+const submitOrder = async () => {
+
   if (
     !form.value.idEstabelecimento ||
-    !form.value.client.name ||
-    !form.value.veiculo.idVeiculo ||
-    !form.value.ordem.formaPagamento ||
-    !form.value.ordem.responsavel ||
-    !form.value.ordem.tipoProposta ||
-    !form.value.ordem.statusPedido
+    !form.value.idCliente ||
+    !form.value.veiculo.placa ||
+    !form.value.formaPagamento ||
+    !form.value.cpfResponsavel ||
+    !form.value.tipoProposta ||
+    !form.value.statusPedido
   ) {
     $q.notify({
       type: 'negative',
@@ -571,15 +573,15 @@ const submitOrder = () => {
     return;
   }
 
-  if (form.value.ordem.formaPagamento === 'CC') {
-    if (form.value.ordem.valorEntrada > total.value) {
+  if (form.value.formaPagamento === 'CC') {
+    if (form.value.valorEntrada > total.value) {
       $q.notify({
         type: 'negative',
         message: 'O valor de entrada não pode ser maior que o total do pedido.',
       });
       return;
     }
-    if (form.value.ordem.parcelas < 1) {
+    if (form.value.parcelas < 1) {
       $q.notify({
         type: 'negative',
         message: 'A quantidade de parcelas deve ser pelo menos 1.',
@@ -588,20 +590,16 @@ const submitOrder = () => {
     }
   }
 
+  await registrarOrdemEstabelecimento(form.value)
+  resetForm();
+
   // Aqui você pode adicionar a lógica para enviar o pedido para uma API
   $q.notify({
     type: 'positive',
     message: 'Pedido/Orçamento gerado com sucesso!',
-  });
+  })
+}
 
-  console.log('Form Data:', form.value);
-  resetForm();
-};
-
-// Link para compartilhamento no WhatsApp (exemplo, precisa ser implementado conforme necessidade)
-const whatsappLink = computed(() => {
-  return '#'; // Implementar lógica real para gerar o link do WhatsApp
-});
 </script>
 
 <style scoped>

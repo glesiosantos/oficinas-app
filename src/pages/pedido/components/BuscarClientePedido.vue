@@ -74,31 +74,31 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import useNotify from 'src/composables/useNotify';
-import { useClienteStore } from 'src/stores/cliente.store';
+import { ref, onMounted } from 'vue'
+import useNotify from 'src/composables/useNotify'
+import { useClienteStore } from 'src/stores/cliente.store'
 
-const { notifyError, notifySuccess } = useNotify();
+const { notifyError, notifySuccess } = useNotify()
 const clienteStore = useClienteStore();
 
 // Definir os eventos emitidos
-const emit = defineEmits(['submit', 'cancel']);
+const emit = defineEmits(['submit', 'cancel'])
 
-const searchTerm = ref('');
-const allClients = ref([]);
-const filteredClients = ref([]);
-const loading = ref(false);
+const searchTerm = ref('')
+const allClients = ref([])
+const filteredClients = ref([])
+const loading = ref(false)
 
 // Colunas da tabela (apenas para compatibilidade, mas não exibidas diretamente no modo grid)
 const columns = [
   { name: 'cpfOuCnpj', label: 'CPF/CNPJ', field: 'cpfOuCnpj', align: 'left', sortable: true },
   { name: 'nome', label: 'Nome', field: 'nome', align: 'left', sortable: true },
-];
+]
 
 // Carregar todos os clientes do Pinia ao montar o componente
 onMounted(() => {
-  loadAllClients();
-});
+  loadAllClients()
+})
 
 // Função para carregar todos os clientes do Pinia
 const loadAllClients = () => {
@@ -116,7 +116,7 @@ const loadAllClients = () => {
   } finally {
     loading.value = false;
   }
-};
+}
 
 // Função para filtrar clientes com base no termo de busca
 const filterClients = (term) => {
@@ -131,15 +131,15 @@ const filterClients = (term) => {
       (client.nome && client.nome.toLowerCase().includes(lowerTerm)) ||
       (client.cpfOuCnpj && client.cpfOuCnpj.toLowerCase().includes(lowerTerm)) ||
       (client.veiculo?.placa && client.veiculo.placa.toLowerCase().includes(lowerTerm))
-    );
-  });
-};
+    )
+  })
+}
 
 // Função para selecionar um cliente
 const selectClient = (client) => {
   try {
     if (!client || !client.idCliente || !client.nome || !client.cpfOuCnpj) {
-      throw new Error('Dados do cliente inválidos ou incompletos');
+      throw new Error('Dados do cliente inválidos ou incompletos')
     }
 
     const clientData = {
@@ -147,16 +147,14 @@ const selectClient = (client) => {
       nome: client.nome,
       cpfOuCnpj: client.cpfOuCnpj,
       razao: client.razao || client.nome
-    };
-
-    console.log('Emitting clientData:', clientData);
+    }
     emit('submit', clientData);
-    notifySuccess('Cliente selecionado com sucesso!');
+    notifySuccess('Cliente selecionado com sucesso!')
   } catch (error) {
     console.error('Erro ao emitir submit:', error);
-    notifyError('Erro ao selecionar cliente: ' + error.message);
+    notifyError('Erro ao selecionar cliente: ' + error.message)
   }
-};
+}
 </script>
 
 <style scoped>
