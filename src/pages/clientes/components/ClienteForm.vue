@@ -81,11 +81,12 @@
       <q-btn flat label="Adicionar Contato" color="black" icon="add" @click="addContact" class="q-my-sm"/>
     </q-card-section>
 
-    <!-- Rodapé (botões) -->
-    <q-card-section class="footer-fixed q-pa-md text-right">
-      <q-btn flat label="Cancelar" color="negative" @click="$emit('cancel')" />
-      <q-btn type="submit" color="primary" class="text-black" label="Salvar" :disable="loading" />
-    </q-card-section>
+    <div class="fixed-bottom q-pa-sm bg-white" style="border-top: 1px solid #ccc;">
+      <div class="row q-gutter-sm">
+        <q-btn flat label="Cancelar" class="col" color="negative" @click="$emit('cancel')" />
+        <q-btn type="submit" color="accent" class="col" label="Salvar" :disable="loading" />
+      </div>
+    </div>
   </q-form>
 </template>
 

@@ -1,5 +1,5 @@
 <template>
-  <q-form class="column full-height">
+  <div class="column full-height relative-position">
     <!-- Cabeçalho -->
     <q-card-section class="bg-primary q-py-sm">
       <div class="row items-center no-wrap">
@@ -9,9 +9,8 @@
       </div>
     </q-card-section>
 
-    <!-- Corpo -->
-    <q-card-section class="flex-1 q-pa-md">
-      <!-- Campo de Busca -->
+    <!-- Campo de Busca -->
+    <div class="q-pa-md">
       <q-input
         v-model="searchTerm"
         label="Buscar por Nome ou Referência"
@@ -22,8 +21,10 @@
         @update:model-value="filterProducts"
         debounce="300"
       />
+    </div>
 
-      <!-- Tabela de Produtos -->
+    <!-- Lista rolável -->
+    <div class="scroll-area q-px-md" style="flex: 1; overflow-y: auto;">
       <q-table
         :rows="filteredProducts"
         :columns="columns"
@@ -66,13 +67,15 @@
           </q-item>
         </template>
       </q-table>
-    </q-card-section>
+    </div>
 
-    <q-card-section class="q-pa-md text-right q-mt-lg">
-      <q-btn flat label="Cancelar" color="negative" @click="$emit('cancel')" />
-    </q-card-section>
-  </q-form>
+    <!-- Rodapé fixo com botão -->
+    <div class="fixed-bottom q-pa-sm bg-white" style="border-top: 1px solid #ccc;">
+      <q-btn flat label="Cancelar" color="negative" class="full-width" @click="$emit('cancel')" />
+    </div>
+  </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from 'vue'
@@ -166,43 +169,5 @@ const selectProduct = (product) => {
 </script>
 
 <style scoped>
-.full-height {
-  height: 100%;
-}
 
-.product-table {
-  width: 100%;
-  max-height: 60vh;
-}
-
-.product-card {
-  width: 100%;
-  margin-bottom: 8px;
-}
-
-.full-width {
-  width: 100% !important;
-}
-
-.q-card-section {
-  padding: 16px;
-}
-
-.q-mb-md {
-  margin-bottom: 16px;
-}
-
-@media (max-width: 600px) {
-  .q-card-section {
-    padding: 12px;
-  }
-
-  .product-card {
-    font-size: 12px;
-  }
-
-  .full-width {
-    width: 100% !important;
-  }
-}
 </style>

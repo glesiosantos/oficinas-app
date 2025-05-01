@@ -133,18 +133,10 @@
       </div>
 
     </q-card-section>
-
-    <!-- Rodapé -->
-    <q-card-section class="q-pa-md text-right">
-      <q-btn flat label="Cancelar" color="negative" @click="$emit('cancel')" />
-      <q-btn
-        v-if="showNewVehicleForm"
-        type="submit"
-        color="primary"
-        label="Cadastrar Veículo"
-        class="q-ml-md"
-      />
-    </q-card-section>
+    <div class="fixed-bottom q-pa-sm bg-white" style="border-top: 1px solid #ccc;">
+      <q-btn flat label="Cancelar" color="negative" class="full-width q-my-sm" @click="$emit('cancel')" />
+      <q-btn v-if="showNewVehicleForm" type="submit" color="accent" class="full-width" label="Cadastrar Veículo"/>
+    </div>
   </q-form>
 </template>
 

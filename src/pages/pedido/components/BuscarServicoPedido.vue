@@ -69,9 +69,9 @@
       </q-table>
     </q-card-section>
 
-    <q-card-section class="q-pa-md text-right q-mt-lg">
-      <q-btn flat label="Cancelar" color="negative" @click="$emit('cancel')" />
-    </q-card-section>
+    <div class="fixed-bottom q-pa-sm bg-white" style="border-top: 1px solid #ccc;">
+      <q-btn flat label="Cancelar" color="negative" class="full-width" @click="$emit('cancel')" />
+    </div>
   </q-form>
 </template>
 
@@ -162,44 +162,3 @@ const selectService = (service) => {
 };
 </script>
 
-<style scoped>
-.full-height {
-  height: 100%;
-}
-
-.service-table {
-  width: 100%;
-  max-height: 60vh;
-}
-
-.service-card {
-  width: 100%;
-  margin-bottom: 8px;
-}
-
-.full-width {
-  width: 100% !important;
-}
-
-.q-card-section {
-  padding: 16px;
-}
-
-.q-mb-md {
-  margin-bottom: 16px;
-}
-
-@media (max-width: 600px) {
-  .q-card-section {
-    padding: 12px;
-  }
-
-  .service-card {
-    font-size: 12px;
-  }
-
-  .full-width {
-    width: 100% !important;
-  }
-}
-</style>

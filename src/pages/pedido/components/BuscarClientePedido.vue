@@ -66,10 +66,9 @@
       </q-table>
     </q-card-section>
 
-    <!-- Rodapé (botões) -->
-    <q-card-section class="q-pa-md text-right">
-      <q-btn flat label="Cancelar" color="negative" @click="$emit('cancel')" />
-    </q-card-section>
+    <div class="fixed-bottom q-pa-sm bg-white" style="border-top: 1px solid #ccc;">
+      <q-btn flat label="Cancelar" class="full-width" color="negative" @click="$emit('cancel')" />
+    </div>
   </q-form>
 </template>
 
