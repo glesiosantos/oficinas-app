@@ -113,7 +113,7 @@
         <q-route-tab exact class="text-black" replace icon="dashboard" label="Dashboard" :to="{name: 'dashboard'}"/>
         <q-route-tab exact class="text-black" replace icon="groups" label="Clintes" :to="{name: 'clientes'}"/>
         <q-route-tab exact class="text-black" replace icon="monitor" label="Pedido" :to="{name: 'pedidos'}"/>
-        <q-route-tab exact class="text-black" replace icon="calculate" label="Orçamento" :to="{name: 'criarOrcamentoAvulso'}"/>
+        <q-route-tab exact class="text-black" replace icon="car_repair" label="Oficina" :to="{name: 'naOficina'}"/>
       </q-tabs>
     </q-footer>
 
@@ -247,6 +247,12 @@ const linksList = [
     caption: 'Pedidos realizado',
     icon: 'monitor',
     route: {name: 'pedidos'}
+  },
+  {
+    title: 'Oficina',
+    caption: 'Oficina Mecânica',
+    icon: 'car_repair',
+    route: {name: 'naOficina'}
   },
   {
     title: 'Estabelecimento',

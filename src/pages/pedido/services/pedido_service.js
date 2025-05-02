@@ -13,7 +13,6 @@ export const pedidoService = () => {
 
   const carregarTodasAsOrdensDoEstabelecimento = async () => {
     const response = await api.get(`v1/ordens/${idEstabelecimento}`, {headers: { Authorization: `Bearer ${token}` }})
-    console.log('**** **** ', response.data)
     pedidoStore.setPedidos(response.data)
   }
 
@@ -32,5 +31,28 @@ export const pedidoService = () => {
     return response.data
   }
 
-  return { carregarTodasAsOrdensDoEstabelecimento,carregarOrdensDoEstabelecimentoComTipoPedido, carregarStatusProposta, registrarOrdemEstabelecimento }
+  const atualizarOrcamentoParaPedido = async (data) => {
+    const response = await api.put(`/v1/ordens/converter/${data}`, null, {headers: { Authorization: `Bearer ${authStore.auth.token}` }})
+    return response
+  }
+
+  const mudarStatusPedido = async (data) => {
+    const response = await api.post('/v1/ordens/status', data, {headers: { Authorization: `Bearer ${authStore.auth.token}` }})
+    return response
+  }
+
+  const mudarStatusPedidoNaOficina = async (data) => {
+    const response = await api.post('/v1/ordens/oficina/status', data, {headers: { Authorization: `Bearer ${authStore.auth.token}` }})
+    return response
+  }
+
+  return {
+      carregarTodasAsOrdensDoEstabelecimento,
+      carregarOrdensDoEstabelecimentoComTipoPedido,
+      carregarStatusProposta,
+      registrarOrdemEstabelecimento,
+      atualizarOrcamentoParaPedido,
+      mudarStatusPedido,
+      mudarStatusPedidoNaOficina
+  }
 }

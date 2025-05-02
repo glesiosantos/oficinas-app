@@ -51,7 +51,7 @@
       </q-card>
     </div>
 
-    <q-drawer v-model="drawer" side="right" overlay elevated :width="$q.screen.xs ? 300 : 400">
+    <q-drawer v-model="drawer" side="right" overlay elevated :width="400">
       <q-scroll-area class="fit">
         <cliente-form
           v-if="drawer"
