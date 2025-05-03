@@ -31,34 +31,32 @@
         row-key="id"
         dense
         :loading="loading"
-        :rows-per-page-options="[10, 20, 50]"
-        class="product-table full-width"
         hide-header
         flat
         bordered
+        :rows-per-page-options="[20, 50]"
+        class="product-table full-width"
         grid
       >
         <template v-slot:item="props">
-          <div class="q-pa-sm col-xs-12 col-sm-12 col-md-12">
-            <q-card flat bordered class="product-card">
-              <q-card-section>
-                <div class="text-subtitle2">{{ props.row.descricao }}</div>
-                <div class="text-caption">Ref: {{ props.row.referencia }}</div>
-                <div class="text-caption">Preço: R$ {{ calcularPrecoVenda(props.row).toFixed(2) }}</div>
-              </q-card-section>
-              <q-card-actions>
-                <q-btn
-                  color="accent"
-                  label="Selecionar"
-                  dense
-                  flat
-                  class="full-width"
-                  @click="selectProduct(props.row)"
-                />
-              </q-card-actions>
-            </q-card>
-          </div>
+          <q-item dense class="q-pa-xs q-my-xs bg-grey-1 rounded-borders">
+            <q-item-section side>
+              <q-checkbox
+                v-model="selectedProducts"
+                :val="props.row"
+                dense
+              />
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label class="text-subtitle2 ellipsis">{{ props.row.descricao }}</q-item-label>
+              <q-item-label caption>Ref: {{ props.row.referencia }}</q-item-label>
+              <q-item-label caption>Preço: R$ {{ calcularPrecoVenda(props.row).toFixed(2) }}</q-item-label>
+              <q-item-label caption>Estoque: {{ props.row.quantidadeEstoque ?? '0' }}</q-item-label>
+            </q-item-section>
+          </q-item>
         </template>
+
         <template v-slot:no-data>
           <q-item>
             <q-item-section>
@@ -69,13 +67,28 @@
       </q-table>
     </div>
 
-    <!-- Rodapé fixo com botão -->
+    <!-- Rodapé fixo com botões -->
     <div class="fixed-bottom q-pa-sm bg-white" style="border-top: 1px solid #ccc;">
-      <q-btn flat label="Cancelar" color="negative" class="full-width" @click="$emit('cancel')" />
+      <div class="row q-gutter-sm">
+        <q-btn
+          flat
+          label="Cancelar"
+          color="negative"
+          class="col"
+          @click="$emit('cancel')"
+        />
+        <q-btn
+          flat
+          label="Selecionar"
+          color="accent"
+          class="col"
+          :disable="selectedProducts.length === 0"
+          @click="emitSelectedProducts"
+        />
+      </div>
     </div>
   </div>
 </template>
-
 
 <script setup>
 import { ref, onMounted } from 'vue'
@@ -83,18 +96,17 @@ import { useQuasar } from 'quasar'
 import { useProdutoStore } from 'src/stores/produto.store'
 
 const produtoStore = useProdutoStore()
-
 const $q = useQuasar();
 const emit = defineEmits(['select', 'cancel']);
 
 const searchTerm = ref('');
 const allProducts = ref([]);
 const filteredProducts = ref([]);
+const selectedProducts = ref([]);
 const loading = ref(false);
 
-// Colunas (não aparecem no grid, mas são necessárias para o QTable)
 const columns = [
-  { name: 'descricao', label: 'Descrição do prdouto', field: 'descricao', align: 'left' },
+  { name: 'descricao', label: 'Descrição', field: 'descricao', align: 'left' },
   { name: 'referencia', label: 'Referência', field: 'referencia', align: 'left' },
   { name: 'valorCusto', label: 'Preço', field: 'valorCusto', align: 'right' },
 ]
@@ -109,17 +121,11 @@ onMounted(() => {
   loadAllProducts();
 });
 
-// Carregar todos os produtos
 const loadAllProducts = async () => {
+  // console.log('**** Produtos', produtoStore.produtos)
   try {
     loading.value = true;
-    // Simulação de chamada a API:
-    // const response = await api.get('/produtos');
-    // allProducts.value = response.data;
-
-    // Exemplo fictício:
-    allProducts.value = produtoStore.produtos
-
+    allProducts.value = produtoStore.produtos;
     filteredProducts.value = allProducts.value;
   } catch (error) {
     $q.notify({
@@ -133,7 +139,6 @@ const loadAllProducts = async () => {
   }
 }
 
-// Filtrar produtos conforme o termo
 const filterProducts = (term) => {
   if (!term) {
     filteredProducts.value = allProducts.value;
@@ -148,26 +153,25 @@ const filterProducts = (term) => {
   });
 };
 
-// Emitir produto selecionado
-const selectProduct = (product) => {
-  try {
-    if (!product || !product.idProduto) {
-      throw new Error('Produto inválido');
-    }
-    emit('select', product);
+const emitSelectedProducts = () => {
+  if (selectedProducts.value.length > 0) {
+    emit('select', selectedProducts.value);
     $q.notify({
       type: 'positive',
-      message: 'Produto selecionado com sucesso!',
+      message: `${selectedProducts.value.length} produto(s) selecionado(s)`
     });
-  } catch (error) {
+    selectedProducts.value = [];
+  } else {
     $q.notify({
-      type: 'negative',
-      message: 'Erro ao selecionar produto: ' + (error.message || 'Erro desconhecido'),
+      type: 'warning',
+      message: 'Nenhum produto selecionado'
     });
   }
 };
 </script>
 
 <style scoped>
-
+.scroll-area {
+  max-height: calc(100vh - 220px); /* Ajuste conforme a altura do cabeçalho e rodapé */
+}
 </style>

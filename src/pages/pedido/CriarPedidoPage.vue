@@ -65,25 +65,29 @@
           row-key="idProduto"
         >
           <template v-slot:body-cell-quantity="props">
-            <div class="flex items-center justify-center gap-2">
-              <q-btn
-                dense
-                flat
-                round
-                icon="remove"
-                color="primary"
-                @click="decreaseQuantity(props.row)"
-              />
-              <div>{{ props.row.quantidade }}</div>
-              <q-btn
-                dense
-                flat
-                round
-                icon="add"
-                color="primary"
-                @click="increaseQuantity(props.row)"
-              />
-            </div>
+            <q-td class="text-center" style="padding: 4px; max-width: 140px; overflow: hidden;">
+              <div class="row items-center justify-center no-wrap q-gutter-xs">
+                <q-btn
+                  dense
+                  flat
+                  round
+                  size="sm"
+                  icon="remove"
+                  color="primary"
+                  @click="decreaseQuantity(props.row)"
+                />
+                <div class="text-no-wrap">{{ props.row.quantidade }}</div>
+                <q-btn
+                  dense
+                  flat
+                  round
+                  size="sm"
+                  icon="add"
+                  color="primary"
+                  @click="increaseQuantity(props.row)"
+                />
+              </div>
+            </q-td>
           </template>
           <template v-slot:body-cell-actions="props">
             <q-td align="center">
@@ -495,15 +499,20 @@ const handleVeiculoSubmit = (vehicleData) => {
 };
 
 // Funções para manipulação de produtos
-const addProduct = (product) => {
-  form.value.produtos.push({
-    idProduto: product.idProduto || null,
-    descricao: product.descricao,
-    quantidade: 1,
-    precoUnitario: product.precoVenda,
-  });
+function addProduct(produtoSelecionados) {
+  if (Array.isArray(produtoSelecionados)) {
+    produtoSelecionados.forEach(produto => {
+      form.value.produtos.push({...produto, quantidade: 1, precoUnitario: produto.precoVenda, descricao: produto.descricao})
+    })
+  } else {
+    form.value.produtos.push({...produtoSelecionados, quantidade: 1, precoUnitario: produtoSelecionados.precoVenda, descricao: produtoSelecionados.descricao})
+  }
+
+
+  console.log('**** produtos selecionado: ', produtoSelecionados)
+
   closeProductDrawer()
-};
+}
 
 const removeProduct = (id) => {
   form.value.produtos = form.value.produtos.filter(product => product.idProduto !== id)
@@ -599,6 +608,7 @@ const submitOrder = async () => {
     message: 'Pedido/Orçamento gerado com sucesso!',
   })
 }
+
 
 </script>
 
