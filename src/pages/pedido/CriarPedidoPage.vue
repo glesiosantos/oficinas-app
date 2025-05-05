@@ -6,40 +6,51 @@
         <div class="text-h6">Gerar Pedido/Orçamento</div>
       </q-card-section>
 
-      <!-- 1. Identificação do Cliente -->
-      <q-card-section>
-        <div class="text-subtitle1 q-mb-sm">Cliente</div>
-        <div class="row q-col-gutter-md items-center">
-          <div class="col-12 col-md-6">
-            <q-input v-model="form.nomeCliente" label="Nome do Cliente" outlined dense readonly />
-          </div>
-          <div class="col-12 col-md-6">
-            <q-input v-model="form.cpfCnpjCliente" label="CPF ou CNPJ" outlined dense readonly/>
-          </div>
+      <div class="row q-col-gutter-xs q-col-gutter-md-md items-stretch">
+  <!-- Card Cliente -->
+        <div class="col-12 col-md-6">
+          <q-card class="q-pa-sm q-pa-md-md full-height no-shadow">
+            <q-card-section>
+              <div class="text-subtitle1 q-mb-sm">Cliente</div>
+              <div class="row q-col-gutter-md items-center">
+                <div class="col-12 col-md-6">
+                  <q-input v-model="form.nomeCliente" label="Nome do Cliente" outlined dense readonly />
+                </div>
+                <div class="col-12 col-md-6">
+                  <q-input v-model="form.cpfCnpjCliente" label="CPF ou CNPJ" outlined dense readonly/>
+                </div>
+              </div>
+              <div class="col-12 q-mt-md">
+                <q-btn color="accent" label="Buscar Cliente" class="full-width" dense @click="openClientDrawer" />
+              </div>
+            </q-card-section>
+          </q-card>
         </div>
-        <div class="col-12 q-mt-md">
-          <q-btn color="accent" label="Buscar Cliente" class="full-width" dense @click="openClientDrawer" />
-        </div>
-      </q-card-section>
 
-      <!-- 2. Identificação do Veículo -->
-      <q-card-section>
-        <div class="text-subtitle1 q-mb-sm">Veículo</div>
-        <div class="row q-col-gutter-md items-center">
-          <div class="col-12 col-md-4">
-            <q-input v-model="form.veiculo.placa" label="Placa" outlined dense readonly />
-          </div>
-          <div class="col-12 col-md-4">
-            <q-input v-model="form.veiculo.marca" label="Marca" outlined dense readonly />
-          </div>
-          <div class="col-12 col-md-4">
-            <q-input v-model="form.veiculo.modelo" label="Modelo" outlined dense readonly />
-          </div>
+  <!-- Card Veículo -->
+        <div class="col-12 col-md-6">
+          <q-card class="q-pa-sm q-pa-md-md full-height no-shadow">
+            <q-card-section>
+              <div class="text-subtitle1 q-mb-sm">Veículo</div>
+              <div class="row q-col-gutter-md items-center">
+                <div class="col-12 col-md-4">
+                  <q-input v-model="form.veiculo.placa" label="Placa" outlined dense readonly />
+                </div>
+                <div class="col-12 col-md-4">
+                  <q-input v-model="form.veiculo.marca" label="Marca" outlined dense readonly />
+                </div>
+                <div class="col-12 col-md-4">
+                  <q-input v-model="form.veiculo.modelo" label="Modelo" outlined dense readonly />
+                </div>
+              </div>
+              <div class="col-12 q-mt-md">
+                <q-btn color="accent" label="Buscar Veículo" class="full-width" dense @click="openVeiculoDrawer" />
+              </div>
+            </q-card-section>
+          </q-card>
         </div>
-        <div class="col-12 q-mt-md">
-          <q-btn color="accent" label="Buscar Veículo" class="full-width" dense @click="openVeiculoDrawer" />
-        </div>
-      </q-card-section>
+      </div>
+
 
       <!-- 3. Observações Gerais -->
       <q-card-section>
@@ -126,7 +137,7 @@
       <q-card-section>
         <div class="text-subtitle1 q-mb-sm">Dados do Pedido</div>
 
-        <div class="row q-col-gutter-md">
+        <div class="row q-col-gutter-sm">
           <div class="col-12 col-md-4">
             <q-input
               v-model.number="form.desconto"
@@ -157,7 +168,7 @@
           </div>
         </div>
 
-        <div class="row q-col-gutter-md q-mt-md">
+        <div class="row q-col-gutter-sm q-mt-xs">
           <div class="col-12 col-md-6">
             <q-select
               v-model="form.tipoProposta"
@@ -228,20 +239,43 @@
             </div>
           </div>
         </div>
+        <div class="q-mt-md border rounded q-pa-sm" style="border-color: rgba(0, 0, 0, 0.08);">
+          <!-- Linha com 3 colunas fixas para Subtotal, Desconto e Total -->
+          <div class="row q-col-gutter-md justify-around items-start">
+            <div class="col-4">
+              <div class="text-subtitle4">Subtotal</div>
+              <div class="text-h6 text-weight-bold">{{ formatToBRL(subtotal) }}</div>
+            </div>
+            <div class="col-4">
+              <div class="text-subtitle4">Desconto</div>
+              <div class="text-h6 text-weight-bold">{{ formatToBRL(discountAmount) }}</div>
+            </div>
+            <div class="col-4">
+              <div class="text-subtitle4">Total</div>
+              <div class="text-h6 text-weight-bold">{{ formatToBRL(total) }}</div>
+            </div>
+          </div>
 
-        <!-- Resumo da negociação -->
-        <div class="q-mt-md text-h6">
-          <div><strong>Subtotal: </strong>{{ formatToBRL(subtotal) }}</div>
-          <div><strong>Desconto: </strong>{{ formatToBRL(discountAmount) }}</div>
-          <div><strong>Total: </strong>{{ formatToBRL(total) }}</div>
-          <div v-if="form.formaPagamento === 'CC' && form.parcelas > 0">
-            <strong>Valor de Entrada: </strong>{{ formatToBRL(form.valorEntrada) }}<br />
-            <strong>Parcelas ({{ form.parcelas }}x): </strong>
-            <div v-for="i in form.parcelas" :key="i">
-              {{ i }}ª parcela: {{ formatToBRL(installmentAmount) }}
+          <!-- Entrada e Parcelamento em linha (duas colunas) -->
+          <div class="row q-mt-md q-col-gutter-md justify-around items-start"
+            v-if="form.formaPagamento === 'CC' && form.parcelas > 0"
+          >
+            <div class="col-6" v-if="form.valorEntrada > 0">
+              <div class="text-subtitle4">Entrada</div>
+              <div class="text-h6 text-weight-bold">{{ formatToBRL(form.valorEntrada) }}</div>
+            </div>
+
+            <div class="col-6">
+              <div class="text-subtitle4">Parcelamento</div>
+              <div class="text-h6 text-weight-bold">
+                {{ form.parcelas }}x {{ formatToBRL(installmentAmount) }}
+              </div>
             </div>
           </div>
         </div>
+
+
+
       </q-card-section>
 
       <!-- Botões -->
@@ -578,6 +612,18 @@ const submitOrder = async () => {
     $q.notify({
       type: 'negative',
       message: 'Por favor, preencha todos os campos obrigatórios, incluindo cliente, veículo, tipo de proposta e situação do pedido.',
+    });
+    return;
+  }
+
+  // Nova validação: pelo menos um produto ou serviço
+  const hasProdutos = Array.isArray(form.value.produtos) && form.value.produtos.length > 0;
+  const hasServicos = Array.isArray(form.value.servicos) && form.value.servicos.length > 0;
+
+  if (!hasProdutos && !hasServicos) {
+    $q.notify({
+      type: 'negative',
+      message: 'É necessário adicionar pelo menos um produto ou serviço ao pedido.',
     });
     return;
   }

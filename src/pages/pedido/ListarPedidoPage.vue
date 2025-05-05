@@ -109,10 +109,10 @@
                     />
                     <q-btn
                       round dense icon="construction"
-                      v-if="props.row.tipoProposta === 'Pedido' && (props.row.statusOrdem === 'Em Execução' || props.row.statusOrdem === 'Pendente')"
+                      v-if="props.row.tipoProposta === 'Pedido' && props.row.statusOrdem === 'Pendente'"
                       color="blue"
                       @click="atualizarStatusPedido(props.row, 'EE')"
-                      title="Executar"
+                      title="Enviar para Execução"
                     />
                     <q-btn round dense icon="payments" color="blue" title="Cancelar Pedido" v-if="props.row.tipoProposta === 'Pedido' && props.row.statusOrdem === 'Aguardando Pagamento'" @click="atualizarStatusPedido(props.row, 'FI')"/>
                     <q-btn round dense icon="stop_circle" color="red" title="Cancelar Pedido" v-if="props.row.tipoProposta === 'Pedido' && props.row.statusOrdem !== 'Aguardando Pagamento'" @click="atualizarStatusPedido(props.row, 'CA')"/>
@@ -136,28 +136,51 @@
       >
         <!-- Se for a célula de ações, renderize os botões -->
         <template v-if="col.name === 'actions'">
-          <div class="q-gutter-x-sm row justify-end">
-            <template v-if="props.row.statusOrdem !== 'Finalizado' && props.row.statusOrdem !== 'Cancelado'">
-              <q-btn
-                v-if="props.row.statusOrdem === 'Aguardando Autorização'"
-                round dense icon="check" color="green"
-                @click="converterOrcamentoEmPedido(props.row.idOrdem)"
-                title="Autorizar Pedido"
-              />
-            <q-btn
-              round dense icon="construction"
-              v-if="props.row.tipoProposta === 'Pedido'"
-              color="blue"
-              @click="atualizarStatusPedido(props.row, 'EE')"
-              title="Executar"
-            />
-            <q-btn round dense icon="payments" color="blue" title="Cancelar Pedido" v-if="props.row.tipoProposta === 'Pedido' && props.row.statusOrdem === 'Aguardando Pagamento'" @click="atualizarStatusPedido(props.row, 'FI')"/>
-            <q-btn round dense icon="stop_circle" color="red" title="Cancelar Pedido" v-if="props.row.tipoProposta === 'Pedido' && props.row.statusOrdem !== 'Aguardando Pagamento'" @click="atualizarStatusPedido(props.row, 'CA')"/>
-            <q-btn round dense icon="edit" color="accent" title="Editar"/>
-            </template>
-          </div>
-        </template>
+        <div class="q-gutter-x-sm row justify-end">
+          <template v-if="props.row.statusOrdem !== 'Finalizado' && props.row.statusOrdem !== 'Cancelado'">
 
+            <!-- Autorizar Pedido -->
+            <q-btn
+              v-if="props.row.statusOrdem === 'Aguardando Autorização'"
+              round dense icon="check" color="green"
+              @click="converterOrcamentoEmPedido(props.row.idOrdem)"
+              title="Autorizar Pedido"
+            />
+
+            <!-- Enviar para Execução -->
+            <q-btn
+              v-if="props.row.tipoProposta === 'Pedido' && props.row.statusOrdem === 'Pendente' || props.row.statusOrdem === 'Autorizado'"
+              round dense icon="construction" color="blue"
+              @click="atualizarStatusPedido(props.row, 'EE')"
+              title="Enviar para Execução"
+            />
+
+            <!-- Cancelar após aguardando pagamento (Finalizar) -->
+            <q-btn
+              v-if="props.row.tipoProposta === 'Pedido' && props.row.statusOrdem === 'Aguardando Pagamento'"
+              round dense icon="payments" color="blue"
+              title="Finalizar Pedido"
+              @click="atualizarStatusPedido(props.row, 'FI')"
+            />
+
+            <!-- Cancelar Pedido geral (exceto aguardando pagamento) -->
+            <q-btn
+              v-if="props.row.tipoProposta === 'Pedido' && props.row.statusOrdem !== 'Aguardando Pagamento'"
+              round dense icon="stop_circle" color="red"
+              title="Cancelar Pedido"
+              @click="atualizarStatusPedido(props.row, 'CA')"
+            />
+
+            <!-- Editar Pedido -->
+            <q-btn
+              v-if="['Aguardando Autorização', 'Autorizado', 'Pendente'].includes(props.row.statusOrdem)"
+              round dense icon="edit" color="accent"
+              title="Editar Pedido"
+              @click="editarPedido(props.row)"
+            />
+          </template>
+        </div>
+      </template>
         <!-- Caso contrário, exiba o valor da célula -->
         <template v-else>
           {{ col.value }}
@@ -184,6 +207,7 @@ import { useQuasar, date } from 'quasar'
 import { useFormatarDocumento } from 'src/composables/useFormatarDocumento'
 import { pedidoService } from './services/pedido_service'
 import useNotify from 'src/composables/useNotify'
+import { useRouter } from 'vue-router'
 
 const $q = useQuasar()
 const { notifySuccess, notifyError } = useNotify()
@@ -206,6 +230,8 @@ const filtros = ref({
   dataFim: '',
   termoBusca: ''
 })
+
+const router = useRouter()
 
 const pedidoStore = usePedidoStore()
 const { formatarDocumento } = useFormatarDocumento()
@@ -315,6 +341,10 @@ const converterOrcamentoEmPedido = async (idPedido) => {
   } else {
     notifyError(`Não foi possível converter o pedido ${idPedido}`)
   }
+}
+
+const editarPedido = (pedido) => {
+  router.push({ name: 'editar-pedido', params: { id: pedido.idOrdem } })
 }
 
 const atualizarStatusPedido = (pedidoRow, novoStatus) => {
