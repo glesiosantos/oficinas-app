@@ -137,7 +137,7 @@
       <q-card-section>
         <div class="text-subtitle1 q-mb-sm">Dados do Pedido</div>
 
-        <div class="row q-col-gutter-sm">
+        <div class="row q-col-gutter-md">
           <div class="col-12 col-md-4">
             <q-input
               v-model.number="form.desconto"
@@ -168,7 +168,7 @@
           </div>
         </div>
 
-        <div class="row q-col-gutter-sm q-mt-xs">
+        <div class="row q-col-gutter-sm q-mt-sm">
           <div class="col-12 col-md-6">
             <q-select
               v-model="form.tipoProposta"
@@ -273,9 +273,6 @@
             </div>
           </div>
         </div>
-
-
-
       </q-card-section>
 
       <!-- Botões -->
@@ -330,14 +327,17 @@ import { useAuthStore } from 'src/stores/auth.store'
 import useCurrency from 'src/composables/useCurrency'
 import { usePedidoStore } from 'src/stores/pedido.store'
 import { pedidoService } from './services/pedido_service'
+import { useRoute } from 'vue-router'
 
 const $q = useQuasar();
 const { carregarStatusProposta } = pedidoService();
-const { formatToBRL } = useCurrency();
+const { formatToBRL } = useCurrency()
+const route = useRoute()
 
 const { registrarOrdemEstabelecimento } = pedidoService()
-const authStore = useAuthStore();
-const pedidoStore = usePedidoStore();
+const authStore = useAuthStore()
+const pedidoStore = usePedidoStore()
+const isEditMode = computed(() => !!route.params.id);
 
 // Estado do formulário
 const form = ref({
@@ -466,18 +466,20 @@ const handlePaymentMethodChange = () => {
 
 // Carregar dados do estabelecimento
 onMounted(async () => {
-  try {
+  if (isEditMode.value) {
+    // Buscar o pedido na store, caso esteja editando
+    const pedidoExistente = pedidoStore.getPedidoById(route.params.id); // ou o método apropriado da store
+    if (pedidoExistente) {
+      form.value = { ...pedidoExistente };  // Preencher o formulário com os dados do pedido
+    }
+  } else {
+    // Caso seja um novo pedido, preenche com dados padrões ou limpos
     form.value.idEstabelecimento = authStore.auth.estabelecimento.idEstabelecimento
     form.value.responsavel = authStore.auth.nome
     form.value.cpfResponsavel = authStore.auth.cpf
     await carregarStatusProposta();
-  } catch (error) {
-    $q.notify({
-      type: 'negative',
-      message: 'Erro ao carregar dados do estabelecimento: ' + error.message,
-    })
   }
-})
+});
 
 // Funções para manipulação de drawers
 const openClientDrawer = () => {
@@ -599,16 +601,7 @@ const resetForm = () => {
 };
 
 const submitOrder = async () => {
-
-  if (
-    !form.value.idEstabelecimento ||
-    !form.value.idCliente ||
-    !form.value.veiculo.placa ||
-    !form.value.formaPagamento ||
-    !form.value.cpfResponsavel ||
-    !form.value.tipoProposta ||
-    !form.value.statusPedido
-  ) {
+  if (!form.value.idEstabelecimento || !form.value.idCliente || !form.value.veiculo.placa || !form.value.formaPagamento || !form.value.cpfResponsavel || !form.value.tipoProposta || !form.value.statusPedido) {
     $q.notify({
       type: 'negative',
       message: 'Por favor, preencha todos os campos obrigatórios, incluindo cliente, veículo, tipo de proposta e situação do pedido.',
@@ -645,17 +638,24 @@ const submitOrder = async () => {
     }
   }
 
-  await registrarOrdemEstabelecimento(form.value)
-  resetForm();
+  if (isEditMode.value) {
+    // Atualizar pedido existente
+    await pedidoStore.updatePedido(form.value);
+    $q.notify({
+      type: 'positive',
+      message: 'Pedido atualizado com sucesso!',
+    });
+  } else {
+    // Criar novo pedido
+    await registrarOrdemEstabelecimento(form.value);
+    $q.notify({
+      type: 'positive',
+      message: 'Pedido/Orçamento gerado com sucesso!',
+    });
+  }
 
-  // Aqui você pode adicionar a lógica para enviar o pedido para uma API
-  $q.notify({
-    type: 'positive',
-    message: 'Pedido/Orçamento gerado com sucesso!',
-  })
+  resetForm(); // Limpa o formulário após a submissão
 }
-
-
 </script>
 
 <style scoped>

@@ -10,6 +10,10 @@ export const usePedidoStore = defineStore('pedidoStore', () => {
 
   const setPedidos = (data) => pedidos.value = data
 
-  return { statusProposta, pedidos, setStatus, setPedidos }
+  const getPedidoById = (id) => {
+    return this.pedidos.find(pedido => pedido.id === id) || null;
+  }
+
+  return { statusProposta, pedidos, setStatus, setPedidos, getPedidoById }
 
 })
