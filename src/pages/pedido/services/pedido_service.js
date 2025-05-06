@@ -13,7 +13,6 @@ export const pedidoService = () => {
 
   const carregarTodasAsOrdensDoEstabelecimento = async () => {
     const response = await api.get(`v1/ordens/${idEstabelecimento}`, {headers: { Authorization: `Bearer ${token}` }})
-    console.log('**** **** **** pedidos: ', response.data)
     pedidoStore.setPedidos(response.data)
   }
 

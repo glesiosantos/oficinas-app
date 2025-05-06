@@ -3,7 +3,7 @@
     <q-card flat bordered class="order-card flex-grow">
       <!-- Cabeçalho -->
       <q-card-section class="bg-accent text-white q-py-sm">
-        <div class="text-h6">Gerar Pedido/Orçamento</div>
+        <div class="text-h6">{{form.idOrdem === null ? 'Gerar Pedido/Orçamento': `Editar Pedido/Orçamento Nº ${form.idOrdem}` }}</div>
       </q-card-section>
 
       <div class="row q-col-gutter-xs q-col-gutter-md-md items-stretch">
@@ -341,6 +341,7 @@ const isEditMode = computed(() => !!route.params.id);
 
 // Estado do formulário
 const form = ref({
+  idOrdem: '',
   idEstabelecimento: '',
   valorEntrada: 0,
   parcelas: 0,
@@ -349,6 +350,7 @@ const form = ref({
   formaPagamento: '',
   tipoProposta: '',
   statusPedido: '',
+  statusOficina: '',
   idCliente: '',
   nomeCliente: '',
   cpfCnpjCliente: '',
@@ -469,6 +471,7 @@ onMounted(async () => {
   if (isEditMode.value) {
     // Buscar o pedido na store, caso esteja editando
     const pedidoExistente = pedidoStore.getPedidoById(route.params.id); // ou o método apropriado da store
+    console.log('*** **** pedido existente: ', pedidoExistente)
     if (pedidoExistente) {
       form.value = { ...pedidoExistente };  // Preencher o formulário com os dados do pedido
     }

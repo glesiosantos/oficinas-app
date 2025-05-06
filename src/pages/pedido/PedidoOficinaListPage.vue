@@ -19,70 +19,66 @@
       </div>
     </div>
 
-    <!-- Tabela para Desktop -->
     <q-table
-      v-if="$q.screen.gt.sm"
-      :rows="pedidosFiltrados"
-      :columns="columns"
-      row-key="id"
-      flat
-      bordered
-      :pagination="{ rowsPerPage: 20 }"
-    >
-      <!-- <template v-slot:body-cell-status="props">
-        <q-badge
-          class="q-pa-sm"
-          rounded
-          :style="{ backgroundColor: getStatusColor(props.row.statusOficina) }"
-        >
-          {{ props.row.statusOficina }}
-        </q-badge>
-      </template> -->
-      <template v-slot:body-cell-acao="props">
-        <q-td :props="props" class="q-gutter-x-xs text-center">
-          <q-btn round dense color="blue" size="md" icon="checklist" @click="openDrawer('edit',props.row)" />
-        </q-td>
-      </template>
-    </q-table>
-
-    <!-- Cards com Collapse para Mobile -->
-    <div v-else>
-      <q-card
-        v-for="pedido in pedidosFiltrados"
-        :key="pedido.id"
-        class="q-mb-md"
+        :rows="pedidosFiltrados"
+        :columns="columns"
+        row-key="id"
+        flat
         bordered
+        :pagination="{ rowsPerPage: 20 }"
+        :hide-header="$q.screen.lt.md"
       >
-        <q-expansion-item
-          icon="directions_car"
-          :label="pedido.veiculo"
-          dense
-          expand-separator
-        >
-          <div class="q-pa-sm">
-            <div><strong>Cliente:</strong> {{ pedido.cliente }}</div>
-            <div class="row items-center q-gutter-sm q-mt-sm">
-              <div
-                style="width: 12px; height: 12px; border-radius: 3px;"
-                :style="{ backgroundColor: getStatusColor(pedido.statusOficina) }"
-              ></div>
-              <div><strong>Status:</strong> {{ pedido.statusOficina }}</div>
-            </div>
-            <q-btn
-              dense
-              flat
-              icon="info"
-              color="primary"
-              class="q-mt-sm"
-              @click="openDrawer(pedido)"
-              label="Detalhes"
-            />
-          </div>
-        </q-expansion-item>
-      </q-card>
-    </div>
+        <!-- Desktop: botão de ação -->
+        <template v-if="$q.screen.gt.sm" v-slot:body-cell-acao="props">
+          <q-td :props="props" class="q-gutter-x-xs text-center">
+            <q-btn round dense color="blue" size="md" icon="checklist" @click="openDrawer('edit', props.row)" />
+          </q-td>
+        </template>
 
-    <!-- Drawer com detalhes -->
+        <!-- Mobile: renderização em card -->
+        <template v-if="$q.screen.lt.md" v-slot:body="props">
+          <q-tr :props="props">
+            <q-td colspan="100%">
+              <q-card
+                flat
+                bordered
+                class="q-mb-sm"
+                :style="`border-top: 4px solid ${getStatusColor(props.row.statusOficina)}`"
+              >
+                <q-card-section>
+                  <div class="text-subtitle2 text-weight-bold">
+                    {{ props.row.veiculo?.placa }} - {{ props.row.veiculo?.modelo }}
+                  </div>
+                  <div class="text-caption">Cliente: {{ props.row.nomeCliente }}</div>
+                  <div class="row items-center q-gutter-sm q-mt-sm">
+                    <div
+                      style="width: 12px; height: 12px; border-radius: 3px;"
+                      :style="{ backgroundColor: getStatusColor(props.row.statusOficina) }"
+                    ></div>
+                    <div class="text-caption"><strong>Status:</strong> {{ props.row.statusOficina }}</div>
+                  </div>
+                </q-card-section>
+
+                <q-separator />
+
+                <q-card-actions align="right" class="q-gutter-sm">
+                  <q-btn
+                    round
+                    dense
+                    icon="checklist"
+                    color="blue"
+                    @click="openDrawer('edit', props.row)"
+                    title="Abrir detalhes"
+                  />
+                </q-card-actions>
+              </q-card>
+            </q-td>
+          </q-tr>
+        </template>
+      </q-table>
+
+
+    <!-- Drawer lateral com detalhes -->
     <q-drawer v-model="drawer" side="right" overlay elevated :width="400">
       <q-scroll-area class="fit">
         <detalhe-pedido-oficina
@@ -114,23 +110,24 @@ const legenda = [
   { label: 'Concluído', color: '#42a5f5' }
 ]
 
-// Retorna a cor do status
+// Retorna a cor com base no status
 const getStatusColor = (status) => {
   const item = legenda.find(l => l.label === status)
   return item ? item.color : '#ccc'
 }
 
-// Filtra os pedidos com os status da legenda
+// Filtro dos pedidos
 const statusPermitidos = legenda.map(l => l.label)
 const pedidosFiltrados = computed(() =>
   pedidoStore.pedidos.filter(p => statusPermitidos.includes(p.statusOficina))
 )
 
+// Colunas da tabela desktop
 const columns = [
   {
     name: 'veiculo',
     label: 'Veículo',
-    field: row => `${row.placa} - ${row.modelo}`,
+    field: row => `${row.veiculo.placa} - ${row.veiculo.modelo}`,
     align: 'left',
     style: 'min-width: 200px;'
   },
@@ -157,9 +154,10 @@ const columns = [
     sortable: false
   }
 ]
+
+// Ao submeter dados
 const handleSubmit = (data) => {
-  // Atualização ou lógica personalizada aqui
-  console.log(data)
+  console.log('*** SUBMIT ***', data)
   closeDrawer()
 }
 </script>

@@ -77,19 +77,19 @@
         <template v-if="isMobile" v-slot:body="props">
           <q-tr :props="props">
             <q-td colspan="100%">
-              <q-card flat bordered class="q-mb-sm" :class="{ 'bg-orange-1': props.row.statusOrdem === 'Em Execução' }">
+              <q-card flat bordered class="q-mb-sm" :class="{ 'bg-orange-1': props.row.statusPedido === 'Em Execução' }">
                 <q-card-section>
                   <div class="text-subtitle2 text-weight-bold">
                     Pedido #{{ props.row.idOrdem }}
                   </div>
                   <div class="text-caption">Cliente: {{ props.row.nomeCliente }}</div>
                   <div class="text-caption">Placa: {{ props.row.placa }}</div>
-                  <div class="text-caption">Status: {{ props.row.statusOrdem }}</div>
+                  <div class="text-caption">Status: {{ props.row.statusPedido }}</div>
                 </q-card-section>
 
                 <q-expansion-item icon="expand_more" label="Ver mais detalhes" dense expand-separator>
                   <q-card-section class="q-pt-none">
-                    <div class="text-caption">Modelo: {{ props.row.modelo }}</div>
+                    <div class="text-caption">Modelo: {{ props.row.veiculo?.modelo }}</div>
                     <div class="text-caption">Tipo: {{ props.row.tipoProposta }}</div>
                     <div class="text-caption">Pagamento: {{ props.row.formaPagamento }}</div>
                     <div class="text-caption">Cadastro: {{ date.formatDate(props.row.dataCadastro, 'DD/MM/YYYY') }}</div>
@@ -100,22 +100,46 @@
                 <q-separator />
 
                 <q-card-actions align="right" class="q-gutter-sm">
-                  <template v-if="props.row.statusOrdem !== 'Finalizado' && props.row.statusOrdem !== 'Cancelado'">
+                  <template v-if="props.row.statusPedido !== 'Finalizado' && props.row.statusPedido !== 'Cancelado'">
+                    <!-- Autorizar Pedido -->
                     <q-btn
-                      v-if="props.row.statusOrdem === 'Aguardando Autorização'"
+                      v-if="props.row.statusPedido === 'Aguardando Autorização'"
                       round dense icon="check" color="green"
                       @click="converterOrcamentoEmPedido(props.row.idOrdem)"
                       title="Autorizar Pedido"
                     />
+
+                    <!-- Enviar para Execução -->
                     <q-btn
-                      round dense icon="construction"
-                      v-if="props.row.tipoProposta === 'Pedido' && props.row.statusOrdem === 'Pendente'"
-                      color="blue"
+                      v-if="props.row.tipoProposta === 'Pedido' && props.row.statusPedido === 'Pendente' || props.row.statusPedido === 'Autorizado'"
+                      round dense icon="construction" color="blue"
                       @click="atualizarStatusPedido(props.row, 'EE')"
                       title="Enviar para Execução"
                     />
-                    <q-btn round dense icon="payments" color="blue" title="Cancelar Pedido" v-if="props.row.tipoProposta === 'Pedido' && props.row.statusOrdem === 'Aguardando Pagamento'" @click="atualizarStatusPedido(props.row, 'FI')"/>
-                    <q-btn round dense icon="stop_circle" color="red" title="Cancelar Pedido" v-if="props.row.tipoProposta === 'Pedido' && props.row.statusOrdem !== 'Aguardando Pagamento'" @click="atualizarStatusPedido(props.row, 'CA')"/>
+
+                    <!-- Cancelar após aguardando pagamento (Finalizar) -->
+                    <q-btn
+                      v-if="props.row.tipoProposta === 'Pedido' && props.row.statusPedido === 'Aguardando Pagamento'"
+                      round dense icon="payments" color="blue"
+                      title="Finalizar Pedido"
+                      @click="atualizarStatusPedido(props.row, 'FI')"
+                    />
+
+                    <!-- Cancelar Pedido geral (exceto aguardando pagamento) -->
+                    <q-btn
+                      v-if="props.row.tipoProposta === 'Pedido' && props.row.statusPedido !== 'Aguardando Pagamento'"
+                      round dense icon="stop_circle" color="red"
+                      title="Cancelar Pedido"
+                      @click="atualizarStatusPedido(props.row, 'CA')"
+                    />
+
+                    <!-- Editar Pedido -->
+                    <q-btn
+                      v-if="['Aguardando Autorização', 'Autorizado', 'Pendente'].includes(props.row.statusPedido)"
+                      round dense icon="edit" color="accent"
+                      title="Editar Pedido"
+                      @click="editarPedido(props.row)"
+                    />
                   </template>
                 </q-card-actions>
               </q-card>
@@ -127,7 +151,7 @@
         <template v-else v-slot:body="props">
     <q-tr
       :props="props"
-      :class="{ 'bg-orange-1': props.row.statusOrdem === 'Em Execução' }"
+      :class="{ 'bg-orange-1': props.row.statusPedido === 'Em Execução' }"
     >
       <q-td
         v-for="col in props.cols"
@@ -137,11 +161,11 @@
         <!-- Se for a célula de ações, renderize os botões -->
         <template v-if="col.name === 'actions'">
         <div class="q-gutter-x-sm row justify-end">
-          <template v-if="props.row.statusOrdem !== 'Finalizado' && props.row.statusOrdem !== 'Cancelado'">
+          <template v-if="props.row.statusPedido !== 'Finalizado' && props.row.statusPedido !== 'Cancelado'">
 
             <!-- Autorizar Pedido -->
             <q-btn
-              v-if="props.row.statusOrdem === 'Aguardando Autorização'"
+              v-if="props.row.statusPedido === 'Aguardando Autorização'"
               round dense icon="check" color="green"
               @click="converterOrcamentoEmPedido(props.row.idOrdem)"
               title="Autorizar Pedido"
@@ -149,7 +173,7 @@
 
             <!-- Enviar para Execução -->
             <q-btn
-              v-if="props.row.tipoProposta === 'Pedido' && props.row.statusOrdem === 'Pendente' || props.row.statusOrdem === 'Autorizado'"
+              v-if="props.row.tipoProposta === 'Pedido' && props.row.statusPedido === 'Pendente' || props.row.statusPedido === 'Autorizado'"
               round dense icon="construction" color="blue"
               @click="atualizarStatusPedido(props.row, 'EE')"
               title="Enviar para Execução"
@@ -157,7 +181,7 @@
 
             <!-- Cancelar após aguardando pagamento (Finalizar) -->
             <q-btn
-              v-if="props.row.tipoProposta === 'Pedido' && props.row.statusOrdem === 'Aguardando Pagamento'"
+              v-if="props.row.tipoProposta === 'Pedido' && props.row.statusPedido === 'Aguardando Pagamento'"
               round dense icon="payments" color="blue"
               title="Finalizar Pedido"
               @click="atualizarStatusPedido(props.row, 'FI')"
@@ -165,7 +189,7 @@
 
             <!-- Cancelar Pedido geral (exceto aguardando pagamento) -->
             <q-btn
-              v-if="props.row.tipoProposta === 'Pedido' && props.row.statusOrdem !== 'Aguardando Pagamento'"
+              v-if="props.row.tipoProposta === 'Pedido' && props.row.statusPedido !== 'Aguardando Pagamento'"
               round dense icon="stop_circle" color="red"
               title="Cancelar Pedido"
               @click="atualizarStatusPedido(props.row, 'CA')"
@@ -173,7 +197,7 @@
 
             <!-- Editar Pedido -->
             <q-btn
-              v-if="['Aguardando Autorização', 'Autorizado', 'Pendente'].includes(props.row.statusOrdem)"
+              v-if="['Aguardando Autorização', 'Autorizado', 'Pendente'].includes(props.row.statusPedido)"
               round dense icon="edit" color="accent"
               title="Editar Pedido"
               @click="editarPedido(props.row)"
@@ -240,14 +264,14 @@ const { formatarDocumento } = useFormatarDocumento()
 const columns = [
   { name: 'idOrdem', label: 'Pedido', field: 'idOrdem', sortable: true, align: 'left' },
   { name: 'cliente', label: 'Cliente', field: 'nomeCliente', sortable: true, align: 'left' },
-  { name: 'cpfCnpj', label: 'CPF/CNPJ', field: row => formatarDocumento(row.cpfCnpj), sortable: true, align: 'left' },
-  { name: 'placa', label: 'Placa', field: 'placa', sortable: true, align: 'left' },
-  { name: 'modelo', label: 'Modelo', field: 'modelo', sortable: true, align: 'left' },
+  { name: 'cpfCnpj', label: 'CPF/CNPJ', field: row => formatarDocumento(row.cpfCnpjCliente), sortable: true, align: 'left' },
+  { name: 'placa', label: 'Placa', field: row => row.veiculo.placa, sortable: true, align: 'left' },
+  { name: 'modelo', label: 'Modelo', field: row => row.veiculo.modelo, sortable: true, align: 'left' },
   { name: 'tipoProposta', label: 'Tipo Proposta', field: 'tipoProposta', sortable: true, align: 'center' },
   {
-    name: 'vencimentoProposta',
+    name: 'dtVencimentoOrcamento',
     label: 'Vencimento',
-    field: row => row.dataVencimentoProposta || '',
+    field: row => row.dtVencimentoOrcamento || '',
     format: val => {
       if (!val) return ' - '
       const parsed = new Date(`${val}T00:00:00`)
@@ -256,9 +280,9 @@ const columns = [
     sortable: true,
     align: 'center'
   },
-  { name: 'status', label: 'Status', field: 'statusOrdem', sortable: true, align: 'center' },
+  { name: 'status', label: 'Status', field: 'statusPedido', sortable: true, align: 'center' },
   { name: 'formaPagamento', label: 'Pagamento', field: 'formaPagamento', sortable: true, align: 'center' },
-  { name: 'dataCadastro', label: 'Cadastro', field: row => row.dataCadastro,
+  { name: 'dataCadastro', label: 'Data de Cadastro', field: row => row.dtCadastro,
   format: val => {
     const parsed = new Date(val + 'T00:00:00') // Força UTC neutro
     return date.formatDate(parsed, 'DD/MM/YYYY')
@@ -282,16 +306,16 @@ const abaSelecionada = ref('todos')
 const pedidosFiltradosPorAba = computed(() => {
   return rowsFiltrados.value.filter(pedido => {
     if (abaSelecionada.value === 'todos') return true
-    if (abaSelecionada.value === 'aguardando') return pedido.statusOrdem === 'Aguardando Autorização'
-    if (abaSelecionada.value === 'execucao') return pedido.statusOrdem === 'Em Execução'
-    if (abaSelecionada.value === 'finalizado') return pedido.statusOrdem === 'Finalizado'
+    if (abaSelecionada.value === 'aguardando') return pedido.statusPedido === 'Aguardando Autorização'
+    if (abaSelecionada.value === 'execucao') return pedido.statusPedido === 'Em Execução'
+    if (abaSelecionada.value === 'finalizado') return pedido.statusPedido === 'Finalizado'
     return true
   })
 })
 
 const rowsFiltrados = computed(() => {
   return pedidoStore.pedidos.filter(pedido => {
-    const statusOk = !filtros.value.status || pedido.statusOrdem === filtros.value.status
+    const statusOk = !filtros.value.status || pedido.statusPedido === filtros.value.status
 
     const dataCadastro = date.extractDate(pedido.dataCadastro, 'YYYY-MM-DD')
     const dataInicio = filtros.value.dataInicio ? date.extractDate(filtros.value.dataInicio, 'YYYY-MM-DD') : null
