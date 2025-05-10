@@ -1,18 +1,18 @@
 <template>
-  <div class="fullscreen bg-blue text-white text-center q-pa-md flex flex-center">
+  <div class="fullscreen bg-yellow text-white text-center q-pa-md flex flex-center">
     <div>
-      <div style="font-size: 30vh">
-        404
+      <div>
+        <q-img src="../assets/imgs/404_vector.png"/>
       </div>
 
-      <div class="text-h2" style="opacity:.4">
-        Oops. Nothing here...
+      <div class="text-h2 text-black" style="opacity:.4">
+        Página não encontrada
       </div>
 
       <q-btn
         class="q-mt-xl"
-        color="white"
-        text-color="blue"
+        color="black"
+        text-color="white"
         unelevated
         to="/"
         label="Go Home"
@@ -25,3 +25,11 @@
 <script setup>
 //
 </script>
+
+<style scoped>
+.error-fundo {
+  background-image: url(../assets/imgs/404.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+</style>

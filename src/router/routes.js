@@ -1,18 +1,45 @@
+import authRouter from '../pages/auth/router'
+import estabelecimentoRouter from '../pages/estabelecimento/router'
+import fornecedorRouter from '../pages/fornecedor/router'
+import colaboradorRouter from '../pages/colaborador/router'
+import clienteRouter from '../pages/clientes/router'
+import pedidoRouter from '../pages/pedido/router'
+import servicoRouter from '../pages/servicos/router'
+import produtoRouter from '../pages/produtos/router'
+
 const routes = [
   {
-    path: '/',
-    component: () => import('layouts/MainLayout.vue'),
+    path: '',
+    component: () => import('layouts/AuthLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/IndexPage.vue') }
-    ]
+      ...authRouter
+    ],
+  },
+  {
+    path: '',
+    component: () => import('layouts/MainLayout.vue'),
+    meta: { requiresAuth: true }, // Todas as rotas filhas exigem autenticação
+    children: [
+      {
+        path: '', // Raiz redireciona para dashboard
+        name: 'dashboard',
+        component: () => import('src/pages/dashboard/IndexPage.vue'),
+      },
+      ...estabelecimentoRouter,
+      ...fornecedorRouter,
+      ...colaboradorRouter,
+      ...clienteRouter,
+      ...pedidoRouter,
+      ...servicoRouter,
+      ...produtoRouter
+    ],
   },
 
-  // Always leave this as last one,
-  // but you can also remove it
+  // Rota 404 (catch-all)
   {
     path: '/:catchAll(.*)*',
-    component: () => import('pages/ErrorNotFound.vue')
-  }
-]
+    component: () => import('pages/ErrorNotFound.vue'),
+  },
+];
 
-export default routes
+export default routes;
