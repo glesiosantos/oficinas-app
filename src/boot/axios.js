@@ -7,7 +7,7 @@ import axios from 'axios'
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const api = axios.create({ baseURL: process.env.URL_API })
+const api = axios.create({ baseURL: process.env.URL_API, withCredentials: false })
 
 export default defineBoot(({ app }) => {
   app.config.globalProperties.$axios = axios

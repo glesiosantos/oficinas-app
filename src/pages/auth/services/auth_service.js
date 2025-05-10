@@ -17,7 +17,7 @@ export const authService = () => {
       authStore.setAuth(response.data)
       return response.data
     } catch (error) {
-      console.error('Erro ao realizar login:', error.message)
+      console.error('Erro ao realizar login:', error)
       throw error
     }
   }

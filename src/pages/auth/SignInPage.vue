@@ -54,6 +54,6 @@ const handleForm = () => {
   logar(form).then(() => {
     router.replace({ name: 'dashboard'})
     notifySuccess("Logado com sucesso!")
-  }).catch((error) => notifyError(error.message))
+  }).catch((error) => notifyError(error))
 }
 </script>
