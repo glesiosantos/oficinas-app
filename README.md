@@ -1,22 +1,27 @@
 <div align="center">
-    <img src="./src/assets/logo.jpeg" width="250px"/>
+    <img src="./src/assets/autorevise_1024x1024.png" width="250px"/>
 </div>
 
-## AUTOREVISE PRO - Gestor para Oficinas Mecânicas (Carros, Motos e Bicicletas) - (WEB AND PWA)
+## AUTOREVISE - API de Gestão para Oficinas Mecânicas (Carros, Motos e Bicicletas)
 
 AUTOREVISE é uma API desenvolvida para gerenciar múltiplas oficinas mecânicas, abrangendo serviços para carros, motos e bicicletas. O sistema oferece funcionalidades completas para administração de pedidos, produtos, estoque, fluxo de caixa e gerenciamento de clientes e seus veículos.
 
 ## 🚀 Funcionalidades
 
-- **Autenticação e Autorização**: Autenticação de colaboradores de acordo a unidade.  
-- **Gerenciamento de Pedidos**: Cadastro, atualização e acompanhamento do status dos serviços prestados.  
-- **Controle de Produtos e Estoque**: Administração de peças, acessórios e insumos utilizados nas oficinas.  
-- **Gestão Financeira**: Monitoramento de receitas, despesas e fluxo de caixa.  
-- **Cadastro de Clientes e Veículos**: Registro detalhado de clientes, incluindo dados de contato e informações sobre seus veículos.  
-- **Suporte a Múltiplas Oficinas**: Cada oficina pode operar de forma independente dentro da mesma plataforma.  
+    >> LEGENDA 🔵 CONCLUÍDO | 🔴 EM DESENVOLVIMENTO
+
+- 🔵 **Autenticação e Autorização**: Autenticação de colaboradores de acordo a unidade.  
+- 🔵 **Gerenciamento de Pedidos**: Cadastro, atualização e acompanhamento do status dos serviços prestados.  
+- 🔵 **Controle de Produtos**: Administração de peças, acessórios e insumos utilizados nas oficinas.  
+- 🔵 **Controle de Fornecedores**: Administração contatos dos fornecedores de seus produtos.  
+- 🔵 **Cadastro de Clientes e Veículos**: Registro detalhado de clientes, incluindo dados de contato e informações sobre seus veículos.  
+- 🔵 **Suporte a Múltiplas Oficinas**: Cada oficina pode operar de forma independente dentro da mesma plataforma.
+- 🔴 **Controle de estoque**: Debitar od estoque a quantidade realizada nas vendas e registrar quantidades adquiridas pelo fornecedor.
+- 🔴 **Controle de contas à pagar/receber**: Registrar receitas/despesa das oficinas
 
 ## 🛠 Tecnologias Utilizadas
 
+- **FrontEnd**: [VueJS](https://vuejs.org/) com [Quasar Framework](https://quasar.dev/)
 - **Backend**: [Java](https://docs.oracle.com/en/java/) com [Spring Boot](https://spring.io/projects/spring-boot)  
 - **Banco de Dados**: [PostgreSQL](https://www.postgresql.org/)  
 - **Autenticação**: JWT com [AUTH0] (https://auth0.com/docs/secure/tokens/json-web-tokens)  
@@ -26,7 +31,7 @@ AUTOREVISE é uma API desenvolvida para gerenciar múltiplas oficinas mecânicas
 
 ### Pré-requisitos
 
-
+- [Node 21](https://nodejs.org/pt) ou superior instalado;
 - [Java 21](https://docs.oracle.com/en/java/) ou superior instalado;  
 - Gerenciador de pacotes [maven](https://maven.apache.org/);  
 - Banco de dados configurado (PostgreSQL de preferência) ou Docker com PostgreSQL;
@@ -37,21 +42,30 @@ AUTOREVISE é uma API desenvolvida para gerenciar múltiplas oficinas mecânicas
 
 ```bash
 # Clone o repositório
-git clone https://github.com/glesiosantos/ms-oficinas-api.git
-
-# Caso use docker
-docker-compose up -d
+git clone https://github.com/glesiosantos/oficinas-app
 
 # Acesse a pasta do projeto
-cd ms-oficinas-api
+cd oficinas-app
+
+# Clone o repositório do backend
+git clone https://github.com/glesiosantos/mecanica-gestor-api
+
+# Acesse a pasta do projeto
+cd mecanica-gestor-api
 
 # Instale as dependências
 mvn install
 
-# Para rodar localmente, certifique se o application.yml está com active setado com valor 'DEV'
-spring:
-  profiles:
-    active: dev
+# Configurar as váriaveis de ambiente 
+    POSTGRESQL_HOST=
+    POSTGRESQL_USER=
+    POSTGRESQL_PASS=
+    RABBITMQ_HOST=
+    RABBITMQ_PORT=
+    RABBITMQ_USER=
+    RABBITMQ_PASS=
+    API_CORS_ALLOWED_ORIGINS=
+    API_SECRET=
 
 # Inicie a aplicação
 mvn spring-boot:run
