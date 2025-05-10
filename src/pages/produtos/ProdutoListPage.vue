@@ -68,7 +68,6 @@ import { useDrawer } from 'src/composables/useDrawer'
 import ProdutoForm from './components/ProdutoForm.vue'
 import useNotify from 'src/composables/useNotify'
 import { useRouter } from 'vue-router'
-import { marcaService } from '../marcas/services/marca_service'
 import { produtoService } from './services/produto_service'
 import { useProdutoStore } from 'src/stores/produto.store'
 import useCalcularPrecoVendas from 'src/composables/usCalcularPrecoVenda'
@@ -77,7 +76,6 @@ import { fornecedorService } from '../fornecedor/services/fornecedor_service'
 
 const { drawer, openDrawer,closeDrawer, isEdit, currentData } = useDrawer()
 const { notifyError, notifySuccess, notifyWarning } = useNotify()
-const { carregarMarcas, carregarModelosDasMarcas } = marcaService()
 const { carregarProdutosDoEstabelecimento, addProduto, editarProduto } = produtoService()
 const { carregarFornecedores } = fornecedorService()
 const {calcularPrecoVenda} = useCalcularPrecoVendas()
@@ -130,10 +128,6 @@ const visualizarProduto = (produto) => {
 }
 
 onMounted(async () => {
-  await carregarMarcas()
-  await carregarModelosDasMarcas()
-  await carregarProdutosDoEstabelecimento()
   await carregarFornecedores()
-
 })
 </script>

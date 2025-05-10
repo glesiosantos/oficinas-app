@@ -2,9 +2,13 @@ import { defineRouter } from '#q-app/wrappers'
 import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router'
 import routes from './routes'
 import { useAuthStore } from 'src/stores/auth.store'
+import { authService } from 'src/pages/auth/services/auth_service'
 
 
 export default defineRouter(function (/* { store, ssrContext } */) {
+
+  const {refreshToken } = authService()
+
   const authStore = useAuthStore()
   const createHistory = process.env.SERVER
     ? createMemoryHistory
@@ -16,13 +20,30 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE)
   })
 
-  Router.beforeEach(async(to, from, next) => {
-    if(to.meta?.requiresAuth){
-      authStore.isAuth ? next() : next({name: 'login'})
+  Router.beforeEach(async (to, from, next) => {
+    if (to.meta?.requiresAuth) {
+      if (authStore.isAuth) {
+        next()
+      } else {
+        try {
+          const refresh = await refreshToken()
+
+          if (refresh?.data) {
+            authStore.setAuth(refresh.data) // ou outro método que você usa para setar o auth
+            next()
+          } else {
+            next({ name: 'login' })
+          }
+        } catch (e) {
+          console.log('*** ', e)
+          next({ name: 'login' })
+        }
+      }
     } else {
       next()
     }
   })
+
 
   return Router
 })
