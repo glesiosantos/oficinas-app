@@ -12,32 +12,13 @@
     </q-card-section>
 
     <q-card-section class="flex-1">
-      <q-select
-        outlined
-        :options="store.categoriasEspecialidades"
-        option-label="categoria"
-        option-value="categoria"
-        label="Selecione a categoria"
-        v-model="form.categoria"
-        emit-value
-        map-options
-        lazy-rules
-        :disable="isEdit"
-        :rules="[val => (val && val.length > 0) || 'Categoria é campo obrigatório']"
-      />
 
-      <q-select
+      <q-input
+        v-model="form.descricao"
+        label="Descricao do Serviço"
         outlined
-        :options="filteredEspecialidades"
-        option-label="nomeEspecialidade"
-        option-value="idEspecialidade"
-        label="Selecione a especialidade"
-        v-model="form.idEspecialidade"
-        emit-value
-        map-options
         lazy-rules
-        :disable="isEdit"
-        :rules="[val => (val && val.length > 0) || 'Especialidade é campo obrigatório']"
+        :rules="[val => (val && val.length > 0) || 'Descrição é obrigatório']"
       />
 
       <q-input
@@ -52,19 +33,17 @@
       />
     </q-card-section>
 
-    <!-- Rodapé (botões) -->
-    <q-card-section class="footer-fixed q-pa-md text-right">
-      <q-btn flat label="Cancelar" color="negative" @click="emit('cancel')" />
-      <q-btn type="submit" color="primary" label="Salvar" class="text-black" />
-    </q-card-section>
+    <div class="fixed-bottom q-pa-sm bg-white" style="border-top: 1px solid #ccc;">
+      <div class="row q-gutter-sm">
+        <q-btn flat label="Cancelar" class="col" color="negative" @click="emit('cancel')" />
+      <q-btn type="submit" color="accent" class="col" label="Salvar"/>
+      </div>
+    </div>
   </q-form>
 </template>
 
 <script setup>
-import { useServicoStore } from 'src/stores/servico.store'
-import { ref, watch, computed, onMounted } from 'vue'
-
-const store = useServicoStore()
+import { ref, watch } from 'vue'
 
 const props = defineProps({
   isEdit: Boolean,
@@ -75,8 +54,7 @@ const emit = defineEmits(['submit', 'cancel'])
 
 const form = ref({
   idServico: null,
-  categoria: '',
-  idEspecialidade: null,
+  descricao: null,
   valor: 0
 })
 
@@ -94,18 +72,12 @@ const updateRawValue = (val) => {
   form.value.valor = rawValue.value
 }
 
-// Filtrar especialidades
-const filteredEspecialidades = computed(() => {
-  if (!form.value.categoria) return []
-  return store.especialidades.filter(esp => esp.categoria === form.value.categoria)
-})
 
 // Carregar dados iniciais
 const loadInitialData = () => {
   if (props.initialData) {
     form.value.idServico = props.initialData.idServico || ''
-    form.value.categoria = props.initialData.categoria || ''
-    form.value.idEspecialidade = String(props.initialData.idEspecialidade || '')
+    form.value.descricao = props.initialData.descricao || ''
     form.value.valor = props.initialData.valor || 0
     rawValue.value = props.initialData.valor || 0
     inputValue.value = props.initialData.valor
@@ -114,21 +86,9 @@ const loadInitialData = () => {
   }
 }
 
-// Carregar ao montar (somente se a store já estiver pronta)
-onMounted(() => {
-  if (store.categoriasEspecialidades.length && store.especialidades.length) {
-    loadInitialData()
-  }
-})
-
 // Garante que dados da store estejam disponíveis para carregar corretamente no modo de edição
 watch(
-  () => store.especialidades,
-  (especialidades) => {
-    if (especialidades.length > 0 && props.isEdit && props.initialData) {
-      loadInitialData()
-    }
-  },
+  loadInitialData() ,
   { immediate: true }
 )
 
