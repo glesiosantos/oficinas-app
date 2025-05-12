@@ -23,6 +23,7 @@
         v-model="form.cpf"
         label="CPF"
         outlined
+        color="accent"
         mask="###.###.###-##"
         lazy-rules
         :rules="[val => (val && val.length > 0) || 'CPF é obrigatório']"
@@ -32,6 +33,7 @@
         v-model="form.nomeCompleto"
         label="Nome do Colaborador"
         outlined
+        color="accent"
         lazy-rules
         :rules="[val => (val && val.length > 0) || 'Nome do Colaborador é obrigatório']"
       />
@@ -43,6 +45,7 @@
         option-value="nome"
         label="Selecione o perfil"
         v-model="form.perfil"
+        color="accent"
         emit-value
         map-options
         lazy-rules
@@ -54,7 +57,6 @@
     <div class="fixed-bottom q-pa-sm bg-white" style="border-top: 1px solid #ccc;">
       <div class="row q-gutter-sm">
         <q-btn flat label="Cancelar" class="col" color="negative" @click="$emit('cancel')" />
-
         <q-btn type="submit" color="accent" class="col" label="Salvar"/>
       </div>
     </div>

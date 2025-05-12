@@ -21,6 +21,7 @@
         v-model="form.nomeFornecedor"
         label="Nome do Fornecedor"
         outlined
+        color="accent"
         class="q-mb-md"
         lazy-rules
         :rules="[val => (val && val.length > 0) || 'Nome do Fornecedor é obrigatório']"
@@ -30,6 +31,7 @@
         <q-input
           v-model="form.contatos[index]"
           mask="(##) #.####-####"
+          color="accent"
           :label="index === 0 ? 'Contato Principal' : `Contato ${index + 1}`"
           outlined
           lazy-rules

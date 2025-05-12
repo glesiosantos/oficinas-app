@@ -1,10 +1,9 @@
 <template>
   <q-form @submit="onSubmit" class="column">
-    <q-card style="height: 100%;">
       <q-card-section class="bg-primary text-black">
         <div class="text-h6">{{ isEdit ? 'Editar Entrada' : 'Nova Entrada de Estoque' }}</div>
       </q-card-section>
-        <q-card-section class="flex-1">
+        <q-card-section class="col-grow">
           <q-select
             v-model="formData.idFornecedor"
             :options="fornecedoresOptions"
@@ -12,6 +11,7 @@
             option-label="nomeFornecedor"
             option-value="id"
             filled
+
             color="accent"
             emit-value
             map-options
@@ -35,6 +35,7 @@
             label="Preço de Custo (R$)"
             filled
             lazy-rules
+            color="accent"
             :rules="[val => (val && parseFloat(val) > 0) || 'Preço deve ser maior que zero']"
             class="q-mb-md"
           />
@@ -44,26 +45,19 @@
             inputmode="numeric"
             label="Quantidade"
             filled
+            color="accent"
             lazy-rules
             :rules="[val => (val && parseInt(val) > 0) || 'Quantidade deve ser maior que zero']"
             class="q-mb-md"
           />
         </q-card-section>
-        <q-card-section class="footer-fixed q-pa-md text-right">
-          <q-btn
-              color="primary"
-              type="submit"
-              label="Adicionar Entrada"
-              class="q-mr-sm text-black"
-            />
-            <q-btn
-              color="negative"
-              label="Cancelar"
-              @click="$emit('cancel')"
-            />
+         <div class="fixed-bottom q-pa-sm bg-white" style="border-top: 1px solid #ccc;">
+          <div class="row q-gutter-sm">
+            <q-btn flat label="Cancelar" class="col" color="negative" @click="$emit('cancel')" />
 
-        </q-card-section>
-    </q-card>
+            <q-btn type="submit" color="accent" class="col" label="Adicionar Estoque"/>
+          </div>
+        </div>
   </q-form>
 </template>
 
