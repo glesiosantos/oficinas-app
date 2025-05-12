@@ -1,41 +1,39 @@
 <template>
-  <q-page padding>
-    <div class="row">
-      <q-card class="col-12 col-sm-12 col-lg-8">
-        <q-card-section>
-          <q-table
-            flat
-            bordered
-            :columns="columns"
-            :rows="servicoStore.servicos"
-            :filter="filter"
-          >
-            <template v-slot:top>
-              <q-input outlined color="primary" v-model="filter" class="col-4" :class="{'full-width': $q.screen.xs}">
-                <template v-slot:append>
-                  <q-icon name="search" />
-                </template>
-              </q-input>
-              <q-space />
-              <q-btn
-                color="primary"
-                class="text-black"
-                label="Adicionar Serviço"
-                @click="openDrawer('add')"
-                :class="{'full-width q-mt-sm': $q.screen.xs}"/>
-            </template>
+  <q-page padding style="min-height: 100vh;">
+    <q-card flat bordered class="order-card flex-grow">
+      <!-- Cabeçalho -->
+      <q-card-section class="bg-accent text-white q-py-sm">
+        <div class="text-h6">Serviços do estabelecimento</div>
+      </q-card-section>
 
-            <template v-slot:body-cell-actions="props">
-              <q-td :props="props" class="q-gutter-x-xs text-center">
-                <q-btn round dense color="accent" size="sm" icon="edit" @click="openDrawer('edit', props.row)" />
-                <!-- <q-btn round dense color="red" size="sm" icon="delete" @click="handleDelete(props.row)"/> -->
-              </q-td>
-            </template>
-          </q-table>
-        </q-card-section>
-      </q-card>
-    </div>
+      <div class="row">
+        <q-card class="col-12">
+          <q-card-section>
+            <q-table
+              flat
+              bordered
+              :columns="columns"
+              :rows="servicoStore.servicos"
+              :filter="filter"
+            >
+              <template v-slot:top>
+                <q-input outlined color="primary" v-model="filter" class="col-12" :class="{'full-width': $q.screen.xs}">
+                  <template v-slot:append>
+                    <q-icon name="search" />
+                  </template>
+                </q-input>
+              </template>
 
+              <template v-slot:body-cell-actions="props">
+                <q-td :props="props" class="q-gutter-x-xs text-center">
+                  <q-btn round dense color="accent" size="sm" icon="edit" @click="openDrawer('edit', props.row)" />
+                </q-td>
+              </template>
+            </q-table>
+          </q-card-section>
+        </q-card>
+      </div>
+    </q-card>
     <q-drawer v-model="drawer" side="right" overlay elevated :width="400">
       <q-scroll-area class="fit">
         <servico-form
@@ -47,6 +45,12 @@
         />
       </q-scroll-area>
     </q-drawer>
+
+    <q-page-sticky :position="stickyPosition" :offset="[18, 18]">
+        <div :class="layoutClass">
+          <q-btn fab icon="add" color="accent" @click="openDrawer('add')" />
+        </div>
+    </q-page-sticky>
   </q-page>
 </template>
 <script setup>
@@ -58,6 +62,8 @@ import useNotify from 'src/composables/useNotify'
 import useCurrency from 'src/composables/useCurrency'
 import { servicoService } from './services/servico_service'
 import { useServicoStore } from 'src/stores/servico.store'
+import { computed } from 'vue'
+import { useQuasar } from 'quasar'
 
 const { drawer, openDrawer,closeDrawer, isEdit, currentData } = useDrawer()
 const { notifyError, notifyWarning, notifySuccess } = useNotify()
@@ -67,30 +73,27 @@ const { carregarCategoriasDosServicos,
   } = servicoService()
 
 const filter = ref('')
+const $q = useQuasar()
 
 const servicoStore = useServicoStore()
 const { formatToBRL } = useCurrency()
 
+const stickyPosition = computed(() => {
+  return $q.screen.lt.md ? 'bottom-right' : 'top-right'
+})
+
 const columns = [
-  { label: 'Nome',
+  { label: 'Código',
+    field: row => row.idServico,
+    align: 'left'
+  },
+    { label: 'Nome',
     field: row => row.descricao,
     align: 'left'
   },
-  { label: 'Categoria', field: row => row.categoria, align: 'left' },
-  { label: 'Tipo de Veículo', field: row => row.servicoPara, align: 'center' },
   { label: 'Valor', field: row => formatToBRL(row.valor), format: val => `${val}`, align: 'left' },
   { label: 'Ações', field: 'actions', name: 'actions', align: 'center' }
 ]
-
-// const handleDelete = async (data) => {
-//   const response = await deletarServicoDoEstabelecimento(data)
-
-//   if(response.status === 204) {
-//     notifySuccess('Serviço removido com sucesso!')
-//   }
-
-//   await carregarServicoDoEstabelecimento()
-// }
 
 const handleSubmit = async (formData) => {
   try {
@@ -129,3 +132,13 @@ onMounted(async () => {
   await carregarServicoDoEstabelecimento()
 })
 </script>
+
+<style scoped>
+.order-card {
+  max-width: 1200px;
+  margin: 0 auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+</style>

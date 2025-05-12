@@ -215,11 +215,10 @@
 
     </q-table>
 
-  <q-page-sticky :position="stickyPosition" :offset="[18, 18]">
-      <div :class="layoutClass">
-        <q-btn fab icon="mdi-account-wrench" color="accent" :to="{ name: 'criar-pedido' }" />
-        <!-- <q-btn fab icon="bolt" color="blue" :to="{ name: 'listar-pedidos' }" /> -->
-      </div>
+    <q-page-sticky :position="stickyPosition" :offset="[18, 18]">
+        <div :class="layoutClass">
+          <q-btn fab icon="mdi-account-wrench" color="accent" :to="{ name: 'criar-pedido' }" />
+        </div>
     </q-page-sticky>
   </q-page>
 </template>
