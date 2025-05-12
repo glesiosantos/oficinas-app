@@ -51,20 +51,14 @@
     </q-card-section>
 
     <!-- Rodapé (botões) -->
-    <q-card-section class="footer-fixed q-pa-md text-right">
-      <q-btn
-        flat
-        label="Cancelar"
-        color="negative"
-        @click="$emit('cancel')"
-      />
-      <q-btn
-        type="submit"
-        color="primary"
-        label="Salvar"
-        class="text-black"
-      />
-    </q-card-section>
+    <div class="fixed-bottom q-pa-sm bg-white" style="border-top: 1px solid #ccc;">
+      <div class="row q-gutter-sm">
+        <q-btn flat label="Cancelar" class="col" color="negative" @click="$emit('cancel')" />
+
+        <q-btn type="submit" color="accent" class="col" label="Salvar"/>
+      </div>
+    </div>
+
   </q-form>
 </template>
 

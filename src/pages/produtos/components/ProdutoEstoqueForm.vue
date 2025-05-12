@@ -12,6 +12,7 @@
             option-label="nomeFornecedor"
             option-value="id"
             filled
+            color="accent"
             emit-value
             map-options
             input-debounce="300"

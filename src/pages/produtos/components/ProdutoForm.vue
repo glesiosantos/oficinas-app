@@ -16,6 +16,7 @@
       <q-input
         v-model="form.codigo"
         label="Código da Peça/Acessório"
+        color="accent"
         outlined
         lazy-rules
         :rules="[(val) => (val && val.length > 0) || 'Código é obrigatório']"
@@ -27,6 +28,7 @@
         label="Referência da Peça/Acessório"
         :style="{ textTransform: 'uppercase' }"
         outlined
+        color="accent"
         lazy-rules
         :rules="[(val) => (val && val.length > 0) || 'Referência é obrigatória']"
       />
@@ -37,6 +39,7 @@
         label="Descrição"
         :style="{ textTransform: 'uppercase' }"
         outlined
+        color="accent"
         lazy-rules
         :rules="[(val) => (val && val.length > 0) || 'Descrição é obrigatória']"
       />
@@ -50,6 +53,7 @@
         option-value="codigo"
         outlined
         emit-value
+        color="accent"
         map-options
         lazy-rules
         :rules="[(val) => !!val || 'Categoria é obrigatória']"
@@ -62,6 +66,7 @@
         :disable="isEdit"
         type="number"
         outlined
+        color="accent"
         step="0.01"
         lazy-rules
         :rules="[
@@ -76,6 +81,7 @@
         type="number"
         outlined
         step="0.1"
+        color="accent"
         lazy-rules
         :rules="[
           (val) => (val !== null && val >= 0) || 'Percentual de lucro deve ser maior ou igual a zero',
@@ -90,6 +96,7 @@
         type="number"
         outlined
         step="0.01"
+        color="accent"
         disabled
         lazy-rules
         :rules="[(val) => (val !== null && val >= 0) || 'Preço de venda é inválido']"
@@ -102,6 +109,7 @@
         label="Quantidade Minima Estoque"
         type="number"
         outlined
+        color="accent"
         lazy-rules
         :rules="[
           (val) => (val !== null && val >= 0) || 'Quantidade é obrigatória e deve ser maior ou igual a zero',
@@ -113,57 +121,21 @@
         :disable="isEdit"
         label="Quantidade em Estoque Inicial"
         type="number"
+        color="accent"
         outlined
         lazy-rules
         :rules="[
           (val) => (val !== null && val >= 0) || 'Quantidade é obrigatória e deve ser maior ou igual a zero',
         ]"
       />
-
-      <!-- Compatibilidade com Modelos
-      <div class="q-mt-md">
-        <div class="text-subtitle1 q-mb-sm">Compatibilidade com Modelos</div>
-        <div v-for="(compatibilidade, index) in form.modelos" :key="index" class="row q-mb-sm">
-          <div class="col">
-            <q-select
-              v-model="form.modelos[index]"
-              :options="marcaStore.modelos"
-              label="Modelo"
-              outlined
-              option-label="modelo"
-              option-value="idModelo"
-              emit-value
-              map-options
-              lazy-rules
-            />
-          </div>
-          <q-btn
-            v-if="index > 0"
-            round
-            dense
-            flat
-            icon="delete"
-            color="negative"
-            @click="removeCompatibilidade(index)"
-            class="q-ml-sm"
-          />
-        </div>
-        <q-btn
-          flat
-          label="Adicionar Compatibilidade"
-          color="black"
-          icon="add"
-          @click="addCompatibilidade"
-          class="q-my-sm"
-        />
-      </div> -->
     </q-card-section>
 
-    <!-- Rodapé (botões) -->
-    <q-card-section class="footer-fixed q-pa-md text-right">
-      <q-btn flat label="Cancelar" color="negative" @click="$emit('cancel')" />
-      <q-btn type="submit" color="primary" class="text-black" label="Salvar" :disable="loading" />
-    </q-card-section>
+    <div class="fixed-bottom q-pa-sm bg-white" style="border-top: 1px solid #ccc;">
+      <div class="row q-gutter-sm">
+        <q-btn flat label="Cancelar" class="col" color="negative" @click="$emit('cancel')" />
+        <q-btn type="submit" color="accent" class="col" label="Salvar" :disable="loading" />
+      </div>
+    </div>
   </q-form>
 </template>
 

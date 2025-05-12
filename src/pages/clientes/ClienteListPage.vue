@@ -1,55 +1,60 @@
 <template>
-  <q-page padding>
-    <div class="row">
-      <q-card class="col-12 col-sm-12">
-        <q-card-section>
-          <q-table
-            flat
-            bordered
-            :columns="columns"
-            :rows="clienteStore.clientes"
-            :filter="filter"
-            :loading="loading"
-          >
-            <template v-slot:loading>
-              <q-inner-loading showing>
-                <q-spinner size="50px" color="primary" />
-              </q-inner-loading>
-            </template>
-            <template v-slot:top>
-              <q-input outlined color="primary" v-model="filter" class="col-4" :class="{'full-width': $q.screen.xs}">
-                <template v-slot:append>
-                  <q-icon name="search" />
-                </template>
-              </q-input>
-              <q-space />
-              <q-btn
-                color="primary"
-                class="text-black"
-                label="Adicionar cliente"
-                @click="openDrawer('add')"
-                :class="{'full-width q-mt-sm': $q.screen.xs}"/>
-            </template>
-            <template v-slot:body-cell-actions="props">
-              <q-td :props="props" class="q-gutter-x-xs text-center">
-                <q-btn round dense color="primary text-black" size="md" @click="openDrawer('edit', props.row)" title="Editar" icon="edit" />
+  <q-page padding style="min-height: 100vh;">
+    <q-card flat bordered class="list-card flex-grow">
+      <!-- Cabeçalho -->
+      <q-card-section class="bg-accent text-white q-py-sm">
+        <div class="text-h6">Clientes do estabelecimento</div>
+      </q-card-section>
+      <div class="row">
+        <q-card class="col-12 col-sm-12">
+          <q-card-section>
+            <q-table
+              flat
+              bordered
+              :columns="columns"
+              :rows="clienteStore.clientes"
+              :filter="filter"
+              :loading="loading"
+            >
+              <template v-slot:loading>
+                <q-inner-loading showing>
+                  <q-spinner size="50px" color="primary" />
+                </q-inner-loading>
+              </template>
+              <template v-slot:top>
+                <q-input outlined color="primary" v-model="filter" class="col-12" :class="{'full-width': $q.screen.xs}">
+                  <template v-slot:append>
+                    <q-icon name="search" />
+                  </template>
+                </q-input>
+              </template>
+              <template v-slot:body-cell-actions="props">
+                <q-td :props="props" class="q-gutter-x-xs text-center">
+                  <q-btn round dense color="primary text-black" size="md" @click="openDrawer('edit', props.row)" title="Editar" icon="edit" />
 
-                <q-btn
-                  round
-                  dense
-                  color="green"
-                  size="md"
-                  icon="visibility"
-                  @click="visualizarCliente(props.row)"
-                  title="Visualizar Cliente"
-                />
-              </q-td>
-            </template>
+                  <q-btn
+                    round
+                    dense
+                    color="green"
+                    size="md"
+                    icon="visibility"
+                    @click="visualizarCliente(props.row)"
+                    title="Visualizar Cliente"
+                  />
+                </q-td>
+              </template>
 
-          </q-table>
-        </q-card-section>
-      </q-card>
-    </div>
+            </q-table>
+          </q-card-section>
+        </q-card>
+      </div>
+    </q-card>
+
+    <q-page-sticky :position="stickyPosition" :offset="[18, 18]">
+        <div :class="layoutClass">
+          <q-btn fab icon="person_add" title="Adicionar Clientes" color="accent" @click="openDrawer('add')" />
+        </div>
+    </q-page-sticky>
 
     <q-drawer v-model="drawer" side="right" overlay elevated :width="400">
       <q-scroll-area class="fit">
@@ -67,13 +72,14 @@
 </template>
 
 <script setup>
-import { onMounted, ref} from 'vue'
+import { computed, onMounted, ref} from 'vue'
 import { useDrawer } from 'src/composables/useDrawer'
 import ClienteForm from './components/ClienteForm.vue'
 import { clienteService } from './services/cliente_service'
 import useNotify from 'src/composables/useNotify'
 import { useClienteStore } from 'src/stores/cliente.store'
 import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 
 const loading = ref(false)
 const { drawer, openDrawer, closeDrawer, isEdit, currentData } = useDrawer()
@@ -82,6 +88,7 @@ const { notifyError, notifyWarning, notifySuccess } = useNotify()
 const clienteStore = useClienteStore()
 const filter = ref('')
 const router = useRouter()
+const $q = useQuasar()
 
 const columns = [
   {
@@ -101,7 +108,11 @@ const columns = [
     align: 'left'
   },
   { label: 'Ações', field: 'actions', name: 'actions', align: 'center' }
-];
+]
+
+const stickyPosition = computed(() => {
+  return $q.screen.lt.md ? 'bottom-right' : 'top-right'
+})
 
 const formatarCPFouCNPJ = (value) => {
   if (!value) return '';

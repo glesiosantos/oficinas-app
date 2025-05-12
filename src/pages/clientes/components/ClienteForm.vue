@@ -20,6 +20,7 @@
           :val="t.tipo"
           :label="t.descricao"
           :key="t.tipo"
+          color="accent"
         />
       </div>
 
@@ -30,6 +31,7 @@
         outlined
         :mask="form.tipoCliente === 'PF' ? '###.###.###-##' : '##.###.###/####-##'"
         :loading="loading"
+        color="accent"
         lazy-rules
         :rules="[
           (val) => (val && val.length > 0) || (form.tipoCliente === 'PF' ? 'CPF é obrigatório' : 'CNPJ é obrigatório'),
@@ -42,6 +44,7 @@
         label="Razão Social"
         :style="{ textTransform: 'uppercase' }"
         outlined
+        color="accent"
         lazy-rules
         :rules="[(val) => (val && val.length > 0) || 'Razão social é obrigatório']"
       />
@@ -51,6 +54,7 @@
         label="Nome Completo ou Nome Fantasia"
         :style="{ textTransform: 'uppercase' }"
         outlined
+        color="accent"
         lazy-rules
         :rules="[(val) => (val && val.length > 0) || 'Nome Completo é obrigatório']"
       />
@@ -62,6 +66,7 @@
           mask="(##) #.####-####"
           :label="index === 0 ? 'Contato Principal' : `Contato ${index + 1}`"
           outlined
+          color="accent"
           lazy-rules
           :rules="[(val) => (val && val.length > 0) || 'Contato é obrigatório']"
         >

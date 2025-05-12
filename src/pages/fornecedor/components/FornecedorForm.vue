@@ -59,22 +59,14 @@
       />
     </q-card-section>
 
-    <q-card-actions class="q-pa-md">
-      <q-btn
-        flat
-        label="Cancelar"
-        color="negative"
-        class="col"
-        @click="$emit('cancel')"
-      />
-      <q-space class="q-mx-sm" />
-      <q-btn
-        type="submit"
-        color="primary"
-        label="Salvar"
-        class="col text-black"
-      />
-    </q-card-actions>
+    <div class="fixed-bottom q-pa-sm bg-white" style="border-top: 1px solid #ccc;">
+      <div class="row q-gutter-sm">
+        <q-btn flat label="Cancelar" class="col" color="negative" @click="$emit('cancel')" />
+
+        <q-btn type="submit" color="accent" class="col" label="Salvar"/>
+      </div>
+    </div>
+
   </q-form>
 </template>
 
