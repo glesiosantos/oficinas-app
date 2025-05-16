@@ -469,9 +469,7 @@ const handlePaymentMethodChange = () => {
 // Carregar dados do estabelecimento
 onMounted(async () => {
   if (isEditMode.value) {
-    // Buscar o pedido na store, caso esteja editando
-    const pedidoExistente = pedidoStore.getPedidoById(route.params.id); // ou o método apropriado da store
-    console.log('*** **** pedido existente: ', pedidoExistente)
+    const pedidoExistente = pedidoStore.getPedidoById(route.params.id)
     if (pedidoExistente) {
       form.value = { ...pedidoExistente };  // Preencher o formulário com os dados do pedido
     }
@@ -604,7 +602,7 @@ const resetForm = () => {
 };
 
 const submitOrder = async () => {
-  if (!form.value.idEstabelecimento || !form.value.idCliente || !form.value.veiculo.placa || !form.value.formaPagamento || !form.value.cpfResponsavel || !form.value.tipoProposta || !form.value.statusPedido) {
+  if (!form.value.idEstabelecimento || !form.value.idCliente || !form.value.formaPagamento || !form.value.cpfResponsavel || !form.value.tipoProposta || !form.value.statusPedido) {
     $q.notify({
       type: 'negative',
       message: 'Por favor, preencha todos os campos obrigatórios, incluindo cliente, veículo, tipo de proposta e situação do pedido.',

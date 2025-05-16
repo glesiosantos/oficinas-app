@@ -30,7 +30,7 @@
               </template>
               <template v-slot:body-cell-actions="props">
                 <q-td :props="props" class="q-gutter-x-xs text-center">
-                  <q-btn round dense color="primary text-black" size="md" @click="openDrawer('edit', props.row)" title="Editar" icon="edit" />
+                  <q-btn v-if="props.row.cpfOuCnpj !== '00000000000'" round dense color="primary text-black" size="md" @click="openDrawer('edit', props.row)" title="Editar" icon="edit" />
 
                   <q-btn
                     round

@@ -181,10 +181,17 @@
 
             <!-- Cancelar após aguardando pagamento (Finalizar) -->
             <q-btn
-              v-if="props.row.tipoProposta === 'Pedido' && props.row.statusPedido === 'Aguardando Pagamento'"
-              round dense icon="payments" color="blue"
+              v-if="props.row.tipoProposta === 'Pedido' && (props.row.statusPedido === 'Aguardando Pagamento' || props.row.statusPedido === 'Autorizado')"
+              round dense icon="payments" color="green"
               title="Finalizar Pedido"
               @click="atualizarStatusPedido(props.row, 'FI')"
+            />
+
+            <q-btn
+              v-if="['Aguardando Autorização', 'Autorizado', 'Pendente'].includes(props.row.statusPedido)"
+              round dense icon="edit" color="accent"
+              title="Editar Pedido"
+              @click="editarPedido(props.row)"
             />
 
             <!-- Cancelar Pedido geral (exceto aguardando pagamento) -->
@@ -193,14 +200,6 @@
               round dense icon="stop_circle" color="red"
               title="Cancelar Pedido"
               @click="atualizarStatusPedido(props.row, 'CA')"
-            />
-
-            <!-- Editar Pedido -->
-            <q-btn
-              v-if="['Aguardando Autorização', 'Autorizado', 'Pendente'].includes(props.row.statusPedido)"
-              round dense icon="edit" color="accent"
-              title="Editar Pedido"
-              @click="editarPedido(props.row)"
             />
           </template>
         </div>
@@ -224,7 +223,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { usePedidoStore } from 'src/stores/pedido.store'
 import { useQuasar, date } from 'quasar'
 import { useFormatarDocumento } from 'src/composables/useFormatarDocumento'
@@ -246,7 +245,6 @@ const layoutClass = computed(() => {
 
 const {carregarTodasAsOrdensDoEstabelecimento, atualizarOrcamentoParaPedido, mudarStatusPedido } = pedidoService()
 
-// const busca = ref('')
 const filtros = ref({
   status: '',
   dataInicio: '',
@@ -264,8 +262,8 @@ const columns = [
   { name: 'idOrdem', label: 'Pedido', field: 'idOrdem', sortable: true, align: 'left' },
   { name: 'cliente', label: 'Cliente', field: 'nomeCliente', sortable: true, align: 'left' },
   { name: 'cpfCnpj', label: 'CPF/CNPJ', field: row => formatarDocumento(row.cpfCnpjCliente), sortable: true, align: 'left' },
-  { name: 'placa', label: 'Placa', field: row => row.veiculo.placa, sortable: true, align: 'left' },
-  { name: 'modelo', label: 'Modelo', field: row => row.veiculo.modelo, sortable: true, align: 'left' },
+  { name: 'placa', label: 'Placa', field: row => row.veiculo?.placa, sortable: true, align: 'left' },
+  { name: 'modelo', label: 'Modelo', field: row => row.veiculo?.modelo, sortable: true, align: 'left' },
   { name: 'tipoProposta', label: 'Tipo Proposta', field: 'tipoProposta', sortable: true, align: 'center' },
   {
     name: 'dtVencimentoOrcamento',
@@ -352,15 +350,14 @@ const converterOrcamentoEmPedido = async (idPedido) => {
       unelevated: true
       },
     persistent: true}
-  )
-    .onOk(async () => {
+  ).onOk(async () => {
       const response = await atualizarOrcamentoParaPedido(idPedido)
       if (response.status === 204) {
         notifySuccess('Orçamento convertido para Pedido com sucesso!')
       }
+      await carregarTodasAsOrdensDoEstabelecimento()
     })
 
-    await carregarTodasAsOrdensDoEstabelecimento()
   } else {
     notifyError(`Não foi possível converter o pedido ${idPedido}`)
   }
@@ -392,7 +389,6 @@ const atualizarStatusPedido = (pedidoRow, novoStatus) => {
           if (response.status === 204) {
             notifySuccess('Pedido com status alterado com sucesso!')
           }
-
           await carregarTodasAsOrdensDoEstabelecimento()
         })
     }
@@ -415,13 +411,13 @@ const atualizarStatusPedido = (pedidoRow, novoStatus) => {
           if (response.status === 204) {
             notifySuccess('Pedido finalizado com sucesso!')
           }
-
           await carregarTodasAsOrdensDoEstabelecimento()
         })
-    }
-
+      }
   } else {
     notifyError(`Pedido ${pedidoRow.idOrdem} não encontrado.`)
   }
 }
+
+onMounted(async() => await carregarTodasAsOrdensDoEstabelecimento())
 </script>
