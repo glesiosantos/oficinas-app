@@ -26,6 +26,11 @@ export const pedidoService = () => {
     pedidoStore.setStatus(response.data)
   }
 
+  const carregarStatusOficina = async () => {
+    const response = await api.get('v1/utils/status/oficina', {headers: { Authorization: `Bearer ${token}` }})
+    pedidoStore.setStatusOficina(response.data)
+  }
+
   const registrarOrdemEstabelecimento = async (data) => {
     const response = await api.post('/v1/ordens', data, {headers: { Authorization: `Bearer ${authStore.auth.token}` }})
     return response.data
@@ -50,6 +55,7 @@ export const pedidoService = () => {
       carregarTodasAsOrdensDoEstabelecimento,
       carregarOrdensDoEstabelecimentoComTipoPedido,
       carregarStatusProposta,
+      carregarStatusOficina,
       registrarOrdemEstabelecimento,
       atualizarOrcamentoParaPedido,
       mudarStatusPedido,

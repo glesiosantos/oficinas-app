@@ -1,6 +1,6 @@
 <template>
   <q-page padding style="min-height: 100vh;">
-    <q-card flat bordered class="order-card flex-grow">
+    <q-card flat bordered class="list-card flex-grow">
       <!-- Cabeçalho -->
       <q-card-section class="bg-accent text-white q-py-sm">
         <div class="text-h6">Serviços do estabelecimento</div>
@@ -15,6 +15,7 @@
               :columns="columns"
               :rows="servicoStore.servicos"
               :filter="filter"
+              :pagination="{rowsPerPage: 10}"
             >
               <template v-slot:top>
                 <q-input outlined color="primary" v-model="filter" class="col-12" :class="{'full-width': $q.screen.xs}">
@@ -132,13 +133,3 @@ onMounted(async () => {
   await carregarServicoDoEstabelecimento()
 })
 </script>
-
-<style scoped>
-.order-card {
-  max-width: 1200px;
-  margin: 0 auto;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-</style>

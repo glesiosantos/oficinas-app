@@ -1,41 +1,46 @@
 <template>
-  <q-page padding>
-    <div class="row">
-      <q-card class="col-12 col-sm-12 col-lg-8">
-        <q-card-section>
-          <q-table
-            flat
-            bordered
-            :columns="columns"
-            :rows="colaboradoreStore.colaboradores"
-            :filter="filter"
-          >
-            <template v-slot:top>
-              <q-input outlined color="primary" v-model="filter" class="col-4" :class="{'full-width': $q.screen.xs}">
-                <template v-slot:append>
-                  <q-icon name="search" />
-                </template>
-              </q-input>
-              <q-space />
-              <q-btn
-                v-if="authStore.auth.plano.totalUsuario > colaboradoreStore.colaboradores.length"
-                color="primary"
-                class="text-black"
-                label="Adicionar Colaborador"
-                @click="openDrawer('add')"
-                :class="{'full-width q-mt-sm': $q.screen.xs}"/>
-            </template>
+  <q-page padding style="min-height: 100vh;">
+    <q-card flat bordered class="list-card flex-grow">
+      <!-- Cabeçalho -->
+      <q-card-section class="bg-accent text-white q-py-sm">
+        <div class="text-h6">Colaboradores do estabelecimento</div>
+      </q-card-section>
+      <div class="row">
+        <q-card class="col-12">
+          <q-card-section>
+            <q-table
+              flat
+              bordered
+              :columns="columns"
+              :rows="colaboradoreStore.colaboradores"
+              :filter="filter"
+              :pagination="{rowsPerPage: 10}"
+            >
+              <template v-slot:top>
+                <q-input outlined color="primary" v-model="filter" class="col-12" :class="{'full-width': $q.screen.xs}">
+                  <template v-slot:append>
+                    <q-icon name="search" />
+                  </template>
+                </q-input>
+               </template>
 
-            <template v-slot:body-cell-actions="props">
-              <q-td :props="props" class="q-gutter-x-xs text-center">
-                <q-btn round dense color="primary" size="sm" icon="edit" v-if="!props.row.usuarioPrincipal" @click="openDrawer('edit', props.row)" />
-                <q-btn round dense color="red" size="sm" icon="delete" v-if="!props.row.usuarioPrincipal" @click="deletar(props.row)"/>
-              </q-td>
-            </template>
-          </q-table>
-        </q-card-section>
-      </q-card>
-    </div>
+              <template v-slot:body-cell-actions="props">
+                <q-td :props="props" class="q-gutter-x-xs text-center">
+                  <q-btn round dense color="primary" size="sm" icon="edit" v-if="!props.row.usuarioPrincipal" @click="openDrawer('edit', props.row)" />
+                  <q-btn round dense color="red" size="sm" icon="delete" v-if="!props.row.usuarioPrincipal" @click="deletar(props.row)"/>
+                </q-td>
+              </template>
+            </q-table>
+          </q-card-section>
+        </q-card>
+      </div>
+    </q-card>
+
+    <q-page-sticky :position="stickyPosition" :offset="[18, 18]" v-if="authStore.auth.plano.totalUsuario > colaboradoreStore.colaboradores.length">
+        <div :class="layoutClass">
+          <q-btn fab icon="add" title="Adicionar Novo Colaborador" color="accent" @click="openDrawer('add')" />
+        </div>
+    </q-page-sticky>
 
     <q-drawer v-model="drawer" side="right" overlay elevated :width="400">
       <q-scroll-area class="fit">
@@ -52,8 +57,8 @@
   </q-page>
 </template>
 <script setup>
-import { onMounted, ref, nextTick } from 'vue'
-import { date } from 'quasar'
+import { onMounted, ref, nextTick, computed } from 'vue'
+import { date, useQuasar } from 'quasar'
 import { useDrawer } from 'src/composables/useDrawer'
 
 import ColaboradorForm from './components/ColaboradorForm.vue'
@@ -68,7 +73,12 @@ const { notifyError, notifySuccess, notifyWarning } = useNotify()
 const colaboradoreStore = useColaboradorStore()
 const authStore = useAuthStore()
 
+const $q = useQuasar()
 const filter = ref('')
+
+const stickyPosition = computed(() => {
+  return $q.screen.lt.md ? 'bottom-right' : 'top-right'
+})
 
 const columns = [
   { label: 'CPF',

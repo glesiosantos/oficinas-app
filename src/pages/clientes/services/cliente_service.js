@@ -18,7 +18,7 @@ export const clienteService = () => {
 
   const carregarClienteESeusVeiculos = async (data) => {
     const response = await api.get(`v1/estabelecimento/clientes/${idEstabelecimento}/${data}`,{ headers: { Authorization: `Bearer ${token}` }})
-    response.data
+    return response.data
   }
 
   const adicionarVeiculo = async (data) => {
@@ -34,6 +34,7 @@ export const clienteService = () => {
 
   const carregarClientePeloCpfOuCnpj = async (data) => {
     const response = await api.get(`/v1/clientes/${data}`,{headers: { Authorization: `Bearer ${token}` }})
+    console.log('**** ', response.data)
     return response
   }
 

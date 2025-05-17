@@ -98,9 +98,14 @@ import { computed } from 'vue'
 import { usePedidoStore } from 'src/stores/pedido.store'
 import { useDrawer } from 'src/composables/useDrawer'
 import DetalhePedidoOficina from './components/DetalhePedidoOficina.vue'
+import { pedidoService } from './services/pedido_service'
+import useNotify from 'src/composables/useNotify'
 
 const { drawer, isEdit, currentData, openDrawer, closeDrawer } = useDrawer()
+const { notifySuccess } = useNotify()
+
 const pedidoStore = usePedidoStore()
+const { mudarStatusPedidoNaOficina, carregarTodasAsOrdensDoEstabelecimento } = pedidoService()
 
 // Legenda dos status
 const legenda = [
@@ -155,9 +160,10 @@ const columns = [
   }
 ]
 
-// Ao submeter dados
-const handleSubmit = (data) => {
-  console.log('*** SUBMIT ***', data)
+const handleSubmit = async (data) => {
+  await mudarStatusPedidoNaOficina(data)
+  await carregarTodasAsOrdensDoEstabelecimento()
   closeDrawer()
+  notifySuccess('Status do serviço atualizado com sucesso!')
 }
 </script>

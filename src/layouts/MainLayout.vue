@@ -200,7 +200,7 @@ const { carregarCategoriasDosProdutos,
         carregarServicoDoEstabelecimento
 } = utilService()
 
-const { carregarTodasAsOrdensDoEstabelecimento } = pedidoService()
+const { carregarTodasAsOrdensDoEstabelecimento, carregarStatusOficina } = pedidoService()
 
 const router = useRouter()
 const { notifySuccess } = useNotify()
@@ -292,6 +292,7 @@ onMounted(async () => {
   await carregarProdutosDoEstabelecimento()
   await carregarServicoDoEstabelecimento()
   await carregarTodasAsOrdensDoEstabelecimento()
+  await carregarStatusOficina()
 })
 
 </script>

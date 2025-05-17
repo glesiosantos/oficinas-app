@@ -32,15 +32,18 @@
           <q-card class="q-pa-sm q-pa-md-md full-height no-shadow">
             <q-card-section>
               <div class="text-subtitle1 q-mb-sm">Veículo</div>
-              <div class="row q-col-gutter-md items-center">
+              <div class="row q-col-gutter-md items-center" v-if="form.veiculo">
                 <div class="col-12 col-md-4">
-                  <q-input v-model="form.veiculo.placa" label="Placa" outlined dense readonly />
+                  <q-input
+                    v-model="form.veiculo.placa" label="Placa" outlined dense readonly />
                 </div>
                 <div class="col-12 col-md-4">
-                  <q-input v-model="form.veiculo.marca" label="Marca" outlined dense readonly />
+                  <q-input
+                    v-model="form.veiculo.marca" label="Marca" outlined dense readonly />
                 </div>
                 <div class="col-12 col-md-4">
-                  <q-input v-model="form.veiculo.modelo" label="Modelo" outlined dense readonly />
+                  <q-input
+                    v-model="form.veiculo.modelo" label="Modelo" outlined dense readonly />
                 </div>
               </div>
               <div class="col-12 q-mt-md">
@@ -469,9 +472,7 @@ const handlePaymentMethodChange = () => {
 // Carregar dados do estabelecimento
 onMounted(async () => {
   if (isEditMode.value) {
-    // Buscar o pedido na store, caso esteja editando
-    const pedidoExistente = pedidoStore.getPedidoById(route.params.id); // ou o método apropriado da store
-    console.log('*** **** pedido existente: ', pedidoExistente)
+    const pedidoExistente = pedidoStore.getPedidoById(route.params.id)
     if (pedidoExistente) {
       form.value = { ...pedidoExistente };  // Preencher o formulário com os dados do pedido
     }
@@ -546,10 +547,6 @@ function addProduct(produtoSelecionados) {
   } else {
     form.value.produtos.push({...produtoSelecionados, quantidade: 1, precoUnitario: produtoSelecionados.precoVenda, descricao: produtoSelecionados.descricao})
   }
-
-
-  console.log('**** produtos selecionado: ', produtoSelecionados)
-
   closeProductDrawer()
 }
 
@@ -604,7 +601,7 @@ const resetForm = () => {
 };
 
 const submitOrder = async () => {
-  if (!form.value.idEstabelecimento || !form.value.idCliente || !form.value.veiculo.placa || !form.value.formaPagamento || !form.value.cpfResponsavel || !form.value.tipoProposta || !form.value.statusPedido) {
+  if (!form.value.idEstabelecimento || !form.value.idCliente || !form.value.formaPagamento || !form.value.cpfResponsavel || !form.value.tipoProposta || !form.value.statusPedido) {
     $q.notify({
       type: 'negative',
       message: 'Por favor, preencha todos os campos obrigatórios, incluindo cliente, veículo, tipo de proposta e situação do pedido.',
