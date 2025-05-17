@@ -32,7 +32,7 @@
           <q-card class="q-pa-sm q-pa-md-md full-height no-shadow">
             <q-card-section>
               <div class="text-subtitle1 q-mb-sm">Veículo</div>
-              <div class="row q-col-gutter-md items-center">
+              <div class="row q-col-gutter-md items-center" v-if="form.veiculo">
                 <div class="col-12 col-md-4">
                   <q-input
                     v-model="form.veiculo.placa" label="Placa" outlined dense readonly />
