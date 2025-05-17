@@ -34,13 +34,16 @@
               <div class="text-subtitle1 q-mb-sm">Veículo</div>
               <div class="row q-col-gutter-md items-center">
                 <div class="col-12 col-md-4">
-                  <q-input v-model="form.veiculo.placa" label="Placa" outlined dense readonly />
+                  <q-input
+                    v-model="form.veiculo.placa" label="Placa" outlined dense readonly />
                 </div>
                 <div class="col-12 col-md-4">
-                  <q-input v-model="form.veiculo.marca" label="Marca" outlined dense readonly />
+                  <q-input
+                    v-model="form.veiculo.marca" label="Marca" outlined dense readonly />
                 </div>
                 <div class="col-12 col-md-4">
-                  <q-input v-model="form.veiculo.modelo" label="Modelo" outlined dense readonly />
+                  <q-input
+                    v-model="form.veiculo.modelo" label="Modelo" outlined dense readonly />
                 </div>
               </div>
               <div class="col-12 q-mt-md">
@@ -544,10 +547,6 @@ function addProduct(produtoSelecionados) {
   } else {
     form.value.produtos.push({...produtoSelecionados, quantidade: 1, precoUnitario: produtoSelecionados.precoVenda, descricao: produtoSelecionados.descricao})
   }
-
-
-  console.log('**** produtos selecionado: ', produtoSelecionados)
-
   closeProductDrawer()
 }
 

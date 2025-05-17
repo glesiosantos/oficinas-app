@@ -59,6 +59,9 @@
 <script setup>
 import { ref } from 'vue'
 import VueApexCharts from 'vue3-apexcharts'
+// import { usePedidoStore } from 'src/stores/pedido.store'
+
+// const pedidoStore = usePedidoStore()
 
 // Dados dos Cards
 const cards = ref([

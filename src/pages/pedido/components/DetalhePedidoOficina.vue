@@ -59,7 +59,7 @@
       <!-- Alterar Status -->
       <div class="q-mt-md">
         <q-select
-          v-model="novoStatus"
+          v-model="statusOficina"
           :options="statusDisponiveis"
           label="Alterar Status da Ordem"
           outlined
@@ -69,7 +69,7 @@
       </div>
 
       <!-- Campo de Pendência -->
-      <div v-if="novoStatus === 'Pendente'" class="q-mt-sm">
+      <div v-if="statusOficina === 'Pendente'" class="q-mt-sm">
         <q-input
           v-model="pendenciaDescricao"
           label="Descreva a pendência"
@@ -104,18 +104,20 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { usePedidoStore } from 'src/stores/pedido.store'
+import { ref, computed } from 'vue'
 
 const props = defineProps({
   initialData: Object,
   isEdit: Boolean
-});
+})
 
-const emit = defineEmits(['cancel', 'submit']);
+const emit = defineEmits(['cancel', 'submit'])
 
 const produtosSelecionados = ref([])
-const novoStatus = ref(null)
+const statusOficina = ref(null)
 const pendenciaDescricao = ref('')
+const pedidoStore = usePedidoStore()
 
 const statusDisponiveis = computed(() => {
   const todos = ['Aguardando', 'Em Andamento', 'Pendente', 'Concluído'];
@@ -126,8 +128,8 @@ function emitirSubmit() {
   const payload = {
     ...props.initialData,
     produtosSelecionados: produtosSelecionados.value,
-    novoStatus: novoStatus.value,
-    pendenciaDescricao: novoStatus.value === 'Pendente' ? pendenciaDescricao.value : null
+    statusOficina: pedidoStore.statusOficina.find(s => s.descricao === statusOficina.value)?.sigla || null,
+    pendenciaDescricao: statusOficina.value === 'Pendente' ? pendenciaDescricao.value : null
   };
   emit('submit', payload)
 }
