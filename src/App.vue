@@ -9,12 +9,12 @@ import { useRouter } from 'vue-router'
 import { authService } from './pages/auth/services/auth_service'
 
 const authStore = useAuthStore()
-const { refreshToken } = authService()
+const { checkToken } = authService()
 const router = useRouter()
 
 onMounted(async () => {
 
-  const refresh = await refreshToken()
+  const refresh = await checkToken()
 
   if(authStore.isAuth && refresh.data) {
     router.push({ name: 'dashboard'})

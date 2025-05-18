@@ -7,7 +7,7 @@ import { authService } from 'src/pages/auth/services/auth_service'
 
 export default defineRouter(function (/* { store, ssrContext } */) {
 
-  const {refreshToken } = authService()
+  const {checkToken} = authService()
 
   const authStore = useAuthStore()
   const createHistory = process.env.SERVER
@@ -21,24 +21,16 @@ export default defineRouter(function (/* { store, ssrContext } */) {
   })
 
   Router.beforeEach(async (to, from, next) => {
-    if (to.meta?.requiresAuth) {
-      if (authStore.isAuth) {
-        next()
-      } else {
-        try {
-          const refresh = await refreshToken()
+    // Verifica o token se o usuário está autenticado
+    if (authStore.isAuth) {
+      const isValid = await checkToken()
+      if (!isValid) authStore.removeAuth()
+    }
 
-          if (refresh?.data) {
-            authStore.setAuth(refresh.data) // ou outro método que você usa para setar o auth
-            next()
-          } else {
-            next({ name: 'login' })
-          }
-        } catch (e) {
-          console.log('*** ', e)
-          next({ name: 'login' })
-        }
-      }
+    if (to.meta?.auth) {
+      authStore.isAuth ? next() : next({ name: 'login' })
+    } else if (to.name === 'login' && authStore.isAuth) {
+      next({ name: 'dashboard' })
     } else {
       next()
     }

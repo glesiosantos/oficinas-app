@@ -10,10 +10,7 @@ export const usePedidoStore = defineStore('pedidoStore', () => {
 
   const setStatusOficina = (data) => statusOficina.value = data
 
-  const setPedidos = (data) => {
-    console.log('*** *** pedidos ',data)
-    pedidos.value = data
-  }
+  const setPedidos = (data) => pedidos.value = data
 
   const getPedidoById = (id) => {
     return pedidos.value.find(pedido => pedido.idOrdem === id) || null
