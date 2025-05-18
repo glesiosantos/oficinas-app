@@ -188,6 +188,7 @@ import useNotify from 'src/composables/useNotify'
 import { useAuthStore } from 'src/stores/auth.store'
 import { utilService } from 'src/pages/geral/services/util_service'
 import { pedidoService } from 'src/pages/pedido/services/pedido_service'
+import { dashboardService } from 'src/pages/dashboard/services/dashboard_service'
 
 const { logout } = authService()
 const authStore = useAuthStore()
@@ -201,6 +202,7 @@ const { carregarCategoriasDosProdutos,
 } = utilService()
 
 const { carregarTodasAsOrdensDoEstabelecimento, carregarStatusOficina } = pedidoService()
+const { obterDados } = dashboardService()
 
 const router = useRouter()
 const { notifySuccess } = useNotify()
@@ -293,6 +295,7 @@ onMounted(async () => {
   await carregarServicoDoEstabelecimento()
   await carregarTodasAsOrdensDoEstabelecimento()
   await carregarStatusOficina()
+  await obterDados()
 })
 
 </script>
