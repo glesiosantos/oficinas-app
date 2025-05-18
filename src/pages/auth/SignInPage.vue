@@ -10,6 +10,7 @@
           outlined
           v-model="form.cpf"
           label="CPF"
+          autocomplete="username"
           mask="###.###.###-##"
           lazy-rules
           :rules="[val => (val && val.length > 0) || 'CPF é campo obrigatório']"
@@ -18,18 +19,12 @@
           outlined
           v-model="form.senha"
           type="password"
+          autocomplete="current-password"
           label="Senha"
           lazy-rules
           :rules="[val => (val && val.length > 0) || 'Senha é campo obrigatório']"/>
         <q-btn color="primary" type="submit" label="Acessar plataforma" class="full-width text-black"/>
       </q-form>
-      <!-- <q-btn
-        color="red"
-        label="Esqueci da senha"
-        :to="{ name: 'forgout'}"
-        flat
-        class="full-width q-mt-sm"
-      /> -->
     </q-card>
   </q-page>
 </template>
@@ -43,17 +38,20 @@ import useNotify from 'src/composables/useNotify'
 
 const router = useRouter()
 const { logar } = authService()
-const { notifyError, notifySuccess } = useNotify()
+const { notifyError } = useNotify()
 
 const form = reactive({
   cpf: '',
   senha: ''
 })
 
-const handleForm = () => {
-  logar(form).then(() => {
-    router.replace({ name: 'dashboard'})
-    notifySuccess("Logado com sucesso!")
-  }).catch((error) => notifyError(error))
+const handleForm = async () => {
+  try {
+    await logar(form)
+    router.push({ name: 'dashboard' })
+    window.location.reload()
+  } catch (error) {
+    notifyError(`Acesso negado! Mensagem: ${error.message}`)
+  }
 }
 </script>

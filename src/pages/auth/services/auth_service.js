@@ -12,32 +12,32 @@ export const authService = () => {
   }
 
   const logar = async (data) => {
-    try {
       const response = await api.post('/v1/auth/autenticar', data)
       authStore.setAuth(response.data)
-      return response.data
-    } catch (error) {
-      console.error('Erro ao realizar login:', error)
-      throw error
-    }
   }
 
-  const refreshToken = async () => {
-
-    let response
-
-    if (authStore.isAuth) {
-      const bearerToken = `Bearer ${getBearerToken()}`
-      response = await api.post('/v1/auth/refresh', {token: authStore.auth.token }, {headers: {
-        Authorization: bearerToken
-      }})
+  const checkToken = async () => {
+    if (!authStore.auth?.token) {
+      authStore.removeAuth()
+      return false
     }
-    return response;
+    try {
+      const bearerToken = getBearerToken()
+      const { data } = await api.get('/v1/auth/validar-token', {
+        headers: { Authorization: bearerToken }
+      })
+
+      return data.valid || true
+    } catch (error) {
+      console.error('Erro ao validar token:', error.response?.data || error.message)
+      authStore.removeAuth()
+      return false
+    }
   }
 
   const logout = () => {
     authStore.removeAuth()
   }
 
-  return { logar, refreshToken, logout }
+  return { logar, logout, checkToken, getBearerToken }
 }
