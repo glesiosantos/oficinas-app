@@ -196,7 +196,7 @@ const handleSubmit = async (formData) => {
     });
     closeDrawer();
   }
-};
+}
 
 onMounted(async () => {
   isLoading.value = true;

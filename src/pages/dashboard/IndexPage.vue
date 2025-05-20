@@ -2,14 +2,14 @@
   <q-page class="q-pa-md">
     <!-- Row com 4 Cards -->
     <div class="row q-col-gutter-md q-mb-lg">
-      <div class="col-12 col-sm-6 col-md-3" v-for="(card, index) in cards" :key="index">
+      <div class="col-12 col-sm-6 col-md-3" v-for="(card, index) in dashboardStore.dashboard.cards" :key="index">
         <q-card class="my-card full-height">
           <q-card-section class="row items-center no-wrap full-height">
             <div class="col">
-              <div class="text-h6">{{ card.title }}</div>
-              <div class="text-subtitle1">{{ card.value }}</div>
+              <div class="text-h6">{{ card.titulo }}</div>
+              <div class="text-subtitle1">{{ card.valor }}</div>
             </div>
-            <q-icon :name="card.icon" size="40px" color="primary" />
+            <q-icon :name="card.icon" size="40px" color="accent" />
           </q-card-section>
         </q-card>
       </div>
@@ -27,6 +27,17 @@
       </div>
 
       <div class="col-12 col-md-6">
+        <q-card class="full-height">
+          <q-card-section>
+            <div class="text-h6">Distribuição de Vendas</div>
+            <apexchart type="pie" height="300" :options="pieOptions" :series="pieSeries" />
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
+
+    <div class="row q-col-gutter-md q-mt-md">
+      <div class="col-12">
         <q-card class="full-height">
           <q-card-section>
             <div class="text-h6">Últimos Atendimentos</div>
@@ -57,30 +68,37 @@
 </template>
 
 <script setup>
+import { useDashboardStore } from 'src/stores/dashboard.store'
 import { ref } from 'vue'
 import VueApexCharts from 'vue3-apexcharts'
 
-// Dados dos Cards
-const cards = ref([
-  { title: 'Vendas Totais', value: 'R$ 15.000', icon: 'monetization_on' },
-  { title: 'Clientes Atendidos', value: '120', icon: 'people' },
-  { title: 'Ticket Médio', value: 'R$ 125', icon: 'bar_chart' },
-  { title: 'Pedidos Pendentes', value: '8', icon: 'hourglass_empty' }
-])
+const dashboardStore = useDashboardStore()
 
 // Configuração do Gráfico
 const chartOptions = ref({
   chart: { id: 'sales-chart' },
-  xaxis: { categories: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'] },
+  xaxis: { categories: ['Mar', 'Abr', 'Mai'] },
   title: { text: '' }
 })
 
 const series = ref([
   {
     name: 'Vendas',
-    data: [3000, 4000, 3500, 5000, 4900, 6000]
+    data: dashboardStore.dashboard.series
   }
 ])
+
+const pieOptions = ref({
+  chart: {
+    type: 'pie'
+  },
+  labels: ['Serviços', 'Produtos', 'Outros'],
+  title: {
+    text: 'Distribuição de Vendas'
+  }
+})
+
+const pieSeries = ref([44, 33, 23])
 
 // Configuração da Tabela
 const columns = ref([
@@ -103,6 +121,7 @@ defineOptions({
     apexchart: VueApexCharts
   }
 })
+
 </script>
 
 <style scoped>

@@ -40,3 +40,14 @@
   'GRAD' 0,
   'opsz' 24
 }
+
+.apexcharts-canvas {
+  touch-action: manipulation;
+}
+
+.list-card {
+  max-width: 1200px;
+  margin: 0 auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}

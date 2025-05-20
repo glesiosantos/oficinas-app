@@ -1,211 +1,423 @@
-<!-- src/pages/ListarPedidos.vue -->
 <template>
   <q-page class="q-pa-md">
     <div class="text-h5 q-mb-md">Gerenciamento de Pedidos/Orçamentos</div>
 
-    <!-- Filtros -->
-    <q-form @submit="filtrarPedidos" class="q-mb-md">
-      <div class="row q-col-gutter-md">
-        <div :class="['col-12', { 'col-md-3': !isMobile }]">
+    <q-card class="q-pa-md q-mb-md">
+      <q-form >
+        <div class="row q-col-gutter-md">
           <q-input
-            v-model="filtros.cliente"
-            label="Cliente (Nome ou CPF)"
-            outlined
-            dense
-            clearable
+            v-model="filtros.termoBusca"
+            color="accent"
+            label="Buscar por cliente ou placa"
+            class="col-12 col-md-4"
+            filled
+            debounce="300"
           />
-        </div>
-        <div :class="['col-12', { 'col-md-3': !isMobile }]">
-          <q-input
-            v-model="filtros.dataInicio"
-            label="Data Início"
-            outlined
-            dense
-            mask="##/##/####"
-            placeholder="DD/MM/AAAA"
-          >
-            <template v-slot:append>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy>
-                  <q-date v-model="filtros.dataInicio" mask="DD/MM/YYYY" />
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
-        </div>
-        <div :class="['col-12', { 'col-md-3': !isMobile }]">
-          <q-input
-            v-model="filtros.dataFim"
-            label="Data Fim"
-            outlined
-            dense
-            mask="##/##/####"
-            placeholder="DD/MM/AAAA"
-          >
-            <template v-slot:append>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy>
-                  <q-date v-model="filtros.dataFim" mask="DD/MM/YYYY" />
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
-        </div>
-        <div :class="['col-12', { 'col-md-3': !isMobile }]">
           <q-select
             v-model="filtros.status"
             :options="statusOptions"
+            color="accent"
             label="Status"
+            class="col-12 col-md-2"
             outlined
-            dense
-            multiple
-            use-chips
+            emit-value
+            map-options
             clearable
           />
-        </div>
-        <div class="col-12">
-          <q-btn color="primary" label="Filtrar" type="submit" class="q-mr-sm text-black" />
-          <q-btn color="accent" label="Limpar Filtros" @click="limparFiltros" flat />
-        </div>
-      </div>
-    </q-form>
 
-    <!-- Tabela de Pedidos -->
-    <q-table
-      :rows="pedidosFiltrados"
-      :columns="columns"
-      row-key="numero"
-      :loading="loading"
-      :pagination="pagination"
+          <q-input
+            color="accent"
+            v-model="filtros.dataInicio"
+            label="Data Início"
+            type="date"
+            class="col-12 col-md-2"
+            filled
+          />
+
+          <q-input
+            color="accent"
+            v-model="filtros.dataFim"
+            label="Data Fim"
+            type="date"
+            class="col-12 col-md-2"
+            filled
+          />
+
+          <div class="col-12 col-md-2 flex items-end">
+            <q-btn label="Filtrar" type="submit" color="accent" size="md" class="full-width" />
+          </div>
+        </div>
+      </q-form>
+    </q-card>
+
+    <q-tabs
+      v-model="abaSelecionada"
+      dense
+      align="left"
+      class="text-accent q-mb-md"
+      active-color="accent"
+      indicator-color="accent"
+      narrow-indicator
     >
-      <template v-slot:body-cell-status="props">
-        <q-td :props="props">
-          <q-badge :color="getStatusColor(props.row.status)">
-            {{ props.row.status }}
-          </q-badge>
-        </q-td>
+      <q-tab name="todos" label="Todos" />
+      <q-tab name="aguardando" label="Aguardando Autorização" />
+      <q-tab name="execucao" label="Em Execução" />
+      <q-tab name="finalizado" label="Finalizado" />
+    </q-tabs>
+      <q-table
+        :rows="pedidosFiltradosPorAba"
+        :columns="columns"
+        row-key="idOrdem"
+        :pagination="pagination"
+        :hide-header="isMobile"
+        flat
+        bordered
+      >
+        <!-- MOBILE: VISUAL RESUMIDO -->
+        <template v-if="isMobile" v-slot:body="props">
+          <q-tr :props="props">
+            <q-td colspan="100%">
+              <q-card flat bordered class="q-mb-sm" :class="{ 'bg-orange-1': props.row.statusPedido === 'Em Execução' }">
+                <q-card-section>
+                  <div class="text-subtitle2 text-weight-bold">
+                    Pedido #{{ props.row.idOrdem }}
+                  </div>
+                  <div class="text-caption">Cliente: {{ props.row.nomeCliente }}</div>
+                  <div class="text-caption">Placa: {{ props.row.placa }}</div>
+                  <div class="text-caption">Status: {{ props.row.statusPedido }}</div>
+                </q-card-section>
+
+                <q-expansion-item icon="expand_more" label="Ver mais detalhes" dense expand-separator>
+                  <q-card-section class="q-pt-none">
+                    <div class="text-caption">Modelo: {{ props.row.veiculo?.modelo }}</div>
+                    <div class="text-caption">Tipo: {{ props.row.tipoProposta }}</div>
+                    <div class="text-caption">Pagamento: {{ props.row.formaPagamento }}</div>
+                    <div class="text-caption">Cadastro: {{ date.formatDate(props.row.dataCadastro, 'DD/MM/YYYY') }}</div>
+                    <div class="text-caption">Vencimento: {{ date.formatDate(props.row.dataVencimentoProposta, 'DD/MM/YYYY')}}</div>
+                  </q-card-section>
+                </q-expansion-item>
+
+                <q-separator />
+
+                <q-card-actions align="right" class="q-gutter-sm">
+                  <template v-if="props.row.statusPedido !== 'Finalizado' && props.row.statusPedido !== 'Cancelado'">
+                    <!-- Autorizar Pedido -->
+                    <q-btn
+                      v-if="props.row.statusPedido === 'Aguardando Autorização'"
+                      round dense icon="check" color="green"
+                      @click="converterOrcamentoEmPedido(props.row.idOrdem)"
+                      title="Autorizar Pedido"
+                    />
+
+                    <!-- Enviar para Execução -->
+                    <q-btn
+                      v-if="props.row.tipoProposta === 'Pedido' && props.row.statusPedido === 'Pendente' || props.row.statusPedido === 'Autorizado'"
+                      round dense icon="construction" color="blue"
+                      @click="atualizarStatusPedido(props.row, 'EE')"
+                      title="Enviar para Execução"
+                    />
+
+                    <!-- Cancelar após aguardando pagamento (Finalizar) -->
+                    <q-btn
+                      v-if="props.row.tipoProposta === 'Pedido' && props.row.statusPedido === 'Aguardando Pagamento'"
+                      round dense icon="payments" color="blue"
+                      title="Finalizar Pedido"
+                      @click="atualizarStatusPedido(props.row, 'FI')"
+                    />
+
+                    <!-- Cancelar Pedido geral (exceto aguardando pagamento) -->
+                    <q-btn
+                      v-if="props.row.tipoProposta === 'Pedido' && props.row.statusPedido !== 'Aguardando Pagamento'"
+                      round dense icon="stop_circle" color="red"
+                      title="Cancelar Pedido"
+                      @click="atualizarStatusPedido(props.row, 'CA')"
+                    />
+
+                    <!-- Editar Pedido -->
+                    <q-btn
+                      v-if="['Aguardando Autorização', 'Autorizado', 'Pendente'].includes(props.row.statusPedido)"
+                      round dense icon="edit" color="accent"
+                      title="Editar Pedido"
+                      @click="editarPedido(props.row)"
+                    />
+                  </template>
+                </q-card-actions>
+              </q-card>
+            </q-td>
+          </q-tr>
+        </template>
+
+        <!-- DESKTOP: AÇÕES NA COLUNA -->
+        <template v-else v-slot:body="props">
+    <q-tr
+      :props="props"
+      :class="{ 'bg-orange-1': props.row.statusPedido === 'Em Execução' }"
+    >
+      <q-td
+        v-for="col in props.cols"
+        :key="col.name"
+        :props="props"
+      >
+        <!-- Se for a célula de ações, renderize os botões -->
+        <template v-if="col.name === 'actions'">
+        <div class="q-gutter-x-sm row justify-end">
+          <template v-if="props.row.statusPedido !== 'Finalizado' && props.row.statusPedido !== 'Cancelado'">
+
+            <!-- Autorizar Pedido -->
+            <q-btn
+              v-if="props.row.statusPedido === 'Aguardando Autorização'"
+              round dense icon="check" color="green"
+              @click="converterOrcamentoEmPedido(props.row.idOrdem)"
+              title="Autorizar Pedido"
+            />
+
+            <!-- Enviar para Execução -->
+            <q-btn
+              v-if="props.row.tipoProposta === 'Pedido' && props.row.statusPedido === 'Pendente' || props.row.statusPedido === 'Autorizado'"
+              round dense icon="construction" color="blue"
+              @click="atualizarStatusPedido(props.row, 'EE')"
+              title="Enviar para Execução"
+            />
+
+            <!-- Cancelar após aguardando pagamento (Finalizar) -->
+            <q-btn
+              v-if="props.row.tipoProposta === 'Pedido' && (props.row.statusPedido === 'Aguardando Pagamento' || props.row.statusPedido === 'Autorizado')"
+              round dense icon="payments" color="green"
+              title="Finalizar Pedido"
+              @click="atualizarStatusPedido(props.row, 'FI')"
+            />
+
+            <q-btn
+              v-if="['Aguardando Autorização', 'Autorizado', 'Pendente'].includes(props.row.statusPedido)"
+              round dense icon="edit" color="accent"
+              title="Editar Pedido"
+              @click="editarPedido(props.row)"
+            />
+
+            <!-- Cancelar Pedido geral (exceto aguardando pagamento) -->
+            <q-btn
+              v-if="props.row.tipoProposta === 'Pedido' && props.row.statusPedido !== 'Aguardando Pagamento'"
+              round dense icon="stop_circle" color="red"
+              title="Cancelar Pedido"
+              @click="atualizarStatusPedido(props.row, 'CA')"
+            />
+          </template>
+        </div>
       </template>
+        <!-- Caso contrário, exiba o valor da célula -->
+        <template v-else>
+          {{ col.value }}
+        </template>
+      </q-td>
+    </q-tr>
+  </template>
+
     </q-table>
 
-    <q-page-sticky position="bottom-right" :offset="[18, 18]">
-      <q-btn fab icon="add_shopping_cart" color="accent" :to="{name: 'criar-pedido'}" />
+    <q-page-sticky :position="stickyPosition" :offset="[18, 18]">
+        <div :class="layoutClass">
+          <q-btn fab icon="receipt" color="accent" :to="{ name: 'criar-pedido' }" />
+        </div>
     </q-page-sticky>
   </q-page>
 </template>
 
-<script>
-import { defineComponent, ref, computed, onMounted } from 'vue'
-import { date } from 'quasar'
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { usePedidoStore } from 'src/stores/pedido.store'
+import { useQuasar, date } from 'quasar'
+import { useFormatarDocumento } from 'src/composables/useFormatarDocumento'
+import { pedidoService } from './services/pedido_service'
+import useNotify from 'src/composables/useNotify'
+import { useRouter } from 'vue-router'
 
-export default defineComponent({
-  name: 'ListarPedidosPage',
-  setup() {
-    const pedidos = ref([])
-    const loading = ref(false)
-    const hoje = date.formatDate(new Date(), 'DD/MM/YYYY')
-    const filtros = ref({
-      cliente: '',
-      status: [],
-      dataInicio: hoje,
-      dataFim: hoje
-    })
+const $q = useQuasar()
+const { notifySuccess, notifyError } = useNotify()
+const isMobile = computed(() => $q.screen.lt.md)
 
-    const pedidosIniciais = [
-      { numero: '001', cliente: 'João Silva', cpf: '123.456.789-00', placa: 'ABC-1234', tipo: 'Pedido', status: 'Pendente', data: hoje },
-      { numero: '002', cliente: 'Maria Souza', cpf: '987.654.321-00', placa: 'XYZ-5678', tipo: 'Orçamento', status: 'Concluído', data: hoje },
-    ]
-
-    const columns = [
-      { name: 'numero', label: 'Nº Pedido', field: 'numero', sortable: true },
-      { name: 'cliente', label: 'Cliente', field: 'cliente', sortable: true },
-      { name: 'cpf', label: 'CPF', field: 'cpf', sortable: true },
-      { name: 'placa', label: 'Placa', field: 'placa', sortable: true },
-      { name: 'tipo', label: 'Tipo', field: 'tipo', sortable: true },
-      { name: 'status', label: 'Status', field: 'status', sortable: true },
-      { name: 'data', label: 'Data', field: 'data', sortable: true },
-    ]
-
-    const pagination = { rowsPerPage: 10 }
-    const statusOptions = ['Pendente', 'Concluído', 'Cancelado']
-    const isMobile = computed(() => window.innerWidth <= 600)
-
-    const pedidosFiltrados = computed(() => {
-      let result = [...pedidos.value]
-
-      // Filtro por cliente (nome ou CPF)
-      if (filtros.value.cliente) {
-        const busca = filtros.value.cliente.toLowerCase()
-        result = result.filter(p =>
-          p.cliente.toLowerCase().includes(busca) ||
-          p.cpf.toLowerCase().includes(busca)
-        )
-      }
-
-      // Filtro por status
-      if (filtros.value.status.length > 0) {
-        result = result.filter(p => filtros.value.status.includes(p.status))
-      }
-
-      // Filtro por período
-      const dataInicio = filtros.value.dataInicio ? date.extractDate(filtros.value.dataInicio, 'DD/MM/YYYY') : null
-      const dataFim = filtros.value.dataFim ? date.extractDate(filtros.value.dataFim, 'DD/MM/YYYY') : null
-
-      result = result.filter(p => {
-        const dataPedido = date.extractDate(p.data, 'DD/MM/YYYY')
-        // Usando comparação nativa de JavaScript para datas
-        return (!dataInicio || dataPedido >= dataInicio) &&
-               (!dataFim || dataPedido <= dataFim)
-      })
-
-      return result
-    })
-
-    const getStatusColor = (status) => {
-      return { Pendente: 'orange', Concluído: 'green', Cancelado: 'red' }[status] || 'grey'
-    }
-
-    const carregarPedidos = () => {
-      loading.value = true
-      return new Promise(resolve => {
-        setTimeout(() => {
-          pedidos.value = pedidosIniciais
-          loading.value = false
-          resolve()
-        }, 500)
-      })
-    }
-
-    const filtrarPedidos = async () => {
-      await carregarPedidos()
-    }
-
-    const limparFiltros = async () => {
-      filtros.value = {
-        cliente: '',
-        status: [],
-        dataInicio: hoje,
-        dataFim: hoje
-      }
-      await carregarPedidos()
-    }
-
-    onMounted(async () => {
-      await carregarPedidos()
-    })
-
-    return {
-      pedidos,
-      pedidosFiltrados,
-      columns,
-      loading,
-      pagination,
-      filtros,
-      statusOptions,
-      isMobile,
-      getStatusColor,
-      filtrarPedidos,
-      limparFiltros
-    }
-  },
+const stickyPosition = computed(() => {
+  return $q.screen.lt.md ? 'bottom-left' : 'top-right'
 })
+
+const layoutClass = computed(() => {
+  return $q.screen.lt.md ? 'column q-gutter-y-sm' : 'row q-gutter-x-sm'
+})
+
+const {carregarTodasAsOrdensDoEstabelecimento, atualizarOrcamentoParaPedido, mudarStatusPedido } = pedidoService()
+
+const filtros = ref({
+  status: '',
+  dataInicio: '',
+  dataFim: '',
+  termoBusca: ''
+})
+
+const router = useRouter()
+
+const pedidoStore = usePedidoStore()
+const { formatarDocumento } = useFormatarDocumento()
+
+// Colunas da Tabela
+const columns = [
+  { name: 'idOrdem', label: 'Pedido', field: 'idOrdem', sortable: true, align: 'left' },
+  { name: 'cliente', label: 'Cliente', field: 'nomeCliente', sortable: true, align: 'left' },
+  { name: 'cpfCnpj', label: 'CPF/CNPJ', field: row => formatarDocumento(row.cpfCnpjCliente), sortable: true, align: 'left' },
+  { name: 'placa', label: 'Placa', field: row => row.veiculo?.placa, sortable: true, align: 'left' },
+  { name: 'modelo', label: 'Modelo', field: row => row.veiculo?.modelo, sortable: true, align: 'left' },
+  { name: 'tipoProposta', label: 'Tipo Proposta', field: 'tipoProposta', sortable: true, align: 'center' },
+  {
+    name: 'dtVencimentoOrcamento',
+    label: 'Vencimento',
+    field: row => row.dtVencimentoOrcamento || '',
+    format: val => {
+      if (!val) return ' - '
+      const parsed = new Date(`${val}T00:00:00`)
+      return isNaN(parsed) ? ' - ' : date.formatDate(parsed, 'DD/MM/YYYY')
+    },
+    sortable: true,
+    align: 'center'
+  },
+  { name: 'status', label: 'Status', field: 'statusPedido', sortable: true, align: 'center' },
+  { name: 'formaPagamento', label: 'Pagamento', field: 'formaPagamento', sortable: true, align: 'center' },
+  { name: 'dataCadastro', label: 'Data de Cadastro', field: row => row.dtCadastro,
+  format: val => {
+    const parsed = new Date(val + 'T00:00:00') // Força UTC neutro
+    return date.formatDate(parsed, 'DD/MM/YYYY')
+  }, sortable: true, align: 'left' },
+  { field: 'actions', name: 'actions', label: 'Ações', align: 'center' },
+]
+
+// Paginação
+const pagination = { rowsPerPage: 20 }
+
+// Opções de status
+const statusOptions = [
+  'Aguardando Autorização',
+  'Autorizado',
+  'Em Execução',
+  'Finalizado',
+]
+
+const abaSelecionada = ref('todos')
+
+const pedidosFiltradosPorAba = computed(() => {
+  return rowsFiltrados.value.filter(pedido => {
+    if (abaSelecionada.value === 'todos') return true
+    if (abaSelecionada.value === 'aguardando') return pedido.statusPedido === 'Aguardando Autorização'
+    if (abaSelecionada.value === 'execucao') return pedido.statusPedido === 'Em Execução'
+    if (abaSelecionada.value === 'finalizado') return pedido.statusPedido === 'Finalizado'
+    return true
+  })
+})
+
+const rowsFiltrados = computed(() => {
+  return pedidoStore.pedidos.filter(pedido => {
+    const statusOk = !filtros.value.status || pedido.statusPedido === filtros.value.status
+
+    const dataCadastro = date.extractDate(pedido.dataCadastro, 'YYYY-MM-DD')
+    const dataInicio = filtros.value.dataInicio ? date.extractDate(filtros.value.dataInicio, 'YYYY-MM-DD') : null
+    const dataFim = filtros.value.dataFim ? date.extractDate(filtros.value.dataFim, 'YYYY-MM-DD') : null
+
+    const dataOk =
+      (!dataInicio || dataCadastro >= dataInicio) &&
+      (!dataFim || dataCadastro <= dataFim)
+
+    const termo = filtros.value.termoBusca?.toLowerCase() || ''
+    const termoOk =
+      !termo ||
+      pedido.nomeCliente.toLowerCase().includes(termo) ||
+      pedido.placa.toLowerCase().includes(termo)
+
+    return statusOk && dataOk && termoOk
+  })
+})
+
+
+const converterOrcamentoEmPedido = async (idPedido) => {
+  const pedido = pedidoStore.pedidos.find(p => p.idOrdem === idPedido)
+  if (pedido && pedido.tipoProposta === 'Orçamento') {
+
+    $q.dialog({
+    title: 'Autorizar Orçamento', message: 'Deseja mudar este orçamento para pedido?',
+    cancel: {
+      label: 'Cancelar',
+      color: 'negative', // cor do botão Cancelar
+      flat: true
+    },
+    ok: {
+      label: 'Confirmar',
+      color: 'accent', // cor do botão OK
+      unelevated: true
+      },
+    persistent: true}
+  ).onOk(async () => {
+      const response = await atualizarOrcamentoParaPedido(idPedido)
+      if (response.status === 204) {
+        notifySuccess('Orçamento convertido para Pedido com sucesso!')
+      }
+      await carregarTodasAsOrdensDoEstabelecimento()
+    })
+
+  } else {
+    notifyError(`Não foi possível converter o pedido ${idPedido}`)
+  }
+}
+
+const editarPedido = (pedido) => {
+  router.push({ name: 'editar-pedido', params: { id: pedido.idOrdem } })
+}
+
+const atualizarStatusPedido = (pedidoRow, novoStatus) => {
+  const pedido = pedidoStore.pedidos.find(p => p.idOrdem === pedidoRow.idOrdem)
+  if (pedido) {
+
+    if(novoStatus === 'EE') {
+      $q.dialog({title: 'Enviar pedido para oficina', message: `Deseja enviar o pedido do(a) cliente ${pedidoRow.nomeCliente} para oficina?`,
+        cancel: {
+          label: 'Cancelar',
+          color: 'negative', // cor do botão Cancelar
+          flat: true
+        },
+        ok: {
+          label: 'Confirmar',
+          color: 'accent', // cor do botão OK
+          unelevated: true
+          },
+        persistent: true})
+        .onOk(async () => {
+          const response = await mudarStatusPedido({idOrdem: pedidoRow.idOrdem, novoStatus})
+          if (response.status === 204) {
+            notifySuccess('Pedido com status alterado com sucesso!')
+          }
+          await carregarTodasAsOrdensDoEstabelecimento()
+        })
+    }
+
+    if(novoStatus === 'FI') {
+      $q.dialog({title: 'Confirmar pagamento', message: `Deseja confirmar o pagamento e finalizar o pedido do(a) Sr(a). ${pedidoRow.nomeCliente}?`,
+        cancel: {
+          label: 'Cancelar',
+          color: 'negative', // cor do botão Cancelar
+          flat: true
+        },
+        ok: {
+          label: 'Confirmar',
+          color: 'accent', // cor do botão OK
+          unelevated: true
+          },
+        persistent: true})
+        .onOk(async () => {
+          const response = await mudarStatusPedido({idOrdem: pedidoRow.idOrdem, novoStatus})
+          if (response.status === 204) {
+            notifySuccess('Pedido finalizado com sucesso!')
+          }
+          await carregarTodasAsOrdensDoEstabelecimento()
+        })
+      }
+  } else {
+    notifyError(`Pedido ${pedidoRow.idOrdem} não encontrado.`)
+  }
+}
+
+onMounted(async() => await carregarTodasAsOrdensDoEstabelecimento())
 </script>

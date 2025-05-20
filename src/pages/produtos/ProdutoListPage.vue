@@ -1,52 +1,54 @@
 <template>
-  <q-page padding>
-    <div class="row">
-      <q-card class="col-12 col-sm-12">
-        <q-card-section>
-          <q-table
-            flat
-            bordered
-            :columns="columns"
-            :rows="produtoStore.produtos"
-            :filter="filter"
-          >
-            <template v-slot:top>
-              <q-input outlined color="primary" v-model="filter" class="col-4" :class="{'full-width': $q.screen.xs}">
-                <template v-slot:append>
-                  <q-icon name="search" />
-                </template>
-              </q-input>
-              <q-space />
-              <q-btn
-                color="primary"
-                class="text-black"
-                label="Adicionar produto"
-                @click="openDrawer('add')"
-                :class="{'full-width q-mt-sm': $q.screen.xs}"/>
-            </template>
+  <q-page padding style="min-height: 100vh;">
+    <q-card flat bordered class="list-card flex-grow">
+      <!-- Cabeçalho -->
+      <q-card-section class="bg-accent text-white q-py-sm">
+        <div class="text-h6">Produtos do estabelecimento</div>
+      </q-card-section>
+      <div class="row">
+        <q-card class="col-12 col-sm-12">
+          <q-card-section>
+            <q-table
+              flat
+              bordered
+              :columns="columns"
+              :rows="produtoStore.produtos"
+              :pagination="{ rowsPerPage: 30 }"
+              :filter="filter"
+            >
+              <template v-slot:top>
+                <q-input outlined color="accent" v-model="filter" class="col-12" :class="{'full-width': $q.screen.xs}">
+                  <template v-slot:append>
+                    <q-icon name="search" />
+                  </template>
+                </q-input>
+              </template>
 
-            <template v-slot:body-cell-actions="props">
-              <q-td :props="props" class="q-gutter-x-xs text-center">
-                <!-- <q-btn round dense color="primary text-black" size="md" @click="openDrawer('edit', props.row)" title="Adicionar um Carro">
-                  <span class="material-symbols-outlined" style="font-size: 20px;">transportation</span>
-                </q-btn> -->
-                <q-btn
-                  round
-                  dense
-                  color="green"
-                  size="md"
-                  icon="visibility"
-                  @click="visualizarProduto(props.row)"
-                  title="Visualizar Produto"
-                />
+              <template v-slot:body-cell-actions="props">
+                <q-td :props="props" class="q-gutter-x-xs text-center">
+                  <q-btn
+                    round
+                    dense
+                    color="green"
+                    size="md"
+                    icon="visibility"
+                    @click="visualizarProduto(props.row)"
+                    title="Visualizar Produto"
+                  />
 
-                <q-btn round dense color="accent" size="md" icon="edit" @click="openDrawer('edit', props.row)" />
-              </q-td>
-            </template>
-          </q-table>
-        </q-card-section>
-      </q-card>
-    </div>
+                  <q-btn round dense color="accent" size="md" icon="edit" @click="openDrawer('edit', props.row)" />
+                </q-td>
+              </template>
+            </q-table>
+          </q-card-section>
+        </q-card>
+      </div>
+    </q-card>
+    <q-page-sticky :position="stickyPosition" :offset="[18, 18]">
+        <div :class="layoutClass">
+          <q-btn fab icon="add" title="Adicionar Produto" color="accent" @click="openDrawer('add')" />
+        </div>
+    </q-page-sticky>
 
     <q-drawer v-model="drawer" side="right" overlay elevated :width="400">
       <q-scroll-area class="fit">
@@ -68,16 +70,16 @@ import { useDrawer } from 'src/composables/useDrawer'
 import ProdutoForm from './components/ProdutoForm.vue'
 import useNotify from 'src/composables/useNotify'
 import { useRouter } from 'vue-router'
-import { marcaService } from '../marcas/services/marca_service'
 import { produtoService } from './services/produto_service'
 import { useProdutoStore } from 'src/stores/produto.store'
 import useCalcularPrecoVendas from 'src/composables/usCalcularPrecoVenda'
 import useCurrency from 'src/composables/useCurrency'
 import { fornecedorService } from '../fornecedor/services/fornecedor_service'
+import { computed } from 'vue'
+import { useQuasar } from 'quasar'
 
 const { drawer, openDrawer,closeDrawer, isEdit, currentData } = useDrawer()
 const { notifyError, notifySuccess, notifyWarning } = useNotify()
-const { carregarMarcas, carregarModelosDasMarcas } = marcaService()
 const { carregarProdutosDoEstabelecimento, addProduto, editarProduto } = produtoService()
 const { carregarFornecedores } = fornecedorService()
 const {calcularPrecoVenda} = useCalcularPrecoVendas()
@@ -87,6 +89,11 @@ const produtoStore = useProdutoStore()
 
 const filter = ref('')
 const router = useRouter()
+const $q = useQuasar()
+
+const stickyPosition = computed(() => {
+  return $q.screen.lt.md ? 'bottom-right' : 'top-right'
+})
 
 const columns = [
   { label: 'Código', field: row => row.codigoProduto, align: 'center'},
@@ -130,10 +137,6 @@ const visualizarProduto = (produto) => {
 }
 
 onMounted(async () => {
-  await carregarMarcas()
-  await carregarModelosDasMarcas()
-  await carregarProdutosDoEstabelecimento()
   await carregarFornecedores()
-
 })
 </script>
