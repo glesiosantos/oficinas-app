@@ -76,6 +76,7 @@
           flat
           bordered
           dense
+          :pagination="{ rowsPerPage: 10 }"
           row-key="idProduto"
         >
           <template v-slot:body-cell-quantity="props">
@@ -604,7 +605,7 @@ const submitOrder = async () => {
   if (!form.value.idEstabelecimento || !form.value.idCliente || !form.value.formaPagamento || !form.value.cpfResponsavel || !form.value.tipoProposta || !form.value.statusPedido) {
     $q.notify({
       type: 'negative',
-      message: 'Por favor, preencha todos os campos obrigatórios, incluindo cliente, veículo, tipo de proposta e situação do pedido.',
+      message: 'Por favor, preencha todos os campos obrigatórios, incluindo cliente, tipo de proposta e situação do pedido.',
     });
     return;
   }
@@ -639,14 +640,12 @@ const submitOrder = async () => {
   }
 
   if (isEditMode.value) {
-    // Atualizar pedido existente
-    await pedidoStore.updatePedido(form.value);
+    await registrarOrdemEstabelecimento(form.value);
     $q.notify({
       type: 'positive',
       message: 'Pedido atualizado com sucesso!',
     });
   } else {
-    // Criar novo pedido
     await registrarOrdemEstabelecimento(form.value);
     $q.notify({
       type: 'positive',

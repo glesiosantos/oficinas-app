@@ -132,7 +132,7 @@ const columns = [
   {
     name: 'veiculo',
     label: 'Veículo',
-    field: row => `${row.veiculo.placa} - ${row.veiculo.modelo}`,
+    field: row => `${row.veiculo?.placa} - ${row.veiculo?.modelo}`,
     align: 'left',
     style: 'min-width: 200px;'
   },

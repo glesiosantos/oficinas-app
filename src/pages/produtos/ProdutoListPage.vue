@@ -13,6 +13,7 @@
               bordered
               :columns="columns"
               :rows="produtoStore.produtos"
+              :pagination="{ rowsPerPage: 30 }"
               :filter="filter"
             >
               <template v-slot:top>

@@ -5,9 +5,7 @@ export const useDashboardStore = defineStore('dashboardStore', () => {
 
   const dashboard = ref([])
 
-  const setDados = (data) => {
-    console.log('**** **** ', data)
-    dashboard.value = data}
+  const setDados = (data) => dashboard.value = data
 
   return { dashboard, setDados}
 })

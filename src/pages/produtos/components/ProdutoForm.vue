@@ -63,7 +63,6 @@
       <q-input
         v-model.number="form.precoCusto"
         label="Preço de Custo (R$)"
-        :disable="isEdit"
         type="number"
         outlined
         color="accent"
@@ -118,7 +117,6 @@
 
       <q-input
         v-model.number="form.quantidadeEstoque"
-        :disable="isEdit"
         label="Quantidade em Estoque Inicial"
         type="number"
         color="accent"
