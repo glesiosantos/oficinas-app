@@ -53,9 +53,7 @@ export default defineConfig((ctx) => {
       // publicPath: '/',
       // analyze: true,
       env: {
-        URL_API:  ctx.dev
-        ? 'http://localhost:5001/api/'
-        : 'https://prod.api.oficinas.com.br/'
+        URL_API:  ctx.dev ? 'http://localhost:5001/api/' : 'https://api.autorevise.com.br'
       },
       // rawDefine: {}
       // ignorePublicFolder: true,
