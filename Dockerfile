@@ -6,6 +6,8 @@ COPY package*.json ./
 
 COPY . .
 
+RUN npm install -g @quasar/cli
+
 RUN npm install --omit=dev
 
 ENV NODE_ENV=production
