@@ -75,7 +75,6 @@ import { useProdutoStore } from 'src/stores/produto.store'
 import useCalcularPrecoVendas from 'src/composables/usCalcularPrecoVenda'
 import useCurrency from 'src/composables/useCurrency'
 import { fornecedorService } from '../fornecedor/services/fornecedor_service'
-import { computed } from 'vue'
 import { useQuasar } from 'quasar'
 
 const { drawer, openDrawer,closeDrawer, isEdit, currentData } = useDrawer()
@@ -90,10 +89,6 @@ const produtoStore = useProdutoStore()
 const filter = ref('')
 const router = useRouter()
 const $q = useQuasar()
-
-const stickyPosition = computed(() => {
-  return $q.screen.lt.md ? 'bottom-right' : 'top-right'
-})
 
 const columns = [
   { label: 'Código', field: row => row.codigoProduto, align: 'center'},

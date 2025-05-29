@@ -256,12 +256,12 @@ const linksList = [
     icon: 'car_repair',
     route: {name: 'naOficina'}
   },
-  {
-    title: 'Estabelecimento',
-    caption: 'Informações do estabelecimento',
-    icon: 'storefront',
-    route: {name: 'estabelecimentoDetails'}
-  },
+  // {
+  //   title: 'Estabelecimento',
+  //   caption: 'Informações do estabelecimento',
+  //   icon: 'storefront',
+  //   route: {name: 'estabelecimentoDetails'}
+  // },
 ]
 
 const sair = () => {
