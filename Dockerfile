@@ -1,24 +1,17 @@
 FROM node:22-alpine AS builder
 
-ENV NODE_ENV=production
-
 WORKDIR /app
 
-# Instala Quasar CLI globalmente
-RUN npm install -g @quasar/cli
-
-# Copia todos os arquivos primeiro (precisa do projeto completo para rodar "quasar prepare")
+# Copia todos os arquivos primeiro (projeto completo)
 COPY . .
 
-# Instala dependências (vai rodar o "postinstall", ou seja, "quasar prepare")
+# Instala dependências e roda postinstall (quasar prepare)
 RUN npm install --omit=dev
 
-# Build da aplicação em modo PWA
-RUN quasar build -m pwa
+# Build da aplicação
+RUN npx quasar build -m pwa
 
 FROM nginx:alpine
-
-ENV NODE_ENV=production
 
 RUN rm -rf /etc/nginx/conf.d
 
