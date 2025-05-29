@@ -2,13 +2,16 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Copia todos os arquivos primeiro (projeto completo)
+# Copia todos os arquivos do projeto
 COPY . .
 
-# Instala dependências e roda postinstall (quasar prepare)
+# Define ambiente produção para o Node e Quasar
+ENV NODE_ENV=production
+
+# Instala apenas dependências de produção
 RUN npm install --omit=dev
 
-# Build da aplicação
+# Build da aplicação para produção
 RUN npx quasar build -m pwa
 
 FROM nginx:alpine
