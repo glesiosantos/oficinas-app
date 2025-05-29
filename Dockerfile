@@ -8,11 +8,11 @@ COPY . .
 
 RUN npm install -g @quasar/cli
 
-RUN npm install --omit=dev
+RUN npm install
 
 ENV NODE_ENV=production
 
-RUN npx quasar build -m pwa
+RUN quasar build -m pwa
 
 FROM nginx:alpine
 
