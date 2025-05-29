@@ -2,7 +2,9 @@ name: Build and Publish Docker Image
 
 on:
   push:
-    tags: [ '*.*.*' ]  # Ex: v1.0.0, 2.3.1
+    tags:
+      - 'v*.*.*'  # Ex: v1.0.0
+      - '*.*.*'   # Ex: 1.0.0
   workflow_dispatch:
 
 env:
@@ -38,17 +40,16 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=semver,pattern={{version}} 
+            type=semver,pattern={{version}}   # Ex: 1.0.0 (mesmo que o tag seja v1.0.0)
             type=semver,pattern=latest
 
       - name: Verificar arquivos no workspace
         run: ls -la
 
       - name: Build and push Docker image
-        id: build-and-push
         uses: docker/build-push-action@v5
         with:
           context: ./
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
