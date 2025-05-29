@@ -201,8 +201,7 @@ const handleSubmit = async (formData) => {
 onMounted(async () => {
   isLoading.value = true;
   try {
-    produto.value = await carregarProdutoPorIdMaisEstabelecimento(route.params.id);
-    console.log('Produto carregado:', produto.value); // Log para depuração
+    produto.value = await carregarProdutoPorIdMaisEstabelecimento(route.params.id)
     await carregarFornecedores();
     if (!produto.value) {
       errorMessage.value = 'Produto não encontrado.';
@@ -216,7 +215,7 @@ onMounted(async () => {
   } finally {
     isLoading.value = false;
   }
-});
+})
 </script>
 
 <style scoped>

@@ -13,7 +13,6 @@ const { checkToken } = authService()
 const router = useRouter()
 
 onMounted(async () => {
-
   const refresh = await checkToken()
 
   if(authStore.isAuth && refresh.data) {
