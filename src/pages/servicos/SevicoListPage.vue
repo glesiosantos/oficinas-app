@@ -63,7 +63,6 @@ import useNotify from 'src/composables/useNotify'
 import useCurrency from 'src/composables/useCurrency'
 import { servicoService } from './services/servico_service'
 import { useServicoStore } from 'src/stores/servico.store'
-import { computed } from 'vue'
 import { useQuasar } from 'quasar'
 
 const { drawer, openDrawer,closeDrawer, isEdit, currentData } = useDrawer()
@@ -78,10 +77,6 @@ const $q = useQuasar()
 
 const servicoStore = useServicoStore()
 const { formatToBRL } = useCurrency()
-
-const stickyPosition = computed(() => {
-  return $q.screen.lt.md ? 'bottom-right' : 'top-right'
-})
 
 const columns = [
   { label: 'Código',

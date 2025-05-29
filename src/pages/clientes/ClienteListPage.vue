@@ -72,7 +72,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref} from 'vue'
+import { onMounted, ref} from 'vue'
 import { useDrawer } from 'src/composables/useDrawer'
 import ClienteForm from './components/ClienteForm.vue'
 import { clienteService } from './services/cliente_service'
@@ -109,10 +109,6 @@ const columns = [
   },
   { label: 'Ações', field: 'actions', name: 'actions', align: 'center' }
 ]
-
-const stickyPosition = computed(() => {
-  return $q.screen.lt.md ? 'bottom-right' : 'top-right'
-})
 
 const formatarCPFouCNPJ = (value) => {
   if (!value) return '';
