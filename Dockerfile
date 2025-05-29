@@ -4,9 +4,6 @@ WORKDIR /app
 
 COPY package*.json ./
 
-# Remova o postinstall temporariamente se for necessário
-RUN sed -i '/postinstall/d' package.json
-
 COPY . .
 
 RUN npm install -g @quasar/cli
