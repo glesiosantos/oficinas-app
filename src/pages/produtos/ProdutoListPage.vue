@@ -138,5 +138,6 @@ const visualizarProduto = (produto) => {
 
 onMounted(async () => {
   await carregarFornecedores()
+  await carregarProdutosDoEstabelecimento()
 })
 </script>

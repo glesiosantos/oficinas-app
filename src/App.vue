@@ -13,7 +13,7 @@ const { checkToken } = authService()
 const router = useRouter()
 
 onMounted(async () => {
-
+  console.log('**** ', process.env.VITE_API_URL)
   const refresh = await checkToken()
 
   if(authStore.isAuth && refresh.data) {

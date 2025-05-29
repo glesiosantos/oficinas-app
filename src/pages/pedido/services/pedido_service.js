@@ -42,7 +42,9 @@ export const pedidoService = () => {
   }
 
   const mudarStatusPedido = async (data) => {
+    console.log('***** data: ', data)
     const response = await api.post('/v1/ordens/status', data, {headers: { Authorization: `Bearer ${authStore.auth.token}` }})
+    console.log('*****', response)
     return response
   }
 
