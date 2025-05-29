@@ -64,7 +64,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, nextTick, computed } from 'vue'
+import { onMounted, ref, nextTick } from 'vue'
 import { useDrawer } from '../../composables/useDrawer'
 import FornecedorForm from './components/FornecedorForm.vue'
 import useNotify from 'src/composables/useNotify'
@@ -84,10 +84,6 @@ const columns = [
   { label: 'Contatos', name: 'contatos', field: row => row.contatos, format: val => `${val}`, sortable: true, align: 'left' },
   { label: 'Ações', field: 'actions', name: 'actions', align: 'center' }
 ]
-
-const stickyPosition = computed(() => {
-  return $q.screen.lt.md ? 'bottom-right' : 'top-right'
-})
 
 const handleSubmit = async (formData) => {
   try {
