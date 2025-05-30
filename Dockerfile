@@ -14,7 +14,12 @@ RUN npm install -g @quasar/cli
 # Copia o restante do projeto
 COPY . .
 
-# Gera o build da aplicação
+RUN npm install -g @quasar/cli
+
+RUN npm install
+
+ENV NODE_ENV=production
+
 RUN quasar build -m pwa
 
 # STAGE FINAL - imagem enxuta com nginx
@@ -23,8 +28,9 @@ FROM nginx:alpine
 # Remove configuração default
 RUN rm -rf /etc/nginx/conf.d
 
-# Copia config do nginx
 COPY nginx.conf /etc/nginx/conf.d
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copia build gerado
 COPY --from=builder /app/dist/pwa /usr/share/nginx/html
