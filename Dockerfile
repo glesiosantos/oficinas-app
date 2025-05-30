@@ -10,8 +10,6 @@ RUN npm install -g @quasar/cli
 
 COPY . .
 
-RUN npm install -g @quasar/cli
-
 RUN npm install
 
 ENV NODE_ENV=production
@@ -21,10 +19,13 @@ RUN quasar build -m pwa
 
 FROM nginx:alpine
 
-RUN rm -rf /etc/nginx/conf.d
+# Corrigido: remover apenas o default.conf
+RUN rm /etc/nginx/conf.d/default.conf
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copia a config corrigida
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 
+# Copia os arquivos do build
 COPY --from=builder /app/dist/pwa /usr/share/nginx/html
 
 EXPOSE 80
