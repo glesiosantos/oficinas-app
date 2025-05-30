@@ -20,6 +20,8 @@ ENV NODE_ENV=production
 
 COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
 
+RUN ls -la /etc/nginx/conf.d/
+
 COPY --from=builder /app/dist/pwa /usr/share/nginx/html
 
 EXPOSE 80
