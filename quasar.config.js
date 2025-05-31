@@ -1,3 +1,4 @@
+
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
@@ -53,7 +54,7 @@ export default defineConfig(() => {
       publicPath: '/',
       // analyze: true,
       env: {
-        URL_API: process.env.VITE_URL_API
+        VITE_URL_API: process.env.VITE_URL_API
       },
       // rawDefine: {}
       // ignorePublicFolder: true,

@@ -13,6 +13,7 @@ const { checkToken } = authService()
 const router = useRouter()
 
 onMounted(async () => {
+  console.log("API URL:", import.meta.env.VITE_API_URL)
   const refresh = await checkToken()
 
   if(authStore.isAuth && refresh.data) {
@@ -21,4 +22,6 @@ onMounted(async () => {
     router.replace({ name: 'login'})
   }
 })
+
+
 </script>
