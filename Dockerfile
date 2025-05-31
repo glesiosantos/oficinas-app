@@ -1,4 +1,4 @@
-FROM node:22-slim AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -23,6 +23,7 @@ RUN ls -la /app || { echo "ls failed"; exit 1; }
 RUN test -f /app/quasar.config.js && echo "quasar.config.js found" || echo "quasar.config.js not found"
 
 ARG VITE_URL_API
+
 ENV VITE_URL_API=$VITE_URL_API
 
 RUN quasar clean || { echo "quasar clean failed"; cat /root/.npm/_logs/*.log; cat /app/quasar.config.js; exit 1; }
