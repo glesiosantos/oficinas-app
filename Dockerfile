@@ -10,6 +10,10 @@ COPY . .
 
 RUN npm install
 
+ARG VITE_URL_API
+
+ENV VITE_URL_API=$VITE_URL_API
+
 RUN quasar clean
 
 RUN quasar build -m pwa
