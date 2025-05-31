@@ -54,7 +54,7 @@ export default defineConfig(() => {
       publicPath: '/',
       // analyze: true,
       env: {
-        VITE_URL_API: process.env.VITE_URL_API
+        URL_API: process.env.VITE_URL_API
       },
       // rawDefine: {}
       // ignorePublicFolder: true,
