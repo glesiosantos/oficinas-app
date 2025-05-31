@@ -2,7 +2,11 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 ENV NODE_ENV=production
 COPY package*.json ./
+
+RUN apk add --no-cache git
 RUN npm install
+
+RUN npm install --save-dev @quasar/cli
 COPY . .
 ARG VITE_URL_API
 ENV VITE_URL_API=$VITE_URL_API
