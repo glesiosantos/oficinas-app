@@ -1,20 +1,17 @@
-FROM node:22-slim AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 ENV NODE_ENV=production
 # Instalar dependências do sistema
-RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache git python3 make g++
 COPY package*.json ./
-# Instalar dependências
+# Limpar cache do npm para evitar corrupção
+RUN npm cache clean --force
 RUN npm install
-# Instalar @quasar/cli explicitamente (caso não esteja no package.json)
-RUN npm install --save-dev @quasar/cli@2.4.2
-# Debug: Verificar node_modules e quasar CLI
-RUN ls -la node_modules/.bin | grep quasar || echo "Quasar CLI not found in node_modules/.bin"
-RUN npx quasar --version || { echo "npx quasar failed"; cat /root/.npm/_logs/*.log; exit 1; }
 COPY . .
 ARG VITE_URL_API
 ENV VITE_URL_API=$VITE_URL_API
-RUN npx quasar clean || { echo "quasar clean failed"; cat /root/.npm/_logs/*.log; exit 1; }
+# Usar npx para executar quasar
+RUN npx quasar clean
 RUN npx quasar build -m pwa
 
 FROM nginx:alpine
