@@ -17,7 +17,7 @@ COPY . .
 ARG VITE_URL_API
 ENV VITE_URL_API=$VITE_URL_API
 
-RUN quasar build -m pwa
+RUN npx quasar build -m pwa
 
 FROM nginx:alpine
 
