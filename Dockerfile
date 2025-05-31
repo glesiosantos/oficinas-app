@@ -1,16 +1,9 @@
-FROM node:20-alpine AS builder
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-ENV NODE_ENV=production
-
-RUN apk add --no-cache git
-
 COPY package*.json ./
-
 RUN npm install
-
-RUN npm install -g @quasar/cli@2.4.1
 
 COPY . .
 
