@@ -3,7 +3,7 @@
 
 import { defineConfig } from '#q-app/wrappers'
 
-export default defineConfig((ctx) => {
+export default defineConfig(() => {
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
@@ -53,7 +53,7 @@ export default defineConfig((ctx) => {
       publicPath: '/',
       // analyze: true,
       env: {
-        VITE_URL_API:  ctx.dev ? 'http://localhost:8081/api/' : '/api/'
+        URL_API: process.env.VITE_URL_API
       },
       // rawDefine: {}
       // ignorePublicFolder: true,

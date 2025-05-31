@@ -18,7 +18,7 @@ FROM nginx:alpine
 
 ENV NODE_ENV=production
 
-COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY nginx/default.conf /etc/nginx/conf.d/
 
 RUN ls -la /etc/nginx/conf.d/
 
