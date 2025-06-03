@@ -163,6 +163,9 @@
         <div class="q-gutter-x-sm row justify-end">
           <template v-if="props.row.statusPedido !== 'Finalizado' && props.row.statusPedido !== 'Cancelado'">
 
+            <q-btn round dense icon="picture_as_pdf" color="deep-orange" title="Exportar PDF" @click="exportarPDF(props.row)"/>
+
+
             <!-- Autorizar Pedido -->
             <q-btn
               v-if="props.row.statusPedido === 'Aguardando Autorização'"
@@ -210,6 +213,10 @@
         </template>
       </q-td>
     </q-tr>
+
+    <div style="position: absolute; left: -9999px;">
+      <PedidoPDF v-if="pedidoSelecionadoParaPDF" :pedido="pedidoSelecionadoParaPDF" ref="pdfRef" />
+    </div>
   </template>
 
     </q-table>
@@ -223,13 +230,20 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { usePedidoStore } from 'src/stores/pedido.store'
 import { useQuasar, date } from 'quasar'
 import { useFormatarDocumento } from 'src/composables/useFormatarDocumento'
 import { pedidoService } from './services/pedido_service'
 import useNotify from 'src/composables/useNotify'
 import { useRouter } from 'vue-router'
+import PedidoPDF from './components/PedidoPDF.vue'
+
+import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
+
+const pedidoSelecionadoParaPDF = ref(null)
+const pdfRef = ref(null)
 
 const $q = useQuasar()
 const { notifySuccess, notifyError } = useNotify()
@@ -363,6 +377,41 @@ const converterOrcamentoEmPedido = async (idPedido) => {
   }
 }
 
+const exportarPDF = async (pedido) => {
+  try {
+    pedidoSelecionadoParaPDF.value = pedido
+
+    await nextTick() // espera o DOM atualizar para que a ref seja válida
+
+    // Verifica se pdfRef está definido e não é null
+    if (!pdfRef.value) {
+      console.error('pdfRef não está definido ou não está montado no DOM.')
+      return
+    }
+
+    // Dependendo do que pdfRef.value referencia, pode ser componente Vue (com $el) ou elemento DOM
+    const element = pdfRef.value.$el || pdfRef.value
+
+    if (!element) {
+      console.error('Elemento para captura está nulo ou indefinido.')
+      return
+    }
+
+    const canvas = await html2canvas(element, { scale: 2 })
+    const imgData = canvas.toDataURL('image/png')
+
+    const pdf = new jsPDF()
+    const imgProps = pdf.getImageProperties(imgData)
+    const pdfWidth = pdf.internal.pageSize.getWidth()
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
+
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
+    pdf.save(`pedido-${pedido.idOrdem}.pdf`)
+  } catch (error) {
+     console.error("Erro ao exportar PDF:", error);
+  }
+}
+
 const editarPedido = (pedido) => {
   router.push({ name: 'editar-pedido', params: { id: pedido.idOrdem } })
 }
@@ -421,3 +470,14 @@ const atualizarStatusPedido = (pedidoRow, novoStatus) => {
 
 onMounted(async() => await carregarTodasAsOrdensDoEstabelecimento())
 </script>
+
+<style scoped>
+.hidden {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+  width: 210mm; /* A4 width */
+  background: white;
+  padding: 20px;
+}
+</style>
