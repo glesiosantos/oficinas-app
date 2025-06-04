@@ -298,7 +298,7 @@ const columns = [
     const parsed = new Date(val + 'T00:00:00') // Força UTC neutro
     return date.formatDate(parsed, 'DD/MM/YYYY')
   }, sortable: true, align: 'left' },
-  { field: 'actions', name: 'actions', label: 'Ações', align: 'center' },
+  { field: 'actions', name: 'actions', label: 'Ações', align: 'center', style: 'width: 20%'},
 ]
 
 // Paginação
@@ -379,36 +379,59 @@ const converterOrcamentoEmPedido = async (idPedido) => {
 
 const exportarPDF = async (pedido) => {
   try {
-    pedidoSelecionadoParaPDF.value = pedido
+    console.log('Dados do pedido:', JSON.stringify(pedido, null, 2)); // Log para verificar os dados
+    pedidoSelecionadoParaPDF.value = pedido;
 
-    await nextTick() // espera o DOM atualizar para que a ref seja válida
+    // Aguarda a renderização do DOM
+    await nextTick();
+    await new Promise(resolve => setTimeout(resolve, 500)); // Pequeno atraso para garantir renderização
 
-    // Verifica se pdfRef está definido e não é null
     if (!pdfRef.value) {
-      console.error('pdfRef não está definido ou não está montado no DOM.')
-      return
+      console.error('pdfRef não está definido ou não está montado no DOM.');
+      return;
     }
 
-    // Dependendo do que pdfRef.value referencia, pode ser componente Vue (com $el) ou elemento DOM
-    const element = pdfRef.value.$el || pdfRef.value
+    const element = pdfRef.value.$el || pdfRef.value;
 
     if (!element) {
-      console.error('Elemento para captura está nulo ou indefinido.')
-      return
+      console.error('Elemento para captura está nulo ou indefinido.');
+      return;
     }
 
-    const canvas = await html2canvas(element, { scale: 2 })
-    const imgData = canvas.toDataURL('image/png')
+    // Configurações do html2canvas para capturar todo o conteúdo
+    const canvas = await html2canvas(element, {
+      scale: 2, // Aumenta a qualidade
+      useCORS: true, // Para carregar imagens externas (como o logo)
+      logging: true, // Para depuração
+      width: element.scrollWidth, // Captura toda a largura
+      height: element.scrollHeight, // Captura toda a altura
+      windowWidth: element.scrollWidth, // Garante que o conteúdo não seja cortado
+      windowHeight: element.scrollHeight,
+    });
 
-    const pdf = new jsPDF()
-    const imgProps = pdf.getImageProperties(imgData)
-    const pdfWidth = pdf.internal.pageSize.getWidth()
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
+    // Opcional: Visualize o canvas para depuração
+    const imgData = canvas.toDataURL('image/png');
+    console.log('Canvas gerado:', imgData);
 
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
-    pdf.save(`pedido-${pedido.idOrdem}.pdf`)
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const imgProps = pdf.getImageProperties(imgData);
+    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+    // Adiciona o conteúdo em várias páginas, se necessário
+    let position = 0;
+    while (position < imgHeight) {
+      pdf.addImage(imgData, 'PNG', 0, -position, pdfWidth, imgHeight);
+      position += pdfHeight;
+      if (position < imgHeight) {
+        pdf.addPage();
+      }
+    }
+
+    pdf.save(`pedido-${pedido.idOrdem}.pdf`);
   } catch (error) {
-     console.error("Erro ao exportar PDF:", error);
+    console.error('Erro ao exportar PDF:', error);
   }
 }
 
@@ -468,7 +491,11 @@ const atualizarStatusPedido = (pedidoRow, novoStatus) => {
   }
 }
 
-onMounted(async() => await carregarTodasAsOrdensDoEstabelecimento())
+onMounted(async() => {
+  await carregarTodasAsOrdensDoEstabelecimento()
+  console.log('****', pedidoStore.pedidos)
+  }
+)
 </script>
 
 <style scoped>
