@@ -101,6 +101,8 @@
 
                 <q-card-actions align="right" class="q-gutter-sm">
                   <template v-if="props.row.statusPedido !== 'Finalizado' && props.row.statusPedido !== 'Cancelado'">
+
+                    <q-btn round dense icon="picture_as_pdf" color="deep-orange" title="Exportar PDF" @click="exportarPDF(props.row)"/>
                     <!-- Autorizar Pedido -->
                     <q-btn
                       v-if="props.row.statusPedido === 'Aguardando Autorização'"
