@@ -3,13 +3,14 @@
     <!-- Header -->
     <div class="row items-center q-mb-xs justify-center">
       <div class="col-auto">
-        <img src="../../../assets/logo.jpeg" style="height: 60px; width: auto; vertical-align: middle;" alt="AutoRevise Logo" />
+        <img :src="authStore.auth.estabelecimento.logo || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMFZPmbYdm1bx3zOLIccsFGbjtOBP2ahDmjg&s'"
+          style="height: 60px; width: auto; vertical-align: middle;" />
       </div>
       <div class="col q-ml-sm">
-        <h5 class="q-my-xs text-primary text-weight-bold header-title" style="line-height: 1.2;">AutoRevise Oficina</h5>
-        <div class="header-text" style="line-height: 1.2;">Av. Principal, 123 - Centro</div>
-        <div class="header-text" style="line-height: 1.2;">Telefone: (99) 99999-9999 | WhatsApp: (99) 98888-8888</div>
-        <div class="header-text" style="line-height: 1.2;">Email: contato@autorevise.com</div>
+        <h5 class="q-my-xs text-accent text-weight-bold header-title" style="line-height: 1.2;">{{auth.estabelecimento.nome}} - CPF/CNPJ.: {{ formatarDocumento(auth.estabelecimento.cpfCnpj) }}</h5>
+        <div class="header-text" style="line-height: 1.2;">{{auth.estabelecimento.endereco}}</div>
+        <div class="header-text" style="line-height: 1.2;">{{auth.estabelecimento.contatos || 'Nenhum contatos encontrado'}}</div>
+        <!-- <div class="header-text" style="line-height: 1.2;">Email: contato@autorevise.com</div> -->
       </div>
     </div>
 
@@ -32,7 +33,7 @@
             </td>
             <td>
               <strong style="font-size: 7px; margin: 0; line-height: 1.5; display: block;">CPF</strong>
-              <span style="display: block; margin: 0; line-height: 1.5;">{{ pedido.cpfCnpjCliente || 'Não informado' }}</span>
+              <span style="display: block; margin: 0; line-height: 1.5;">{{ formatarDocumento(pedido.cpfCnpjCliente) || 'Não informado' }}</span>
             </td>
           </tr>
           <tr v-if="pedido.veiculo">
@@ -191,18 +192,22 @@
 </template>
 
 <script setup>
+import { useFormatarDocumento } from 'src/composables/useFormatarDocumento';
 import { computed } from 'vue';
+
+const {formatarDocumento} = useFormatarDocumento()
 
 const props = defineProps({
   pedido: Object,
-});
+  auth: Object
+})
 
 const calcularTotal = computed(() => {
   const totalProdutos = props.pedido.produtos?.reduce((sum, p) => sum + (p.precoUnitario * p.quantidade || 0), 0) || 0;
   const totalServicos = props.pedido.servicos?.reduce((sum, s) => sum + (s.valorServico || 0), 0) || 0;
   const desconto = props.pedido.desconto || 0;
   return totalProdutos + totalServicos - desconto;
-});
+})
 
 function formatarData(data) {
   if (!data) return 'Não informada';

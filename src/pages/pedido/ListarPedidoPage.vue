@@ -105,9 +105,7 @@
                     <q-btn round dense icon="picture_as_pdf" color="deep-orange" title="Exportar PDF" @click="exportarPDF(props.row)"/>
                     <!-- Autorizar Pedido -->
                     <q-btn
-                      v-if="props.row.statusPedido === 'Aguardando Autorização'"
-                      round dense icon="check" color="green"
-                      @click="converterOrcamentoEmPedido(props.row.idOrdem)"
+                      v-if="props.row.statusPedido === 'Aguardando Autorização'" round dense icon="check" color="green" @click="converterOrcamentoEmPedido(props.row.idOrdem)"
                       title="Autorizar Pedido"
                     />
 
@@ -215,19 +213,19 @@
         </template>
       </q-td>
     </q-tr>
-
-    <div style="position: absolute; left: -9999px;">
-      <PedidoPDF v-if="pedidoSelecionadoParaPDF" :pedido="pedidoSelecionadoParaPDF" ref="pdfRef" />
-    </div>
   </template>
 
-    </q-table>
+  </q-table>
 
-    <q-page-sticky :position="stickyPosition" :offset="[18, 18]">
-        <div :class="layoutClass">
-          <q-btn fab icon="receipt" color="accent" :to="{ name: 'criar-pedido' }" />
-        </div>
-    </q-page-sticky>
+  <div style="position: absolute; left: -9999px;">
+    <PedidoPDF v-if="pedidoSelecionadoParaPDF" :pedido="pedidoSelecionadoParaPDF" :auth="authStore.auth" ref="pdfRef" />
+  </div>
+
+  <q-page-sticky :position="stickyPosition" :offset="[18, 18]">
+      <div :class="layoutClass">
+        <q-btn fab icon="receipt" color="accent" :to="{ name: 'criar-pedido' }" />
+      </div>
+  </q-page-sticky>
   </q-page>
 </template>
 
@@ -243,6 +241,7 @@ import PedidoPDF from './components/PedidoPDF.vue'
 
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
+import { useAuthStore } from 'src/stores/auth.store'
 
 const pedidoSelecionadoParaPDF = ref(null)
 const pdfRef = ref(null)
@@ -269,6 +268,7 @@ const filtros = ref({
 })
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 const pedidoStore = usePedidoStore()
 const { formatarDocumento } = useFormatarDocumento()
@@ -381,12 +381,11 @@ const converterOrcamentoEmPedido = async (idPedido) => {
 
 const exportarPDF = async (pedido) => {
   try {
-    console.log('Dados do pedido:', JSON.stringify(pedido, null, 2)); // Log para verificar os dados
-    pedidoSelecionadoParaPDF.value = pedido;
-
+    pedidoSelecionadoParaPDF.value = pedido
+    console.log('***** ', pedidoSelecionadoParaPDF.value)
     // Aguarda a renderização do DOM
     await nextTick();
-    await new Promise(resolve => setTimeout(resolve, 500)); // Pequeno atraso para garantir renderização
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     if (!pdfRef.value) {
       console.error('pdfRef não está definido ou não está montado no DOM.');
@@ -396,7 +395,6 @@ const exportarPDF = async (pedido) => {
     const element = pdfRef.value.$el || pdfRef.value;
 
     if (!element) {
-      console.error('Elemento para captura está nulo ou indefinido.');
       return;
     }
 
@@ -495,7 +493,7 @@ const atualizarStatusPedido = (pedidoRow, novoStatus) => {
 
 onMounted(async() => {
   await carregarTodasAsOrdensDoEstabelecimento()
-  console.log('****', pedidoStore.pedidos)
+  console.log('****', authStore.auth)
   }
 )
 </script>
