@@ -101,11 +101,11 @@
 
                 <q-card-actions align="right" class="q-gutter-sm">
                   <template v-if="props.row.statusPedido !== 'Finalizado' && props.row.statusPedido !== 'Cancelado'">
+
+                    <q-btn round dense icon="picture_as_pdf" color="deep-orange" title="Exportar PDF" @click="exportarPDF(props.row)"/>
                     <!-- Autorizar Pedido -->
                     <q-btn
-                      v-if="props.row.statusPedido === 'Aguardando Autorização'"
-                      round dense icon="check" color="green"
-                      @click="converterOrcamentoEmPedido(props.row.idOrdem)"
+                      v-if="props.row.statusPedido === 'Aguardando Autorização'" round dense icon="check" color="green" @click="converterOrcamentoEmPedido(props.row.idOrdem)"
                       title="Autorizar Pedido"
                     />
 
@@ -163,6 +163,9 @@
         <div class="q-gutter-x-sm row justify-end">
           <template v-if="props.row.statusPedido !== 'Finalizado' && props.row.statusPedido !== 'Cancelado'">
 
+            <q-btn round dense icon="picture_as_pdf" color="deep-orange" title="Exportar PDF" @click="exportarPDF(props.row)"/>
+
+
             <!-- Autorizar Pedido -->
             <q-btn
               v-if="props.row.statusPedido === 'Aguardando Autorização'"
@@ -212,24 +215,36 @@
     </q-tr>
   </template>
 
-    </q-table>
+  </q-table>
 
-    <q-page-sticky :position="stickyPosition" :offset="[18, 18]">
-        <div :class="layoutClass">
-          <q-btn fab icon="receipt" color="accent" :to="{ name: 'criar-pedido' }" />
-        </div>
-    </q-page-sticky>
+  <div style="position: absolute; left: -9999px;">
+    <PedidoPDF v-if="pedidoSelecionadoParaPDF" :pedido="pedidoSelecionadoParaPDF" :auth="authStore.auth" ref="pdfRef" />
+  </div>
+
+  <q-page-sticky :position="stickyPosition" :offset="[18, 18]">
+      <div :class="layoutClass">
+        <q-btn fab icon="receipt" color="accent" :to="{ name: 'criar-pedido' }" />
+      </div>
+  </q-page-sticky>
   </q-page>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { usePedidoStore } from 'src/stores/pedido.store'
 import { useQuasar, date } from 'quasar'
 import { useFormatarDocumento } from 'src/composables/useFormatarDocumento'
 import { pedidoService } from './services/pedido_service'
 import useNotify from 'src/composables/useNotify'
 import { useRouter } from 'vue-router'
+import PedidoPDF from './components/PedidoPDF.vue'
+
+import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
+import { useAuthStore } from 'src/stores/auth.store'
+
+const pedidoSelecionadoParaPDF = ref(null)
+const pdfRef = ref(null)
 
 const $q = useQuasar()
 const { notifySuccess, notifyError } = useNotify()
@@ -253,6 +268,7 @@ const filtros = ref({
 })
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 const pedidoStore = usePedidoStore()
 const { formatarDocumento } = useFormatarDocumento()
@@ -284,7 +300,7 @@ const columns = [
     const parsed = new Date(val + 'T00:00:00') // Força UTC neutro
     return date.formatDate(parsed, 'DD/MM/YYYY')
   }, sortable: true, align: 'left' },
-  { field: 'actions', name: 'actions', label: 'Ações', align: 'center' },
+  { field: 'actions', name: 'actions', label: 'Ações', align: 'center', style: 'width: 20%'},
 ]
 
 // Paginação
@@ -363,6 +379,62 @@ const converterOrcamentoEmPedido = async (idPedido) => {
   }
 }
 
+const exportarPDF = async (pedido) => {
+  try {
+    pedidoSelecionadoParaPDF.value = pedido
+    console.log('***** ', pedidoSelecionadoParaPDF.value)
+    // Aguarda a renderização do DOM
+    await nextTick();
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    if (!pdfRef.value) {
+      console.error('pdfRef não está definido ou não está montado no DOM.');
+      return;
+    }
+
+    const element = pdfRef.value.$el || pdfRef.value;
+
+    if (!element) {
+      return;
+    }
+
+    // Configurações do html2canvas para capturar todo o conteúdo
+    const canvas = await html2canvas(element, {
+      scale: 2, // Aumenta a qualidade
+      useCORS: true, // Para carregar imagens externas (como o logo)
+      logging: true, // Para depuração
+      width: element.scrollWidth, // Captura toda a largura
+      height: element.scrollHeight, // Captura toda a altura
+      windowWidth: element.scrollWidth, // Garante que o conteúdo não seja cortado
+      windowHeight: element.scrollHeight,
+    });
+
+    // Opcional: Visualize o canvas para depuração
+    const imgData = canvas.toDataURL('image/png');
+    console.log('Canvas gerado:', imgData);
+
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const imgProps = pdf.getImageProperties(imgData);
+    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+    // Adiciona o conteúdo em várias páginas, se necessário
+    let position = 0;
+    while (position < imgHeight) {
+      pdf.addImage(imgData, 'PNG', 0, -position, pdfWidth, imgHeight);
+      position += pdfHeight;
+      if (position < imgHeight) {
+        pdf.addPage();
+      }
+    }
+
+    pdf.save(`pedido-${pedido.idOrdem}.pdf`);
+  } catch (error) {
+    console.error('Erro ao exportar PDF:', error);
+  }
+}
+
 const editarPedido = (pedido) => {
   router.push({ name: 'editar-pedido', params: { id: pedido.idOrdem } })
 }
@@ -419,5 +491,20 @@ const atualizarStatusPedido = (pedidoRow, novoStatus) => {
   }
 }
 
-onMounted(async() => await carregarTodasAsOrdensDoEstabelecimento())
+onMounted(async() => {
+  await carregarTodasAsOrdensDoEstabelecimento()
+  console.log('****', authStore.auth)
+  }
+)
 </script>
+
+<style scoped>
+.hidden {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+  width: 210mm; /* A4 width */
+  background: white;
+  padding: 20px;
+}
+</style>
